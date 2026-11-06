@@ -1,3 +1,5 @@
+import psycopg2
+from urllib.parse import urlparse
 import json
 import ssl
 import urllib.request
@@ -17,18 +19,54 @@ DATA_FILE = Path("/sdcard/Download/curriculum_docs.json")
 MODEL_NAME = "Qwen3-30B-A3B-Thinking"
 
 def load_curriculum():
-    if DATA_FILE.exists():
-        try:
-            return json.loads(DATA_FILE.read_text(encoding="utf-8"))
-        except Exception:
-            return []
-    return []
+    database_url = os.environ.get("DATABASE_URL")
+    if not database_url:
+        return []
+    try:
+        url = urlparse(database_url)
+        conn = psycopg2.connect(
+            database=url.path[1:],
+            user=url.username,
+            password=url.password,
+            host=url.hostname,
+            port=url.port
+        )
+        cur = conn.cursor()
+        cur.execute("CREATE TABLE IF NOT EXISTS documents (id SERIAL PRIMARY KEY, title TEXT, content TEXT);")
+        cur.execute("SELECT title, content FROM documents;")
+        rows = cur.fetchall()
+        cur.close()
+        conn.close()
+        return [{"title": r[0], "content": r[1]} for r in rows]
+    except Exception as e:
+        print(f"خطأ في قراءة قاعدة البيانات: {e}")
+        return []
 
 def save_curriculum(data):
+    database_url = os.environ.get("DATABASE_URL")
+    if not database_url:
+        return
     try:
-        DATA_FILE.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+        url = urlparse(database_url)
+        conn = psycopg2.connect(
+            database=url.path[1:],
+            user=url.username,
+            password=url.password,
+            host=url.hostname,
+            port=url.port
+        )
+        cur = conn.cursor()
+        cur.execute("CREATE TABLE IF NOT EXISTS documents (id SERIAL PRIMARY KEY, title TEXT, content TEXT);")
+        for item in data:
+            title = item.get("title", "وثيقة")
+            content = item.get("content", str(item))
+            cur.execute("INSERT INTO documents (title, content) VALUES (%s, %s);", (title, content))
+        conn.commit()
+        cur.close()
+        conn.close()
     except Exception as e:
-        print(f"خطأ في حفظ البيانات: {e}")
+        print(f"خطأ في حفظ قاعدة البيانات: {e}")
+
 
 # ==============================================================================
 # الواجهة الرسومية المدعومة برفع الصور وتصوير الدروس والأسئلة
