@@ -7,6 +7,7 @@ import urllib.error
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from pathlib import Path
 from datetime import datetime
+import os
 
 # ==============================================================================
 # استخدام مفتاح التفكير الفعال والناجح لديك لكافة وظائف التطبيق
@@ -14,7 +15,6 @@ from datetime import datetime
 API_KEY = "sk-FWE5lPc8aegQHHJZvk967w"
 API_URL = "https://app.ai-grid.io/v1/chat/completions"
 PORT = 8080
-DATA_FILE = Path("/sdcard/Download/curriculum_docs.json")
 
 MODEL_NAME = "Qwen3-30B-A3B-Thinking"
 
@@ -33,16 +33,16 @@ def load_curriculum():
         )
         cur = conn.cursor()
         cur.execute("CREATE TABLE IF NOT EXISTS documents (id SERIAL PRIMARY KEY, title TEXT, content TEXT);")
-        cur.execute("SELECT title, content FROM documents;")
+        cur.execute("SELECT id, title, content FROM documents ORDER BY id ASC;")
         rows = cur.fetchall()
         cur.close()
         conn.close()
-        return [{"title": r[0], "content": r[1]} for r in rows]
+        return [{"id": r[0], "title": r[1], "concepts": r[2]} for r in rows]
     except Exception as e:
         print(f"خطأ في قراءة قاعدة البيانات: {e}")
         return []
 
-def save_curriculum(data):
+def add_document_to_db(title, content):
     database_url = os.environ.get("DATABASE_URL")
     if not database_url:
         return
@@ -57,15 +57,33 @@ def save_curriculum(data):
         )
         cur = conn.cursor()
         cur.execute("CREATE TABLE IF NOT EXISTS documents (id SERIAL PRIMARY KEY, title TEXT, content TEXT);")
-        for item in data:
-            title = item.get("title", "وثيقة")
-            content = item.get("content", str(item))
-            cur.execute("INSERT INTO documents (title, content) VALUES (%s, %s);", (title, content))
+        cur.execute("INSERT INTO documents (title, content) VALUES (%s, %s);", (title, content))
         conn.commit()
         cur.close()
         conn.close()
     except Exception as e:
-        print(f"خطأ في حفظ قاعدة البيانات: {e}")
+        print(f"خطأ في الإضافة لقاعدة البيانات: {e}")
+
+def delete_document_from_db(doc_id):
+    database_url = os.environ.get("DATABASE_URL")
+    if not database_url:
+        return
+    try:
+        url = urlparse(database_url)
+        conn = psycopg2.connect(
+            database=url.path[1:],
+            user=url.username,
+            password=url.password,
+            host=url.hostname,
+            port=url.port
+        )
+        cur = conn.cursor()
+        cur.execute("DELETE FROM documents WHERE id = %s;", (doc_id,))
+        conn.commit()
+        cur.close()
+        conn.close()
+    except Exception as e:
+        print(f"خطأ في الحذف من قاعدة البيانات: {e}")
 
 
 # ==============================================================================
@@ -311,7 +329,7 @@ HTML_CODE = """<!DOCTYPE html>
             listDiv.innerHTML = curriculumDocs.map((item, index) => `
                 <div class="doc-item">
                     <div class="doc-header">
-                        <span class="doc-title">📖 وثيقة رقم ${index + 1}</span>
+                        <span class="doc-title">📖 وثيقة درس رقم ${index + 1}</span>
                         <button class="btn-del" onclick="deleteDoc(${index})">حذف الوثيقة</button>
                     </div>
                     <div class="doc-body">${item.concepts}</div>
@@ -379,7 +397,7 @@ HTML_CODE = """<!DOCTYPE html>
                     }
                 } else {
                     if(statusDiv) {
-                        statusDiv.textContent = '✓ تم قراءة الوثيقة واستخراج المفاهيم بنجاح!';
+                        statusDiv.textContent = '✓ تم قراءة الوثيقة وحفظها في قاعدة البيانات بنجاح!';
                         statusDiv.style.color = '#a6e3a1';
                     }
                     curriculumDocs = data.docs;
@@ -388,7 +406,7 @@ HTML_CODE = """<!DOCTYPE html>
             })
             .catch(err => {
                 const statusDiv = document.getElementById('uploadStatus');
-                if(statusDiv) statusDiv.textContent = '❌ تعذر الاتصال بالسيرفر المحلية.';
+                if(statusDiv) statusDiv.textContent = '❌ تعذر الاتصال بالسيرفر.';
             });
         }
 
@@ -472,7 +490,7 @@ HTML_CODE = """<!DOCTYPE html>
                 chatFeed.removeChild(loadingBubble);
                 const errBubble = document.createElement('div');
                 errBubble.className = 'chat-bubble ai-bubble';
-                errBubble.textContent = '❌ تعذر الاتصال بالسيرفر المحلية.';
+                errBubble.textContent = '❌ تعذر الاتصال بالسيرفر.';
                 chatFeed.appendChild(errBubble);
                 chatFeed.scrollTop = chatFeed.scrollHeight;
             });
@@ -520,7 +538,6 @@ class StudyAppRequestHandler(BaseHTTPRequestHandler):
                 return
 
             try:
-                # إرسال الصورة للنموذج المتاح لتفريغ النص والمفاهيم
                 prompt = "Read this lesson document image and extract all text, concepts, formulas, and rules in Arabic."
                 payload = {
                     "model": MODEL_NAME,
@@ -535,12 +552,9 @@ class StudyAppRequestHandler(BaseHTTPRequestHandler):
 
                 extracted_concepts = self.send_api_request(payload)
 
+                # حفظ الوثيقة مباشرة وثابتاً في قاعدة بيانات PostgreSQL
+                add_document_to_db("وثيقة درس", extracted_concepts)
                 docs = load_curriculum()
-                docs.append({
-                    "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M"),
-                    "concepts": extracted_concepts
-                })
-                save_curriculum(docs)
 
                 self.send_json_response({"status": "success", "docs": docs})
 
@@ -551,8 +565,9 @@ class StudyAppRequestHandler(BaseHTTPRequestHandler):
             docs = load_curriculum()
             index = req_json.get("index")
             if index is not None and 0 <= index < len(docs):
-                docs.pop(index)
-                save_curriculum(docs)
+                doc_to_delete = docs[index]
+                delete_document_from_db(doc_to_delete["id"])
+            docs = load_curriculum()
             self.send_json_response(docs)
 
         elif self.path == "/api/ask":
@@ -560,7 +575,6 @@ class StudyAppRequestHandler(BaseHTTPRequestHandler):
             question_image_base64 = req_json.get("image")
             docs = load_curriculum()
 
-            # إرفاق صورة السؤال إن وجدت مع الاعتماد على مفتاح التفكير الفعال
             messages_content = []
             if question_image_base64:
                 messages_content.append({"type": "image_url", "image_url": {"url": question_image_base64}})
@@ -602,18 +616,15 @@ class StudyAppRequestHandler(BaseHTTPRequestHandler):
 
     def send_json_response(self, data):
         self.send_response(200)
-        self.send_header("Content-type", "application/json; charset=utf-8")
+        self.send_header("Content-type", "text/html; charset=utf-8")
         self.end_headers()
         self.wfile.write(json.dumps(data, ensure_ascii=False).encode("utf-8"))
 
     def log_message(self, format, *args):
         return
 
-import os
-
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))
     server = HTTPServer(("0.0.0.0", port), StudyAppRequestHandler)
     print(f"Server started on port {port}")
     server.serve_forever()
-
