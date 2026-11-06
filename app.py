@@ -18,19 +18,17 @@ PORT = 8080
 
 MODEL_NAME = "Qwen3-30B-A3B-Thinking"
 
-def load_curriculum():
+def get_db_connection():
     database_url = os.environ.get("DATABASE_URL")
     if not database_url:
-        return []
+        return None
+    return psycopg2.connect(database_url, sslmode='require')
+
+def load_curriculum():
     try:
-        url = urlparse(database_url)
-        conn = psycopg2.connect(
-            database=url.path[1:],
-            user=url.username,
-            password=url.password,
-            host=url.hostname,
-            port=url.port
-        )
+        conn = get_db_connection()
+        if not conn:
+            return []
         cur = conn.cursor()
         cur.execute("CREATE TABLE IF NOT EXISTS documents (id SERIAL PRIMARY KEY, title TEXT, content TEXT);")
         cur.execute("SELECT id, title, content FROM documents ORDER BY id ASC;")
@@ -43,18 +41,10 @@ def load_curriculum():
         return []
 
 def add_document_to_db(title, content):
-    database_url = os.environ.get("DATABASE_URL")
-    if not database_url:
-        return
     try:
-        url = urlparse(database_url)
-        conn = psycopg2.connect(
-            database=url.path[1:],
-            user=url.username,
-            password=url.password,
-            host=url.hostname,
-            port=url.port
-        )
+        conn = get_db_connection()
+        if not conn:
+            return
         cur = conn.cursor()
         cur.execute("CREATE TABLE IF NOT EXISTS documents (id SERIAL PRIMARY KEY, title TEXT, content TEXT);")
         cur.execute("INSERT INTO documents (title, content) VALUES (%s, %s);", (title, content))
@@ -65,18 +55,10 @@ def add_document_to_db(title, content):
         print(f"خطأ في الإضافة لقاعدة البيانات: {e}")
 
 def delete_document_from_db(doc_id):
-    database_url = os.environ.get("DATABASE_URL")
-    if not database_url:
-        return
     try:
-        url = urlparse(database_url)
-        conn = psycopg2.connect(
-            database=url.path[1:],
-            user=url.username,
-            password=url.password,
-            host=url.hostname,
-            port=url.port
-        )
+        conn = get_db_connection()
+        if not conn:
+            return
         cur = conn.cursor()
         cur.execute("DELETE FROM documents WHERE id = %s;", (doc_id,))
         conn.commit()
@@ -84,6 +66,7 @@ def delete_document_from_db(doc_id):
         conn.close()
     except Exception as e:
         print(f"خطأ في الحذف من قاعدة البيانات: {e}")
+
 
 
 # ==============================================================================
