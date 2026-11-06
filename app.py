@@ -571,13 +571,11 @@ class StudyAppRequestHandler(BaseHTTPRequestHandler):
     def log_message(self, format, *args):
         return
 
+import os
+
 if __name__ == "__main__":
-    server = HTTPServer(("0.0.0.0", PORT), StudyAppRequestHandler)
-    print("====================================================")
-    print("🚀 تم تشغيل التطبيق بنجاح بمفتاح Qwen3 الموحد والمستقر!")
-    print(f"🔗 افتح المتصفح واكتب: http://localhost:{PORT}")
-    print("====================================================")
-    try:
-        server.serve_forever()
-    except KeyboardInterrupt:
-        print("\nتم إيقاف التطبيق.")
+    port = int(os.environ.get("PORT", 8080))
+    server = HTTPServer(("0.0.0.0", port), StudyAppRequestHandler)
+    print(f"Server started on port {port}")
+    server.serve_forever()
+
