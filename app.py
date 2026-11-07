@@ -91,16 +91,16 @@ def delete_document_from_db(session_id, doc_id):
         MOCK_DB[session_id] = [d for d in MOCK_DB[session_id] if str(d["id"]) != str(doc_id)]
 
 # ==============================================================================
-# HTML Frontend (Cyberpunk Luxe & Ultimate Pro Edition)
+# HTML Frontend (ge_nius Supreme Pro Edition)
 # ==============================================================================
 HTML_CODE = """<!DOCTYPE html>
 <html lang="en" dir="auto">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ge_nius Assistant - Elite Pro</title>
+    <title>ge_nius Assistant - Supreme Edition</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@700;900&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
@@ -114,23 +114,22 @@ HTML_CODE = """<!DOCTYPE html>
 
     <style>
         :root {
-            --bg-main: #0c0a09; 
-            --surface: #1c1917; 
-            --card: #292524;
+            --bg-main: #090807; 
+            --surface: #151312; 
+            --card: #201d1c;
             --primary: #3b82f6; 
             --accent-purple: #8b5cf6; 
             --accent-green: #10b981;
             --danger: #ef4444; 
-            --text-main: #f5f5f4; 
-            --text-dim: #a8a29e;
-            --border: rgba(255, 255, 255, 0.08); 
-            --ai-bubble-bg: #171513;
+            --text-main: #fafaf9; 
+            --text-dim: #999490;
+            --border: rgba(255, 255, 255, 0.07); 
         }
 
         body.light-mode {
             --bg-main: #f8fafc; --surface: #ffffff; --card: #f1f5f9;
-            --primary: #2563eb; --text-main: #0f172a; --text-dim: #475569;
-            --border: rgba(0, 0, 0, 0.08); --ai-bubble-bg: #f1f5f9;
+            --primary: #2563eb; --text-main: #0f172a; --text-dim: #64748b;
+            --border: rgba(0, 0, 0, 0.08); 
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -139,40 +138,41 @@ HTML_CODE = """<!DOCTYPE html>
             font-family: 'Inter', sans-serif; 
             background-color: var(--bg-main); color: var(--text-main);
             margin: 0; padding: 0; width: 100vw; height: 100vh; height: 100dvh; overflow: hidden;
-            background-image: radial-gradient(circle at 15% 15%, rgba(139, 92, 246, 0.08), transparent 40%),
-                              radial-gradient(circle at 85% 85%, rgba(59, 130, 246, 0.08), transparent 40%);
+            background-image: radial-gradient(circle at 10% 10%, rgba(139, 92, 246, 0.06), transparent 40%),
+                              radial-gradient(circle at 90% 90%, rgba(59, 130, 246, 0.06), transparent 40%);
             background-attachment: fixed;
         }
 
         .main-wrapper { 
-            padding: 10px; display: flex; flex-direction: column; gap: 10px; 
+            padding: 10px; display: flex; flex-direction: column; gap: 8px; 
             width: 100%; height: 100%; height: 100dvh; max-width: 900px; margin: 0 auto; 
         }
 
         .top-nav-bar {
             display: flex; justify-content: space-between; align-items: center;
-            padding: 4px 8px; flex-shrink: 0;
+            padding: 4px 6px; flex-shrink: 0; gap: 8px;
         }
 
         .icon-btn {
             background: var(--surface); border: 1px solid var(--border); color: var(--text-main);
-            border-radius: 12px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
+            border-radius: 12px; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center;
             cursor: pointer; transition: all 0.2s; flex-shrink: 0;
         }
-        .icon-btn:hover { background: var(--primary); color: white; transform: scale(1.05); }
+        .icon-btn:hover { background: var(--primary); color: white; }
 
+        /* شريط اختيار المناهج والأنماط */
         .mode-switcher-bar {
-            display: flex; gap: 6px; background: var(--surface); padding: 4px; border-radius: 14px;
-            border: 1px solid var(--border); flex-shrink: 0; overflow-x: auto;
+            display: flex; gap: 4px; background: var(--surface); padding: 3px; border-radius: 12px;
+            border: 1px solid var(--border); flex: 1; overflow-x: auto;
         }
         .mode-tab {
-            flex: 1; padding: 8px 12px; background: transparent; border: none; color: var(--text-dim);
-            font-family: 'Inter', sans-serif; font-weight: 600; font-size: 0.85rem; cursor: pointer;
-            border-radius: 10px; white-space: nowrap; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s;
+            flex: 1; padding: 7px 10px; background: transparent; border: none; color: var(--text-dim);
+            font-family: 'Inter', sans-serif; font-weight: 600; font-size: 0.82rem; cursor: pointer;
+            border-radius: 9px; white-space: nowrap; display: flex; align-items: center; justify-content: center; gap: 5px; transition: all 0.2s;
         }
-        .mode-tab.active { background: var(--primary); color: white; box-shadow: 0 2px 12px rgba(59,130,246,0.35); }
+        .mode-tab.active { background: var(--primary); color: white; box-shadow: 0 2px 10px rgba(59,130,246,0.3); }
 
-        .lucide { width: 18px; height: 18px; stroke-width: 2.2; display: inline-block; vertical-align: middle; }
+        .lucide { width: 17px; height: 17px; stroke-width: 2.2; display: inline-block; vertical-align: middle; }
 
         /* Sidebar & Overlay */
         .sidebar-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 999; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
@@ -192,8 +192,8 @@ HTML_CODE = """<!DOCTYPE html>
         .chat-history-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; margin-top: 5px; }
         .history-item {
             background: transparent; border: 1px solid transparent; color: var(--text-main);
-            padding: 10px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: space-between;
-            font-family: 'Inter', sans-serif; font-size: 0.9rem; transition: all 0.2s;
+            padding: 9px 10px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: space-between;
+            font-family: 'Inter', sans-serif; font-size: 0.88rem; transition: all 0.2s;
         }
         .history-item:hover { background: var(--card); }
         .history-item.active { background: rgba(59, 130, 246, 0.15); border: 1px solid var(--primary); color: var(--primary); font-weight: bold; }
@@ -201,79 +201,102 @@ HTML_CODE = """<!DOCTYPE html>
         .delete-history-btn { background: none; border: none; color: var(--text-dim); cursor: pointer; padding: 4px; border-radius: 6px; }
         .delete-history-btn:hover { color: var(--danger); background: rgba(239, 68, 68, 0.1); }
 
-        .tab-section { display: none; flex-direction: column; gap: 10px; flex: 1; min-height: 0; }
+        .tab-section { display: none; flex-direction: column; gap: 8px; flex: 1; min-height: 0; }
         .tab-section.active { display: flex; }
         
-        .card { background: rgba(28, 25, 23, 0.85); backdrop-filter: blur(12px); border-radius: 18px; border: 1px solid var(--border); padding: 16px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 8px 30px rgba(0,0,0,0.1); }
+        .card { background: var(--surface); border-radius: 16px; border: 1px solid var(--border); padding: 14px; display: flex; flex-direction: column; gap: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
 
-        /* Chat Feed & Scroll Jumpers */
+        /* لوحة التحكم في الشخصية ونقاط الخبرة للالعاب */
+        .persona-panel {
+            background: var(--surface); border: 1px solid var(--border); padding: 8px 12px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; font-size: 0.82rem; gap: 10px;
+        }
+        .persona-select {
+            background: var(--card); color: var(--text-main); border: 1px solid var(--border);
+            padding: 4px 8px; border-radius: 8px; font-family: 'Inter', sans-serif; outline: none; cursor: pointer; font-size: 0.8rem;
+        }
+
+        .games-stats-bar {
+            display: none; background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.2);
+            padding: 6px 12px; border-radius: 10px; align-items: center; justify-content: space-between; font-size: 0.82rem; color: #c4b5fd; flex-shrink: 0;
+        }
+        .games-stats-bar.active { display: flex; }
+
+        /* Chat Feed & Smart Scroll Jumpers */
         .chat-container-wrapper { position: relative; flex: 1; display: flex; flex-direction: column; min-height: 0; }
         .chat-feed {
-            display: flex; flex-direction: column; gap: 16px; flex: 1; overflow-y: auto; padding: 12px 6px;
+            display: flex; flex-direction: column; gap: 16px; flex: 1; overflow-y: auto; padding: 10px 4px;
             background: transparent; scroll-behavior: smooth;
         }
         
-        /* أزرار التنقل الفوري للأسفل والأعلى */
+        /* الأسهم العائمة تظهر حسب اللمس والمسافة */
         .scroll-jumpers {
-            position: absolute; right: 12px; bottom: 15px; display: flex; flex-direction: column; gap: 6px; z-index: 10;
+            position: absolute; right: 10px; bottom: 10px; display: flex; flex-direction: column; gap: 6px; z-index: 10;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
         }
+        .scroll-jumpers.visible { opacity: 1; pointer-events: auto; }
         .jump-btn {
             background: var(--surface); border: 1px solid var(--border); color: var(--primary);
-            width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.3); transition: all 0.2s; opacity: 0.85;
+            width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.3); transition: all 0.2s;
         }
-        .jump-btn:hover { background: var(--primary); color: white; opacity: 1; transform: scale(1.1); }
+        .jump-btn:hover { background: var(--primary); color: white; transform: scale(1.1); }
 
-        .message-row { display: flex; flex-direction: column; gap: 4px; width: 100%; animation: fadeIn 0.3s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        /* رسائل المحادثة بدون أطر ثقيلة (صغيرة للمستخدم، كبيرة وواضحة للذكاء) */
+        .message-row { display: flex; flex-direction: column; gap: 3px; width: 100%; animation: fadeIn 0.25s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
         
-        .message-sender { font-size: 0.75rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px; }
-        .message-text { font-size: 0.98rem; line-height: 1.7; color: var(--text-main); word-break: break-word; }
+        .message-sender { font-size: 0.72rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 5px; }
+        
+        /* كلام المستخدم صغير وقليل وفتيح */
+        .message-text-user { font-size: 0.9rem; line-height: 1.5; color: var(--text-dim); font-weight: 400; word-break: break-word; }
+        
+        /* كلام الذكاء الاصطناعي كبير وغامق واحترافي */
+        .message-text-ai { font-size: 1.05rem; line-height: 1.75; color: var(--text-main); font-weight: 600; word-break: break-word; }
 
         .complex-card-box {
-            background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 14px;
-            margin: 6px 0; box-shadow: 0 4px 15px rgba(0,0,0,0.2); position: relative; overflow-x: auto;
+            background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px;
+            margin: 4px 0; box-shadow: 0 4px 15px rgba(0,0,0,0.2); position: relative; overflow-x: auto;
         }
-        .complex-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 1px solid var(--border); padding-bottom: 6px; font-size: 0.8rem; color: var(--accent-purple); font-weight: bold; }
+        .complex-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; border-bottom: 1px solid var(--border); padding-bottom: 4px; font-size: 0.78rem; color: var(--accent-purple); font-weight: bold; }
         
-        .copy-code-btn { background: var(--card); color: var(--text-dim); border: 1px solid var(--border); border-radius: 6px; padding: 4px 8px; font-size: 0.75rem; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+        .copy-code-btn { background: var(--card); color: var(--text-dim); border: 1px solid var(--border); border-radius: 6px; padding: 3px 7px; font-size: 0.72rem; cursor: pointer; display: flex; align-items: center; gap: 4px; }
         .copy-code-btn:hover { background: var(--primary); color: white; }
 
-        .audio-speech-btn { background: var(--surface); border: 1px solid var(--border); color: var(--primary); border-radius: 8px; padding: 4px 10px; font-size: 0.8rem; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; margin-top: 6px; }
+        .audio-speech-btn { background: var(--surface); border: 1px solid var(--border); color: var(--primary); border-radius: 7px; padding: 3px 8px; font-size: 0.78rem; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; margin-top: 4px; }
         .audio-speech-btn:hover { background: var(--primary); color: white; }
 
-        /* مؤشر التفكير الرقمي الهولوجرام */
         .hologram-thinking {
-            display: flex; align-items: center; gap: 8px; color: var(--accent-purple); font-weight: 600; font-size: 0.9rem;
-            background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.2); padding: 8px 14px; border-radius: 12px; width: fit-content;
+            display: flex; align-items: center; gap: 8px; color: var(--accent-purple); font-weight: 600; font-size: 0.85rem;
+            background: rgba(139, 92, 246, 0.08); border: 1px solid rgba(139, 92, 246, 0.15); padding: 7px 12px; border-radius: 10px; width: fit-content;
         }
-        .pulse-dot { width: 8px; height: 8px; background: var(--accent-purple); border-radius: 50%; animation: pulse-anim 1.2s infinite ease-in-out; }
+        .pulse-dot { width: 7px; height: 7px; background: var(--accent-purple); border-radius: 50%; animation: pulse-anim 1.2s infinite ease-in-out; }
         @keyframes pulse-anim { 0%, 100% { transform: scale(0.8); opacity: 0.4; } 50% { transform: scale(1.3); opacity: 1; } }
 
         /* إطار الكتابة الراقي */
         .chat-input-container { flex-shrink: 0; }
         .chat-input-box {
-            background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 10px 14px;
-            display: flex; flex-direction: column; gap: 8px; box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+            background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 8px 12px;
+            display: flex; flex-direction: column; gap: 6px; box-shadow: 0 8px 30px rgba(0,0,0,0.2);
             transition: border-color 0.2s;
         }
         .chat-input-box:focus-within { border-color: var(--primary); }
 
         textarea {
             background: transparent; color: var(--text-main); border: none; outline: none;
-            font-family: 'Inter', sans-serif; font-size: 0.95rem; resize: none; max-height: 120px; min-height: 24px; line-height: 1.5; width: 100%;
+            font-family: 'Inter', sans-serif; font-size: 0.95rem; resize: none; max-height: 110px; min-height: 22px; line-height: 1.4; width: 100%;
         }
 
         .image-preview-bar {
             display: none; align-items: center; justify-content: space-between; background: rgba(59, 130, 246, 0.15);
-            border: 1px solid var(--primary); padding: 6px 10px; border-radius: 8px; font-size: 0.85rem; color: #93c5fd;
+            border: 1px solid var(--primary); padding: 5px 8px; border-radius: 7px; font-size: 0.82rem; color: #93c5fd;
         }
 
-        .input-actions-bar { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); padding-top: 8px; }
-        .input-left-tools { display: flex; gap: 6px; align-items: center; }
+        .input-actions-bar { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); padding-top: 6px; }
+        .input-left-tools { display: flex; gap: 5px; align-items: center; }
 
         .tool-btn {
-            background: transparent; border: none; color: var(--text-dim); border-radius: 8px; width: 36px; height: 36px;
+            background: transparent; border: none; color: var(--text-dim); border-radius: 7px; width: 34px; height: 34px;
             display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s;
         }
         .tool-btn:hover { background: var(--card); color: var(--text-main); }
@@ -281,21 +304,21 @@ HTML_CODE = """<!DOCTYPE html>
         .tool-btn.muted { color: var(--danger); }
 
         .send-btn {
-            background: var(--primary); color: white; border: none; border-radius: 10px; width: 38px; height: 38px;
+            background: var(--primary); color: white; border: none; border-radius: 9px; width: 36px; height: 36px;
             display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.1s;
         }
         .send-btn:active { transform: scale(0.95); }
 
-        .btn { background: var(--primary); color: white; border: none; padding: 10px 16px; border-radius: 12px; font-family: 'Inter', sans-serif; font-weight: 700; font-size: 0.9rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s; }
+        .btn { background: var(--primary); color: white; border: none; padding: 9px 14px; border-radius: 11px; font-family: 'Inter', sans-serif; font-weight: 700; font-size: 0.88rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s; }
         .btn-purple { background: linear-gradient(135deg, #8b5cf6, #3b82f6); }
-        .btn-danger { background: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.3); padding: 6px 12px; border-radius: 8px; font-size: 0.85rem;}
+        .btn-danger { background: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.3); padding: 5px 10px; border-radius: 7px; font-size: 0.82rem;}
         input[type="file"] { display: none; }
 
-        .doc-item { background: var(--card); border-radius: 14px; padding: 14px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 10px; }
+        .doc-item { background: var(--card); border-radius: 12px; padding: 12px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 8px; }
         .doc-header { display: flex; justify-content: space-between; align-items: center; }
-        .doc-title { font-weight: 700; font-size: 0.95rem; color: #60a5fa; display: flex; align-items: center; gap: 8px;}
-        .doc-body { font-size: 0.85rem; color: var(--text-dim); line-height: 1.6; max-height: 120px; overflow-y: auto; background: var(--surface); padding: 10px; border-radius: 8px; white-space: pre-wrap; }
-        .status-msg { display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.85rem; font-weight: bold;}
+        .doc-title { font-weight: 700; font-size: 0.9rem; color: #60a5fa; display: flex; align-items: center; gap: 6px;}
+        .doc-body { font-size: 0.82rem; color: var(--text-dim); line-height: 1.5; max-height: 110px; overflow-y: auto; background: var(--surface); padding: 8px; border-radius: 7px; white-space: pre-wrap; }
+        .status-msg { display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 0.82rem; font-weight: bold;}
     </style>
 </head>
 <body>
@@ -304,21 +327,21 @@ HTML_CODE = """<!DOCTYPE html>
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <h3><i data-lucide="menu"></i> Menu & History</h3>
-            <button class="icon-btn" style="width:34px; height:34px; border:none; background:transparent;" onclick="toggleSidebar()"><i data-lucide="x"></i></button>
+            <button class="icon-btn" style="width:32px; height:32px; border:none; background:transparent;" onclick="toggleSidebar()"><i data-lucide="x"></i></button>
         </div>
         
-        <button class="btn" onclick="createNewChatSession()" style="width: 100%; justify-content: center; margin-bottom: 10px;">
-            <i data-lucide="plus-circle"></i> New Chat Session
+        <button class="btn" onclick="createNewChatSession()" style="width: 100%; justify-content: center; margin-bottom: 8px;">
+            <i data-lucide="plus-circle"></i> New Session
         </button>
 
-        <button class="btn btn-purple" onclick="switchSection('docsTab')" style="width: 100%; justify-content: center; margin-bottom: 12px;">
+        <button class="btn btn-purple" onclick="switchSection('docsTab')" style="width: 100%; justify-content: center; margin-bottom: 10px;">
             <i data-lucide="folder-kanban"></i> Curriculum Documents (<span id="docCountBadgeSidebar">0</span>)
         </button>
 
-        <h4 style="font-size: 0.8rem; color: var(--text-dim); margin: 10px 0 4px; text-transform: uppercase;"><i data-lucide="history" style="width:14px; height:14px;"></i> Chat History:</h4>
+        <h4 style="font-size: 0.78rem; color: var(--text-dim); margin: 8px 0 4px; text-transform: uppercase;"><i data-lucide="history" style="width:13px; height:13px;"></i> Saved History:</h4>
         <div class="chat-history-list" id="chatHistoryList"></div>
 
-        <div style="margin-top: auto; padding-top: 12px; border-top: 1px solid var(--border);">
+        <div style="margin-top: auto; padding-top: 10px; border-top: 1px solid var(--border);">
             <button class="btn" style="width: 100%; background: var(--card); color: var(--text-main); border: 1px solid var(--border);" onclick="toggleTheme()">
                 <i data-lucide="sun" id="themeIcon"></i> Toggle Theme
             </button>
@@ -331,7 +354,7 @@ HTML_CODE = """<!DOCTYPE html>
                 <i data-lucide="align-right"></i>
             </button>
 
-            <!-- شريط تغيير الأنماط مع حفظ واجهة كل منهج مستقلة -->
+            <!-- شريط المناهج والأنماط -->
             <div class="mode-switcher-bar">
                 <button class="mode-tab active" id="modeStudy" onclick="switchMode('study')">
                     <i data-lucide="graduation-cap"></i> Study
@@ -349,20 +372,38 @@ HTML_CODE = """<!DOCTYPE html>
             </button>
         </div>
 
+        <!-- لوحة التحكم في مستوى وشخصية الذكاء الاصطناعي -->
+        <div class="persona-panel">
+            <span style="display:flex; align-items:center; gap:6px; color:var(--text-dim);"><i data-lucide="sliders" style="width:14px; height:14px;"></i> AI Persona:</span>
+            <select id="aiPersonaSelect" class="persona-select">
+                <option value="strict">Strict & Professional</option>
+                <option value="humor">Entertainment & Light Humor</option>
+                <option value="roast">Witty & Playful Challenge</option>
+                <option value="human" selected>Human-like & Warm</option>
+            </select>
+        </div>
+
+        <!-- شريط نقاط الخبرة والألعاب -->
+        <div class="games-stats-bar" id="gamesStatsBar">
+            <span>⭐ XP: <strong id="userXp">120</strong></span>
+            <span>🏆 Win Rate: <strong id="userWinRate">85%</strong></span>
+            <span style="color: #a78bfa;" id="gameEncourageMsg">Keep going, genius!</span>
+        </div>
+
         <div class="tab-section active" id="askTab">
             <div class="chat-container-wrapper">
-                <div class="chat-feed" id="chatFeed">
-                    <div id="welcomeMsg" style="color: var(--text-dim); text-align: center; padding: 40px 20px; display: flex; flex-direction: column; align-items: center; gap: 10px;">
-                        <i data-lucide="sparkles" style="width: 32px; height: 32px; color: var(--primary);"></i>
-                        <h3 style="margin: 0; color: var(--text-main); font-weight: 700;">Welcome to ge_nius Elite</h3>
-                        <p style="margin: 0; font-size: 0.9rem;">Ask questions, study your curriculum, or play brain games!</p>
+                <div class="chat-feed" id="chatFeed" onscroll="checkScrollPosition()" ontouchmove="checkScrollPosition()">
+                    <div id="welcomeMsg" style="color: var(--text-dim); text-align: center; padding: 40px 20px; display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                        <i data-lucide="sparkles" style="width: 30px; height: 30px; color: var(--primary);"></i>
+                        <h3 style="margin: 0; color: var(--text-main); font-weight: 700;">ge_nius Supreme</h3>
+                        <p style="margin: 0; font-size: 0.88rem;">Select a mode above and start exploring.</p>
                     </div>
                 </div>
 
-                <!-- أزرار التنقل السريع للأسفل والأعلى -->
-                <div class="scroll-jumpers">
-                    <button class="jump-btn" onclick="scrollToTop()" title="Scroll to Top"><i data-lucide="chevron-up"></i></button>
-                    <button class="jump-btn" onclick="scrollToBottom()" title="Scroll to Bottom"><i data-lucide="chevron-down"></i></button>
+                <!-- الأسهم العائمة التفاعلية تظهر فقط في المحادثات الطويلة وتتبع اللمس والسحب -->
+                <div class="scroll-jumpers" id="scrollJumpers">
+                    <button class="jump-btn" id="jumpUpBtn" onclick="scrollToTop()" title="Scroll to Top" style="display:none;"><i data-lucide="chevron-up"></i></button>
+                    <button class="jump-btn" id="jumpDownBtn" onclick="scrollToBottom()" title="Scroll to Bottom" style="display:flex;"><i data-lucide="chevron-down"></i></button>
                 </div>
             </div>
 
@@ -375,7 +416,7 @@ HTML_CODE = """<!DOCTYPE html>
                         </span>
                     </div>
 
-                    <textarea id="userQuery" placeholder="Type your prompt or question..." rows="1" oninput="autoResizeTextarea(this)"></textarea>
+                    <textarea id="userQuery" placeholder="Type your prompt..." rows="1" oninput="autoResizeTextarea(this)"></textarea>
                     
                     <div class="input-actions-bar">
                         <div class="input-left-tools">
@@ -393,14 +434,13 @@ HTML_CODE = """<!DOCTYPE html>
                                 <i data-lucide="mic"></i>
                             </button>
 
-                            <!-- زر كتم وتشغيل الصوت الاحترافي -->
                             <button class="tool-btn" id="audioMuteBtn" onclick="toggleAudioMute()" title="Mute/Unmute AI Voice">
                                 <i data-lucide="volume-2" id="muteIcon"></i>
                             </button>
                         </div>
 
                         <button class="send-btn" onclick="submitQuestion()" title="Send">
-                            <i data-lucide="send-horizontal" style="width: 18px; height: 18px;"></i>
+                            <i data-lucide="send-horizontal" style="width: 17px; height: 17px;"></i>
                         </button>
                     </div>
                 </div>
@@ -408,24 +448,24 @@ HTML_CODE = """<!DOCTYPE html>
         </div>
 
         <div class="tab-section" id="docsTab">
-            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px;">
-                <h3 style="margin:0; font-size: 1.1rem; color: var(--text-main);">Curriculum Documents</h3>
-                <button class="btn" onclick="switchSection('askTab')" style="padding: 6px 12px; font-size: 0.8rem;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
+                <h3 style="margin:0; font-size: 1.05rem; color: var(--text-main);">Curriculum Documents</h3>
+                <button class="btn" onclick="switchSection('askTab')" style="padding: 5px 10px; font-size: 0.78rem;">
                     <i data-lucide="arrow-left"></i> Back to Chat
                 </button>
             </div>
 
             <div class="card">
-                <span style="font-weight: 700; font-size: 0.95rem; color: #60a5fa; display: flex; align-items: center; gap: 8px;">
+                <span style="font-weight: 700; font-size: 0.9rem; color: #60a5fa; display: flex; align-items: center; gap: 6px;">
                     <i data-lucide="file-up"></i> Upload Study Materials
                 </span>
-                <div style="display: flex; gap: 8px; margin-top: 5px;">
-                    <label for="docFileInputCamera" class="btn btn-purple" style="flex: 1; text-align: center; margin:0; padding: 10px;">
+                <div style="display: flex; gap: 6px; margin-top: 4px;">
+                    <label for="docFileInputCamera" class="btn btn-purple" style="flex: 1; text-align: center; margin:0; padding: 9px;">
                         <i data-lucide="camera"></i> Camera
                     </label>
                     <input type="file" id="docFileInputCamera" accept="image/*" capture="environment">
 
-                    <label for="docFileInputGallery" class="btn btn-purple" style="flex: 1; text-align: center; margin:0; padding: 10px;">
+                    <label for="docFileInputGallery" class="btn btn-purple" style="flex: 1; text-align: center; margin:0; padding: 9px;">
                         <i data-lucide="images"></i> Gallery
                     </label>
                     <input type="file" id="docFileInputGallery" accept="image/*" multiple>
@@ -434,8 +474,8 @@ HTML_CODE = """<!DOCTYPE html>
             </div>
 
             <div class="card" style="flex: 1; overflow-y: auto;">
-                <span style="font-weight: 700; font-size: 0.9rem; color: var(--text-dim);">Stored Documents Archive:</span>
-                <div id="docsList" style="display: flex; flex-direction: column; gap: 10px;"></div>
+                <span style="font-weight: 700; font-size: 0.85rem; color: var(--text-dim);">Stored Documents Archive:</span>
+                <div id="docsList" style="display: flex; flex-direction: column; gap: 8px;"></div>
             </div>
         </div>
     </div>
@@ -474,6 +514,39 @@ HTML_CODE = """<!DOCTYPE html>
             el.style.height = (el.scrollHeight) + 'px';
         }
 
+        // ذكاء الأسهم العائمة التفاعلية حسب اتجاه اللمس والمسافة
+        let lastScrollTop = 0;
+        function checkScrollPosition() {
+            const chatFeed = document.getElementById('chatFeed');
+            const jumpers = document.getElementById('scrollJumpers');
+            const upBtn = document.getElementById('jumpUpBtn');
+            const downBtn = document.getElementById('jumpDownBtn');
+
+            const st = chatFeed.scrollTop;
+            const maxScroll = chatFeed.scrollHeight - chatFeed.clientHeight;
+
+            // تظهر الأسهم فقط إذا كانت المحادثة طويلة نسبياً
+            if (chatFeed.scrollHeight > chatFeed.clientHeight + 150) {
+                jumpers.classList.add('visible');
+                
+                // تحديد اتجاه اللمس أو السحب
+                if (st > lastScrollTop) {
+                    // سحب لأسفل -> إظهار سهم الصعود أو إخفاء النزول عند النهاية
+                    upBtn.style.display = 'flex';
+                    if (st >= maxScroll - 20) downBtn.style.display = 'none';
+                    else downBtn.style.display = 'flex';
+                } else {
+                    // سحب لأعلى -> إظهار سهم النزول
+                    downBtn.style.display = 'flex';
+                    if (st <= 20) upBtn.style.display = 'none';
+                    else upBtn.style.display = 'flex';
+                }
+            } else {
+                jumpers.classList.remove('visible');
+            }
+            lastScrollTop = st <= 0 ? 0 : st;
+        }
+
         function scrollToTop() {
             const chatFeed = document.getElementById('chatFeed');
             chatFeed.scrollTo({ top: 0, behavior: 'smooth' });
@@ -484,13 +557,16 @@ HTML_CODE = """<!DOCTYPE html>
             chatFeed.scrollTo({ top: chatFeed.scrollHeight, behavior: 'smooth' });
         }
 
-        // نظام الجلسات والمناهج المتعددة مع حفظ حالة كل واجهة بشكل مستقل تماماً
-        let chatSessions = JSON.parse(localStorage.getItem('ge_nius_sessions_elite')) || {};
-        let currentSessionId = localStorage.getItem('ge_nius_current_session_elite');
+        // تخزين واجهات مستقلة تماماً لكل نمط (Study, General, Games)
+        let modeContents = { study: "", general: "", games: "" };
         let currentMode = 'study';
         let isAudioMuted = false;
+        let userXP = 125;
+        let userWins = 18;
+        let userTotalGames = 21;
 
         const chatFeed = document.getElementById('chatFeed');
+        const gamesStatsBar = document.getElementById('gamesStatsBar');
 
         function toggleAudioMute() {
             isAudioMuted = !isAudioMuted;
@@ -507,6 +583,9 @@ HTML_CODE = """<!DOCTYPE html>
             lucide.createIcons({root: btn});
         }
 
+        let chatSessions = JSON.parse(localStorage.getItem('ge_nius_sessions_supreme')) || {};
+        let currentSessionId = localStorage.getItem('ge_nius_current_session_supreme');
+
         function initSessions() {
             if (!currentSessionId || !chatSessions[currentSessionId]) {
                 createNewSessionQuiet();
@@ -518,7 +597,7 @@ HTML_CODE = """<!DOCTYPE html>
 
         function createNewSessionQuiet() {
             const id = Date.now().toString();
-            chatSessions[id] = { id: id, title: "New Session", html: "", mode: "study" };
+            chatSessions[id] = { id: id, title: "New Session", mode: "study", modesData: { study: "", general: "", games: "" } };
             currentSessionId = id;
             saveSessionsData();
         }
@@ -529,37 +608,67 @@ HTML_CODE = """<!DOCTYPE html>
             if(document.getElementById('sidebar').classList.contains('open')) toggleSidebar();
         }
 
+        // عند التنقل بين المناهج، يتم تغيير الواجهة فوراً وفصل المحتوى مع الحفاظ على كل وضع
         function switchMode(mode) {
+            // حفظ الواجهة الحالية للنمط الحالي
+            modeContents[currentMode] = chatFeed.innerHTML;
+
             currentMode = mode;
             document.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
             if(mode === 'study') document.getElementById('modeStudy').classList.add('active');
             else if(mode === 'general') document.getElementById('modeGeneral').classList.add('active');
             else if(mode === 'games') document.getElementById('modeGames').classList.add('active');
 
+            // إظهار أو إخفاء شريط نقاط الألعاب
+            if (mode === 'games') {
+                gamesStatsBar.classList.add('active');
+                updateGameStatsUI();
+            } else {
+                gamesStatsBar.classList.remove('active');
+            }
+
+            // استرجاع واجهة النمط الجديد أو إظهار الترحيب الفارغ
+            if (modeContents[mode] && modeContents[mode].trim() !== '') {
+                chatFeed.innerHTML = modeContents[mode];
+            } else {
+                chatFeed.innerHTML = `<div id="welcomeMsg" style="color: var(--text-dim); text-align: center; padding: 40px 20px; display: flex; flex-direction: column; align-items: center; gap: 8px;"><i data-lucide="sparkles" style="width: 30px; height: 30px; color: var(--primary);"></i><h3 style="margin: 0; color: var(--text-main); font-weight: 700;">${mode.toUpperCase()} Workspace</h3><p style="margin: 0; font-size: 0.88rem;">Start a fresh conversation in this mode.</p></div>`;
+            }
+
             if(chatSessions[currentSessionId]) {
                 chatSessions[currentSessionId].mode = mode;
+                chatSessions[currentSessionId].modesData = modeContents;
                 saveSessionsData();
             }
+            lucide.createIcons({root: chatFeed});
+            checkScrollPosition();
+        }
+
+        function updateGameStatsUI() {
+            document.getElementById('userXp').innerText = userXP;
+            const rate = Math.round((userWins / userTotalGames) * 100);
+            document.getElementById('userWinRate').innerText = rate + '%';
+            const quotes = [
+                "Brilliant tactical move! Keep pushing.",
+                "Your intellectual sharpness is unmatched.",
+                "Every puzzle solved adds power to your neural core.",
+                "Fascinating deduction! Ready for the next riddle?"
+            ];
+            document.getElementById('gameEncourageMsg').innerText = quotes[Math.floor(Math.random() * quotes.length)];
         }
 
         function loadChatSession(id) {
-            // حفظ الواجهة الحالية قبل التبديل
-            saveCurrentChatHtml();
-            
             currentSessionId = id;
             const session = chatSessions[id];
-            if(session && session.mode) switchMode(session.mode);
-            
-            if (session && session.html && session.html.trim() !== '') {
-                chatFeed.innerHTML = session.html;
+            if (session && session.modesData) {
+                modeContents = session.modesData;
             } else {
-                chatFeed.innerHTML = `<div id="welcomeMsg" style="color: var(--text-dim); text-align: center; padding: 40px 20px; display: flex; flex-direction: column; align-items: center; gap: 10px;"><i data-lucide="sparkles" style="width: 32px; height: 32px; color: var(--primary);"></i><h3 style="margin: 0; color: var(--text-main); font-weight: 700;">New Elite Session</h3><p style="margin: 0; font-size: 0.9rem;">Type your question or choose a mode above.</p></div>`;
+                modeContents = { study: "", general: "", games: "" };
             }
-            
-            lucide.createIcons({root: chatFeed});
-            if (window.MathJax) MathJax.typesetPromise([chatFeed]);
-            chatFeed.scrollTop = chatFeed.scrollHeight;
-            saveSessionsData();
+            if(session && session.mode) {
+                switchMode(session.mode);
+            } else {
+                switchMode('study');
+            }
             renderChatHistoryList();
             if(document.getElementById('sidebar').classList.contains('open')) toggleSidebar();
         }
@@ -583,12 +692,13 @@ HTML_CODE = """<!DOCTYPE html>
             }
         }
 
+        // الحفظ التلقائي في السجل لا يتم إلا عند مغادرة الموقع نهائياً أو عند إرسال أول رسالة
         function saveCurrentChatHtml(userQueryText = null) {
             if(!chatSessions[currentSessionId]) return;
-            const clones = chatFeed.cloneNode(true);
-            clones.querySelectorAll('.loading-bubble-temp').forEach(l => l.remove());
-            chatSessions[currentSessionId].html = clones.innerHTML;
+            modeContents[currentMode] = chatFeed.innerHTML;
+            chatSessions[currentSessionId].modesData = modeContents;
             
+            // دمج كل النصوص لتكوين عنوان السجل
             if (userQueryText && chatSessions[currentSessionId].title === "New Session") {
                 chatSessions[currentSessionId].title = userQueryText.substring(0, 20) + "...";
             }
@@ -596,8 +706,8 @@ HTML_CODE = """<!DOCTYPE html>
         }
 
         function saveSessionsData() {
-            localStorage.setItem('ge_nius_sessions_elite', JSON.stringify(chatSessions));
-            localStorage.setItem('ge_nius_current_session_elite', currentSessionId);
+            localStorage.setItem('ge_nius_sessions_supreme', JSON.stringify(chatSessions));
+            localStorage.setItem('ge_nius_current_session_supreme', currentSessionId);
             renderChatHistoryList();
         }
 
@@ -615,11 +725,11 @@ HTML_CODE = """<!DOCTYPE html>
                 listDiv.innerHTML += `
                     <div class="history-item ${isActive}" onclick="loadChatSession('${id}')">
                         <div class="history-item-content">
-                            <i data-lucide="${icon}" style="width: 14px; height: 14px;"></i>
+                            <i data-lucide="${icon}" style="width: 13px; height: 13px;"></i>
                             <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${session.title}</span>
                         </div>
-                        <button class="delete-history-btn" onclick="deleteSessionItem(event, '${id}')" title="Delete session">
-                            <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
+                        <button class="delete-history-btn" onclick="deleteSessionItem(event, '${id}')" title="Delete">
+                            <i data-lucide="trash-2" style="width: 13px; height: 13px;"></i>
                         </button>
                     </div>
                 `;
@@ -701,7 +811,7 @@ HTML_CODE = """<!DOCTYPE html>
                 <div class="doc-item">
                     <div class="doc-header">
                         <span class="doc-title"><i data-lucide="file-text"></i> Document ${index + 1}</span>
-                        <button class="btn btn-danger" onclick="deleteDoc(${item.id})"><i data-lucide="trash-2" style="width: 14px; height: 14px;"></i> Delete</button>
+                        <button class="btn btn-danger" onclick="deleteDoc(${item.id})"><i data-lucide="trash-2" style="width: 13px; height: 13px;"></i> Delete</button>
                     </div>
                     <div class="doc-body">${item.concepts}</div>
                 </div>
@@ -748,6 +858,8 @@ HTML_CODE = """<!DOCTYPE html>
         function submitQuestion() {
             const queryInput = document.getElementById('userQuery');
             const query = queryInput.value.trim();
+            const personaVal = document.getElementById('aiPersonaSelect').value;
+
             if (!query && !attachedQuestionBase64) { alert('Please type a prompt or attach an image!'); return; }
             if (currentMode === 'study' && curriculumDocs.length === 0) { alert('Study mode requires uploaded curriculum documents. Switch to General or Games!'); return; }
             
@@ -756,24 +868,24 @@ HTML_CODE = """<!DOCTYPE html>
             let userTextDisplay = query.replace(/\\n/g, '<br>');
             if (attachedQuestionBase64) { userTextDisplay = (query ? userTextDisplay + '<br>' : '') + '<span style="color:#60a5fa; font-size:0.85em"><i data-lucide="image" style="width:14px;height:14px;"></i> Image attached</span>'; }
 
+            // كلام المستخدم صغير، قليل وفاتح
             const userRow = document.createElement('div'); userRow.className = 'message-row';
-            userRow.innerHTML = `<div class="message-sender"><i data-lucide="user" style="width:14px;height:14px;"></i> You</div><div class="message-text">${userTextDisplay}</div>`;
+            userRow.innerHTML = `<div class="message-sender"><i data-lucide="user" style="width:12px;height:12px;"></i> You</div><div class="message-text-user">${userTextDisplay}</div>`;
             chatFeed.appendChild(userRow); lucide.createIcons({root: userRow});
 
-            // مؤشر التفكير الرقمي الهولوجرام المتحرك
             const loadingRow = document.createElement('div'); loadingRow.className = 'message-row loading-bubble-temp';
             loadingRow.innerHTML = `
-                <div class="message-sender" style="color:var(--accent-purple)"><i data-lucide="cpu" style="width:14px;height:14px;"></i> ge_nius AI</div>
+                <div class="message-sender" style="color:var(--accent-purple)"><i data-lucide="cpu" style="width:12px;height:12px;"></i> ge_nius AI</div>
                 <div class="hologram-thinking">
                     <div class="pulse-dot"></div>
-                    <span>Neural core processing...</span>
+                    <span>Analyzing...</span>
                 </div>
             `;
             chatFeed.appendChild(loadingRow); lucide.createIcons({root: loadingRow});
             
             saveCurrentChatHtml(query);
 
-            const payload = { query: query, image: attachedQuestionBase64, mode: currentMode };
+            const payload = { query: query, image: attachedQuestionBase64, mode: currentMode, persona: personaVal };
             queryInput.value = ''; queryInput.style.height = 'auto'; removeQuestionImage(); chatFeed.scrollTop = chatFeed.scrollHeight;
 
             fetch('/api/ask', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
@@ -783,45 +895,54 @@ HTML_CODE = """<!DOCTYPE html>
                 const aiRow = document.createElement('div'); aiRow.className = 'message-row';
 
                 if (data.status === 'out_of_scope') {
-                    aiRow.innerHTML = `<div class="message-sender" style="color:var(--danger)">ge_nius</div><div class="message-text" style="color:#fca5a5;">Out of curriculum scope. Switch to General mode.</div>`;
+                    aiRow.innerHTML = `<div class="message-sender" style="color:var(--danger)">ge_nius</div><div class="message-text-ai" style="color:#fca5a5;">Out of curriculum scope. Switch to General mode.</div>`;
                 } else if (data.status === 'success') {
                     const fullText = data.answer;
                     const encoded = encodeURIComponent(fullText);
                     
+                    // تحديث نقاط الالعاب إذا كان النمط هو الألعاب
+                    if (currentMode === 'games') {
+                        userXP += 15;
+                        userTotalGames += 1;
+                        userWins += 1;
+                        updateGameStatsUI();
+                    }
+                    
+                    // كلام الذكاء الاصطناعي كبير، غامق واحترافي
                     if (fullText.includes("```") || fullText.length > 500) {
                         aiRow.innerHTML = `
-                            <div class="message-sender"><i data-lucide="bot" style="width:14px;height:14px;color:#60a5fa"></i> ge_nius</div>
+                            <div class="message-sender"><i data-lucide="bot" style="width:12px;height:12px;color:#60a5fa"></i> ge_nius</div>
                             <div class="complex-card-box">
                                 <div class="complex-card-header">
-                                    <span>Detailed Solution / Complex Exercise</span>
-                                    <button class="copy-code-btn" onclick="copyCodeText(this, '${encoded}')"><i data-lucide="copy" style="width:12px;height:12px;"></i> Copy</button>
+                                    <span>Detailed Solution / Code Block</span>
+                                    <button class="copy-code-btn" onclick="copyCodeText(this, '${encoded}')"><i data-lucide="copy" style="width:11px;height:11px;"></i> Copy</button>
                                 </div>
-                                <div class="message-text ai-content">${marked.parse(fullText)}</div>
+                                <div class="message-text-ai ai-content">${marked.parse(fullText)}</div>
                             </div>
-                            <div><button class="audio-speech-btn" onclick="speakText('${encoded}')"><i data-lucide="volume-2" style="width:14px;height:14px;"></i> Read Aloud</button></div>
+                            <div><button class="audio-speech-btn" onclick="speakText('${encoded}')"><i data-lucide="volume-2" style="width:13px;height:13px;"></i> Read Aloud</button></div>
                         `;
                     } else {
                         aiRow.innerHTML = `
-                            <div class="message-sender"><i data-lucide="bot" style="width:14px;height:14px;color:#60a5fa"></i> ge_nius</div>
-                            <div class="message-text ai-content">${marked.parse(fullText)}</div>
-                            <div><button class="audio-speech-btn" onclick="speakText('${encoded}')"><i data-lucide="volume-2" style="width:14px;height:14px;"></i> Read Aloud</button></div>
+                            <div class="message-sender"><i data-lucide="bot" style="width:12px;height:12px;color:#60a5fa"></i> ge_nius</div>
+                            <div class="message-text-ai ai-content">${marked.parse(fullText)}</div>
+                            <div><button class="audio-speech-btn" onclick="speakText('${encoded}')"><i data-lucide="volume-2" style="width:13px;height:13px;"></i> Read Aloud</button></div>
                         `;
                     }
                     
-                    // تشغيل الصوت تلقائياً إذا لم يكن مكتوماً
                     speakText(encoded);
                 } else {
-                    aiRow.innerHTML = `<div class="message-sender" style="color:var(--danger)">ge_nius</div><div class="message-text">Error: ${data.error || 'Failed.'}</div>`;
+                    aiRow.innerHTML = `<div class="message-sender" style="color:var(--danger)">ge_nius</div><div class="message-text-ai">Error: ${data.error || 'Failed.'}</div>`;
                 }
                 
                 chatFeed.appendChild(aiRow); lucide.createIcons({root: aiRow});
                 chatFeed.scrollTop = chatFeed.scrollHeight;
                 if (window.MathJax) window.MathJax.typesetPromise([aiRow]).catch(e => {});
+                checkScrollPosition();
                 saveCurrentChatHtml();
             }).catch(err => {
                 chatFeed.removeChild(loadingRow);
                 const errRow = document.createElement('div'); errRow.className = 'message-row';
-                errRow.innerHTML = `<div class="message-sender" style="color:var(--danger)">ge_nius</div><div class="message-text">Connection error.</div>`;
+                errRow.innerHTML = `<div class="message-sender" style="color:var(--danger)">ge_nius</div><div class="message-text-ai">Connection error.</div>`;
                 chatFeed.appendChild(errRow); lucide.createIcons({root: errRow});
             });
         }
@@ -831,7 +952,7 @@ HTML_CODE = """<!DOCTYPE html>
 """
 
 # ==============================================================================
-# Python Backend Server (Elite Optimized)
+# Python Backend Server (Supreme Optimized)
 # ==============================================================================
 class StudyAppRequestHandler(BaseHTTPRequestHandler):
 
@@ -919,40 +1040,50 @@ class StudyAppRequestHandler(BaseHTTPRequestHandler):
                 user_query = req_json.get("query", "")
                 question_image_base64 = req_json.get("image")
                 mode = req_json.get("mode", "study") 
+                persona = req_json.get("persona", "human")
                 docs = load_curriculum(session_id)
 
                 messages_content = []
                 if question_image_base64:
                     messages_content.append({"type": "image_url", "image_url": {"url": question_image_base64}})
 
+                # توجيه الـ Persona حسب اختيار المستخدم
+                persona_instructions = {
+                    "strict": "Persona: Strict & Professional. Be highly formal, objective, precise, and academic.",
+                    "humor": "Persona: Entertainment & Light Humor. Keep it witty, fun, and add light jokes while maintaining accuracy.",
+                    "roast": "Persona: Witty & Playful Challenge. Gently tease or challenge the user's logic if they make an error to push them to think harder.",
+                    "human": "Persona: Human-like & Warm. Be friendly, empathetic, natural, and encouraging like a close study partner."
+                }.get(persona, "Persona: Human-like & Warm.")
+
                 if mode == "general":
                     full_prompt = (
                         f"You are a global AI assistant named ge_nius.\n"
-                        f"User prompt/request: \"{user_query}\"\n\n"
-                        f"IMPORTANT: Respond in the exact same language the user is using.\n"
-                        f"Provide a professional, accurate, and structured response using Markdown."
+                        f"{persona_instructions}\n"
+                        f"User request: \"{user_query}\"\n\n"
+                        f"IMPORTANT: Respond in the exact same language the user is using."
                     )
                 elif mode == "games":
                     full_prompt = (
                         f"You are an interactive Brain Games and Puzzle master named ge_nius.\n"
-                        f"The user wants to play a thinking game, crossword, guess the animal/place, or solve a puzzle.\n"
+                        f"{persona_instructions}\n"
+                        f"The user is playing brain/thinking games, riddles, or guessing games.\n"
                         f"User input: \"{user_query}\"\n\n"
-                        f"IMPORTANT: Respond in the exact same language the user is using.\n"
-                        f"Engage the user interactively, propose fun puzzles, riddle questions, or guessing games, and make it exciting!"
+                        f"IMPORTANT: Respond in the exact same language the user is using. Keep it engaging and rewarding!"
                     )
                 else:
                     all_concepts_summary = "\n\n".join([f"Document {i+1}:\n{doc['concepts']}" for i, doc in enumerate(docs)])
                     full_prompt = (
                         f"You are an expert tutor.\n"
+                        f"{persona_instructions}\n"
                         f"Here is the student's curriculum study material:\n"
                         f"--- START CURRICULUM ---\n"
                         f"{all_concepts_summary}\n"
                         f"--- END CURRICULUM ---\n\n"
-                        f"User question/request: \"{user_query}\"\n\n"
+                        f"User question: \"{user_query}\"\n\n"
                         f"IMPORTANT: Respond in the exact same language the user is asking in.\n"
                         f"1. Does this relate to the curriculum?\n"
                         f"2. If completely unrelated, reply with EXACTLY: OUT_OF_SCOPE\n"
-                        f"3. If in scope, provide a clear, step-by-step explanation using Markdown and equations if needed."
+                        f"3. If in scope, provide a clear, step-by-step explanation."
                     )
                     
                 messages_content.append({"type": "text", "text": full_prompt})
