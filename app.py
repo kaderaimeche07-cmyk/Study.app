@@ -125,14 +125,14 @@ def delete_document_from_db(session_id, doc_id):
         MOCK_DB[session_id] = [d for d in MOCK_DB[session_id] if str(d["id"]) != str(doc_id)]
 
 # ==============================================================================
-# HTML Frontend (ge_nius Royal World-Class UI - Correctly Restored)
+# HTML Frontend (ge_nius Royal World-Class UI - Fixed Architecture)
 # ==============================================================================
 HTML_CODE = """<!DOCTYPE html>
 <html lang="en" dir="auto">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ge_nius Assistant - Royal Edition</title>
+    <title>ge_nius Assistant</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@700;900&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -203,45 +203,48 @@ HTML_CODE = """<!DOCTYPE html>
             padding: 12px 16px; border-radius: 12px; font-family: 'Inter', sans-serif; font-size: 0.95rem; outline: none;
         }
         
-        /* --- Top Nav Bar (RESTORED TO GLORY) --- */
+        /* --- Top Nav Bar (Title Top Left, Modes Below) --- */
         .top-nav-bar {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 8px 14px; flex-shrink: 0; gap: 12px; background: var(--glass);
+            display: flex; flex-direction: column; align-items: stretch;
+            padding: 10px 14px; flex-shrink: 0; gap: 10px; background: var(--glass);
             backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--border); border-radius: 24px; box-shadow: 0 4px 30px rgba(0,0,0,0.3);
+            border: 1px solid var(--border); border-radius: 20px; box-shadow: 0 4px 30px rgba(0,0,0,0.3);
             margin-bottom: 10px;
         }
 
-        .nav-left-group { display: flex; align-items: center; gap: 10px; }
+        .nav-header-row {
+            display: flex; align-items: center; gap: 10px; width: 100%;
+        }
 
         .app-brand {
-            font-family: 'Outfit', sans-serif; font-weight: 900; font-size: 1.2rem;
+            font-family: 'Outfit', sans-serif; font-weight: 900; font-size: 1.05rem; /* خط أصغر بناء على الطلب */
             color: var(--text-main); letter-spacing: -0.5px; display: flex; align-items: center; gap: 6px;
         }
         .app-brand span { color: var(--primary); }
-        .brand-icon { width: 22px; height: 22px; color: var(--primary); }
+        .brand-icon { width: 18px; height: 18px; color: var(--primary); }
 
         .icon-btn {
             background: transparent; border: none; color: var(--text-main);
-            border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
+            border-radius: 50%; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center;
             cursor: pointer; transition: all 0.2s; flex-shrink: 0;
         }
         .icon-btn:hover { background: var(--card); color: var(--primary); transform: scale(1.05); }
 
         .mode-switcher-bar {
-            display: flex; gap: 4px; background: rgba(0,0,0,0.2); padding: 3px; border-radius: 18px;
+            display: flex; gap: 6px; background: rgba(0,0,0,0.2); padding: 4px; border-radius: 16px;
+            justify-content: center; width: 100%; overflow-x: auto;
         }
         .mode-tab {
-            padding: 6px 12px; background: transparent; border: none; color: var(--text-dim);
+            padding: 6px 14px; background: transparent; border: none; color: var(--text-dim);
             font-family: 'Inter', sans-serif; font-weight: 600; font-size: 0.8rem; cursor: pointer;
-            border-radius: 14px; white-space: nowrap; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.3s;
+            border-radius: 12px; white-space: nowrap; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.3s;
+            flex: 1;
         }
-        .mode-tab.active { background: var(--surface); color: var(--text-main); box-shadow: 0 2px 15px rgba(0,0,0,0.2); border: 1px solid var(--border); }
+        .mode-tab.active { background: var(--surface); color: var(--text-main); box-shadow: 0 2px 10px rgba(0,0,0,0.2); border: 1px solid var(--border); }
         .mode-tab.hidden { display: none !important; }
 
         .lucide { width: 18px; height: 18px; stroke-width: 2.2; display: inline-block; vertical-align: middle; }
 
-        /* --- Game Stats Bar (Hidden initially, shows below nav only on games mode) --- */
         .games-stats-bar {
             display: none; background: rgba(65, 105, 225, 0.1); border: 1px solid rgba(65, 105, 225, 0.2);
             padding: 8px 16px; border-radius: 16px; align-items: center; justify-content: space-between; font-size: 0.85rem; color: #93c5fd; flex-shrink: 0; margin-bottom: 10px;
@@ -249,7 +252,7 @@ HTML_CODE = """<!DOCTYPE html>
         .games-stats-bar.active { display: flex; }
         .hud-hearts { color: var(--danger); letter-spacing: 2px;}
 
-        /* --- Sidebar --- */
+        /* --- Sidebar & Persona --- */
         .sidebar-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); z-index: 999; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
         .sidebar-overlay.active { opacity: 1; pointer-events: auto; }
         
@@ -265,6 +268,18 @@ HTML_CODE = """<!DOCTYPE html>
         .sidebar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 15px;}
         .sidebar h3 { margin: 0; font-size: 1.15rem; color: var(--text-main); font-weight: 800; display: flex; align-items: center; gap: 8px;}
         
+        /* Persona Section Restored */
+        .sidebar-section-title { font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; margin: 15px 0 8px 0; display: flex; align-items: center; gap: 6px;}
+        .persona-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+        .persona-chip {
+            background: var(--bg-main); border: 1px solid var(--border); border-radius: 12px;
+            padding: 8px; font-size: 0.75rem; font-family: 'Inter', sans-serif; font-weight: 600;
+            color: var(--text-dim); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px;
+            transition: all 0.2s ease;
+        }
+        .persona-chip:hover { background: var(--card); color: var(--text-main); }
+        .persona-chip.active { background: rgba(65, 105, 225, 0.15); color: var(--primary); border-color: var(--primary); }
+
         .chat-history-list { flex: 1; display: flex; flex-direction: column; gap: 6px; }
         .history-item { background: transparent; color: var(--text-main); padding: 10px 12px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; font-size: 0.88rem; transition: all 0.2s;}
         .history-item:hover { background: var(--card); }
@@ -273,24 +288,26 @@ HTML_CODE = """<!DOCTYPE html>
         .delete-history-btn { background: none; border: none; color: var(--text-dim); cursor: pointer; padding: 4px; border-radius: 6px; }
         .delete-history-btn:hover { color: var(--danger); background: rgba(239, 68, 68, 0.1); }
 
-        /* --- Sections Layout --- */
         .tab-section { display: none; flex-direction: column; flex: 1; min-height: 0; }
         .tab-section.active { display: flex; }
         
         .card { background: var(--surface); border-radius: 20px; border: 1px solid var(--border); padding: 16px; display: flex; flex-direction: column; gap: 10px; }
 
-        /* --- Chat Layout --- */
+        /* --- Chat Layout & Avatars --- */
         .chat-container-wrapper { position: relative; flex: 1; display: flex; flex-direction: column; min-height: 0; }
         .chat-feed {
             display: flex; flex-direction: column; gap: 24px; flex: 1; overflow-y: auto; padding: 10px 4px 20px 4px;
             background: transparent; scroll-behavior: smooth;
         }
         
-        .message-row { display: flex; flex-direction: column; gap: 6px; width: 100%; animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+        .message-row { display: flex; flex-direction: column; gap: 4px; width: 100%; animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
         @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
         
-        .message-sender { font-size: 0.75rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px; }
-        
+        /* New Micro-Avatars (No Names) */
+        .message-sender { display: flex; align-items: center; }
+        .avatar-user { background: var(--primary); padding: 6px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px var(--primary-glow);}
+        .avatar-ai { background: var(--card); padding: 6px; border-radius: 50%; border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; }
+
         .message-text-user { 
             font-size: 0.95rem; line-height: 1.6; color: var(--text-main); font-weight: 400; word-break: break-word;
             background: var(--surface); padding: 12px 16px; border-radius: 20px; border-top-right-radius: 4px; width: fit-content; max-width: 85%;
@@ -313,14 +330,17 @@ HTML_CODE = """<!DOCTYPE html>
         .audio-speech-btn { background: transparent; border: 1px solid var(--border); color: var(--text-dim); border-radius: 12px; padding: 6px 14px; font-size: 0.8rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; margin-top: 8px; transition: all 0.2s;}
         .audio-speech-btn:hover { background: var(--card); color: var(--primary); }
 
+        /* --- Thinking Animation Fixed (No Box, Just Beautiful Text Gradient) --- */
         .hologram-thinking {
-            display: flex; align-items: center; gap: 10px; color: var(--primary); font-weight: 600; font-size: 0.85rem;
-            background: rgba(65, 105, 225, 0.05); border: 1px solid rgba(65, 105, 225, 0.15); padding: 12px 18px; border-radius: 16px; width: fit-content;
+            display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 0.95rem; margin-top: 4px;
+            background: linear-gradient(90deg, #4169E1, #8B5CF6, #fbbf24, #4169E1);
+            background-size: 300% 100%;
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            animation: gradientMove 2s linear infinite;
         }
-        .pulse-dot { width: 8px; height: 8px; background: var(--primary); border-radius: 50%; animation: pulse-anim 1s infinite ease-in-out; }
-        @keyframes pulse-anim { 0%, 100% { transform: scale(0.8); opacity: 0.3; } 50% { transform: scale(1.4); opacity: 1; box-shadow: 0 0 10px var(--primary); } }
+        @keyframes gradientMove { 0% { background-position: 100% 0; } 100% { background-position: 0 0; } }
 
-        /* --- Input Box (RESTORED TO BOTTOM FIRMLY) --- */
+        /* --- Input Box --- */
         .chat-input-container { flex-shrink: 0; padding-bottom: 6px; position: relative; margin-top: auto;}
         .input-glass-panel {
             background: rgba(15, 16, 20, 0.85); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
@@ -378,6 +398,12 @@ HTML_CODE = """<!DOCTYPE html>
         
         input[type="file"] { display: none; }
         .image-preview-bar { display: none; align-items: center; justify-content: space-between; background: rgba(65, 105, 225, 0.1); border: 1px solid rgba(65, 105, 225, 0.3); padding: 8px 12px; border-radius: 16px; font-size: 0.82rem; color: #93c5fd; margin-bottom: 8px; }
+
+        /* Document Accordion (Small & Clean UI) */
+        .doc-card-compact { background: var(--bg-main); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 8px; }
+        .doc-card-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; cursor: pointer; }
+        .doc-card-title { font-weight: 700; color: var(--primary); font-size: 0.85rem; display: flex; align-items: center; gap: 6px; }
+        .doc-card-body { padding: 10px 14px; border-top: 1px solid var(--border); font-size: 0.8rem; color: var(--text-dim); line-height: 1.6; display: none; background: var(--surface); border-bottom-left-radius: 12px; border-bottom-right-radius: 12px;}
     </style>
 </head>
 <body>
@@ -428,7 +454,7 @@ HTML_CODE = """<!DOCTYPE html>
         <div style="margin-bottom: 20px; background: var(--card); padding: 10px; border-radius: 12px; border: 1px solid var(--border);">
             <div style="font-weight: bold; font-size: 0.95rem; color: var(--primary);" id="sidebarUserName">User</div>
             <div style="font-size: 0.75rem; color: var(--text-dim);" id="sidebarRoleLabel">Role</div>
-            <button class="btn" style="width: 100%; margin-top: 10px; border-color:var(--danger); color:var(--danger);" onclick="logout()"><i data-lucide="log-out"></i> Logout</button>
+            <button class="btn" style="width: 100%; margin-top: 10px; border-color:var(--danger); color:var(--danger);" onclick="performLogout()"><i data-lucide="log-out"></i> Logout</button>
         </div>
 
         <button class="btn" onclick="createNewChatSession()" style="width: 100%; justify-content: center; margin-bottom: 12px; border-radius: 16px;">
@@ -438,6 +464,15 @@ HTML_CODE = """<!DOCTYPE html>
         <button class="btn btn-purple" onclick="switchSection('docsTab')" style="width: 100%; justify-content: center; margin-bottom: 15px; border-radius: 16px;" id="btnCurriculum">
             <i data-lucide="folder-kanban"></i> Curriculum
         </button>
+
+        <!-- مستوى الذكاء تم إرجاعه وتفعيله بنجاح -->
+        <div class="sidebar-section-title"><i data-lucide="brain"></i> AI Persona</div>
+        <div class="persona-grid" id="personaContainer">
+            <button class="persona-chip active" data-val="human" onclick="selectPersona('human', this)"><i data-lucide="heart" style="width:14px;height:14px;"></i> Human</button>
+            <button class="persona-chip" data-val="strict" onclick="selectPersona('strict', this)"><i data-lucide="briefcase" style="width:14px;height:14px;"></i> Strict</button>
+            <button class="persona-chip" data-val="humor" onclick="selectPersona('humor', this)"><i data-lucide="smile" style="width:14px;height:14px;"></i> Humor</button>
+            <button class="persona-chip" data-val="roast" onclick="selectPersona('roast', this)"><i data-lucide="flame" style="width:14px;height:14px;"></i> Roast</button>
+        </div>
 
         <div class="sidebar-section-title"><i data-lucide="history"></i> History</div>
         <div class="chat-history-list" id="chatHistoryList"></div>
@@ -450,9 +485,9 @@ HTML_CODE = """<!DOCTYPE html>
     </aside>
 
     <div class="main-wrapper">
-        <!-- شريط التنقل العلوي المستقل (مفصول عن باقي العناصر ليعود لشكله الفخم) -->
+        <!-- شريط التنقل العلوي المرتب (العنوان في الأعلى يسار، والعوالم تحته) -->
         <div class="top-nav-bar">
-            <div class="nav-left-group">
+            <div class="nav-header-row">
                 <button class="icon-btn" onclick="toggleSidebar()" title="Menu">
                     <i data-lucide="align-left"></i>
                 </button>
@@ -473,7 +508,6 @@ HTML_CODE = """<!DOCTYPE html>
             </div>
         </div>
 
-        <!-- شريط نقاط الخبرة والألعاب (يظهر فقط في نمط الالعاب لكي لا يزاحم الواجهة) -->
         <div class="games-stats-bar" id="gamesStatsBar">
             <span class="hud-hearts" id="hudHearts">❤️❤️❤️❤️❤️</span>
             <span>⭐ XP: <strong id="userXp">0</strong></span>
@@ -526,7 +560,6 @@ HTML_CODE = """<!DOCTYPE html>
                     <label for="qFileInputGallery" class="magic-item">
                         <i data-lucide="image-plus" style="color:var(--primary)"></i> Upload PDF/Doc
                     </label>
-                    <!-- قبول ملفات PDF والمستندات للطلاب -->
                     <input type="file" id="qFileInputGallery" accept=".pdf, .doc, .docx, image/*">
 
                     <div class="magic-item" id="btnSummarize" onclick="triggerSummarizer()" style="display:none; color:var(--accent-gold); font-weight:bold;">
@@ -539,7 +572,7 @@ HTML_CODE = """<!DOCTYPE html>
                         <i data-lucide="plus"></i>
                     </button>
 
-                    <textarea id="userQuery" placeholder="Ask ge_nius..." rows="1" oninput="autoResizeTextarea(this)"></textarea>
+                    <textarea id="userQuery" placeholder="Ask anything..." rows="1" oninput="autoResizeTextarea(this)"></textarea>
                     
                     <button class="tool-btn" id="voiceRecordBtn" onclick="toggleVoiceRecording()" title="Voice Input">
                         <i data-lucide="mic"></i>
@@ -552,28 +585,26 @@ HTML_CODE = """<!DOCTYPE html>
             </div>
         </div>
 
-        <!-- Curriculum Docs Tab -->
+        <!-- Curriculum Docs Tab (UI المصغر المرتب والمخفي) -->
         <div class="tab-section" id="docsTab" style="gap:15px; overflow-y:auto; padding:0 4px;">
             <div style="display: flex; align-items: center; justify-content: space-between;">
-                <h3 style="margin:0; font-size: 1.15rem; color: var(--text-main); font-weight: 700;">Curriculum</h3>
-                <button class="btn" style="padding: 8px 12px; font-size: 0.8rem;" onclick="switchSection('askTab')">
-                    <i data-lucide="arrow-left"></i> Back
+                <h3 style="margin:0; font-size: 1.15rem; color: var(--text-main); font-weight: 700;">Curriculum Archive</h3>
+                <button class="btn" style="padding: 6px 10px; font-size: 0.75rem;" onclick="switchSection('askTab')">
+                    <i data-lucide="arrow-left" style="width:14px;height:14px;"></i> Back
                 </button>
             </div>
-            <div class="card" id="studentUploadArea">
-                <span style="font-weight: 700; font-size: 0.95rem; color: var(--primary); display: flex; align-items: center; gap: 8px;"><i data-lucide="file-up"></i> Upload Materials</span>
-                <div style="display: flex; gap: 8px;">
-                    <label for="docFileInputCamera" class="btn btn-purple" style="flex: 1; text-align: center; margin:0;"><i data-lucide="scan"></i> Scan</label>
+            <div class="card" id="studentUploadArea" style="padding: 12px;">
+                <span style="font-weight: 700; font-size: 0.85rem; color: var(--primary); display: flex; align-items: center; gap: 8px; margin-bottom:8px;"><i data-lucide="file-up" style="width:14px;height:14px;"></i> Upload Materials</span>
+                <div style="display: flex; gap: 6px;">
+                    <label for="docFileInputCamera" class="btn btn-purple" style="flex: 1; padding:8px; font-size:0.8rem; text-align: center; margin:0;"><i data-lucide="scan" style="width:14px;height:14px;"></i> Scan</label>
                     <input type="file" id="docFileInputCamera" accept="image/*" capture="environment">
                     
-                    <label for="docFileInputGallery" class="btn btn-purple" style="flex: 1; text-align: center; margin:0;"><i data-lucide="folder"></i> Files/Gallery</label>
+                    <label for="docFileInputGallery" class="btn btn-purple" style="flex: 1; padding:8px; font-size:0.8rem; text-align: center; margin:0;"><i data-lucide="folder" style="width:14px;height:14px;"></i> Files</label>
                     <input type="file" id="docFileInputGallery" accept=".pdf, .doc, .docx, image/*" multiple>
                 </div>
-                <div id="uploadStatus" style="font-size: 0.82rem; font-weight: bold; text-align:center; margin-top:8px;"></div>
+                <div id="uploadStatus" style="font-size: 0.75rem; font-weight: bold; text-align:center; margin-top:8px;"></div>
             </div>
-            <div class="card" style="flex: 1; min-height:200px;">
-                <div id="docsList" style="display: flex; flex-direction: column; gap: 10px;"></div>
-            </div>
+            <div id="docsList" style="display: flex; flex-direction: column; gap: 6px;"></div>
         </div>
     </div>
 
@@ -584,6 +615,7 @@ HTML_CODE = """<!DOCTYPE html>
         let currentUser = null;
         let attachedQuestionBase64 = null;
         let currentMode = 'general';
+        let currentPersonaValue = 'human'; // تم استرجاع متغير الـ Persona
         let modeContents = { study: "", general: "", games: "" };
         const chatFeed = document.getElementById('chatFeed');
 
@@ -639,7 +671,22 @@ HTML_CODE = """<!DOCTYPE html>
             } catch(e) {}
         }
 
-        function logout() { document.cookie = "session_id=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"; location.reload(); }
+        // تم إصلاح ميزة تسجيل الخروج جذرياً
+        async function performLogout() {
+            try {
+                await fetch('/api/logout', { method: 'POST' });
+                document.cookie = "session_id=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+                currentUser = null;
+                document.getElementById('authName').value = '';
+                document.getElementById('authEmail').value = '';
+                document.getElementById('authPassword').value = '';
+                
+                document.getElementById('authOverlay').style.display = 'flex';
+                setTimeout(() => document.getElementById('authOverlay').style.opacity = '1', 10);
+                if(document.getElementById('sidebar').classList.contains('open')) toggleSidebar();
+                
+            } catch(e) { console.error(e); }
+        }
 
         function configureUIForRole() {
             document.getElementById('sidebarUserName').innerText = currentUser.name;
@@ -670,7 +717,15 @@ HTML_CODE = """<!DOCTYPE html>
             document.getElementById('userXp').innerText = xp;
         }
 
-        // --- UI Interactions ---
+        // Persona Selection
+        window.selectPersona = function(val, btnElement) {
+            currentPersonaValue = val;
+            document.querySelectorAll('.persona-chip').forEach(btn => btn.classList.remove('active'));
+            btnElement.classList.add('active');
+            if(window.innerWidth < 768) toggleSidebar();
+        };
+
+        // UI Interactions
         function toggleMagicMenu() {
             if(isAiThinking) return;
             const menu = document.getElementById('magicMenu');
@@ -716,7 +771,6 @@ HTML_CODE = """<!DOCTYPE html>
             el.style.height = (el.scrollHeight) + 'px';
         }
 
-        // --- Voice ---
         let recognition = null;
         function toggleVoiceRecording() {
             const btn = document.getElementById('voiceRecordBtn');
@@ -749,9 +803,8 @@ HTML_CODE = """<!DOCTYPE html>
             recognition.start();
         }
 
-        // --- Sessions & Modes ---
-        let chatSessions = JSON.parse(localStorage.getItem('ge_nius_sessions_royal_v3')) || {};
-        let currentSessionId = localStorage.getItem('ge_nius_current_session_royal_v3');
+        let chatSessions = JSON.parse(localStorage.getItem('ge_nius_sessions_royal_v4')) || {};
+        let currentSessionId = localStorage.getItem('ge_nius_current_session_royal_v4');
 
         function initSessions() {
             if (!currentSessionId || !chatSessions[currentSessionId]) { createNewSessionQuiet(); } 
@@ -852,8 +905,8 @@ HTML_CODE = """<!DOCTYPE html>
         }
 
         function saveSessionsData() {
-            localStorage.setItem('ge_nius_sessions_royal_v3', JSON.stringify(chatSessions));
-            localStorage.setItem('ge_nius_current_session_royal_v3', currentSessionId);
+            localStorage.setItem('ge_nius_sessions_royal_v4', JSON.stringify(chatSessions));
+            localStorage.setItem('ge_nius_current_session_royal_v4', currentSessionId);
             renderChatHistoryList();
         }
 
@@ -882,13 +935,18 @@ HTML_CODE = """<!DOCTYPE html>
             }
         };
 
-        window.copyCodeText = function(btn, text) {
-            navigator.clipboard.writeText(decodeURIComponent(text)).then(() => {
-                const originalHtml = btn.innerHTML;
-                btn.innerHTML = `<i data-lucide="check"></i> Copied`;
-                lucide.createIcons({root: btn});
-                setTimeout(() => { btn.innerHTML = originalHtml; lucide.createIcons({root: btn}); }, 2000);
-            });
+        // إصلاح زر النسخ تماماً (يعتمد على قراءة محتوى صندوق الإجابة الفعلي)
+        window.copyCodeText = function(btn) {
+            const container = btn.closest('.complex-card-box');
+            if(container) {
+                const contentText = container.querySelector('.ai-content').innerText;
+                navigator.clipboard.writeText(contentText).then(() => {
+                    const originalHtml = btn.innerHTML;
+                    btn.innerHTML = `<i data-lucide="check" style="width:12px;height:12px;"></i> Copied`;
+                    lucide.createIcons({root: btn});
+                    setTimeout(() => { btn.innerHTML = originalHtml; lucide.createIcons({root: btn}); }, 2000);
+                });
+            }
         };
 
         // --- Documents & Files ---
@@ -897,17 +955,35 @@ HTML_CODE = """<!DOCTYPE html>
 
         function fetchDocs() { fetch('/api/docs').then(res => res.json()).then(data => { curriculumDocs = data; renderDocs(); }); }
 
+        window.toggleDocCollapse = function(id) {
+            const el = document.getElementById('doc-body-' + id);
+            const icon = document.getElementById('doc-icon-' + id);
+            if(el.style.display === 'none' || el.style.display === '') {
+                el.style.display = 'block';
+                icon.style.transform = 'rotate(180deg)';
+            } else {
+                el.style.display = 'none';
+                icon.style.transform = 'rotate(0deg)';
+            }
+        };
+
+        // جعل الوثائق تظهر بشكل مصغر ويمكن طيّها لتنظيف المساحة
         function renderDocs() {
             const listDiv = document.getElementById('docsList');
             if (!listDiv) return;
-            if (curriculumDocs.length === 0) { listDiv.innerHTML = '<div style="color: var(--text-dim); text-align: center; padding: 20px;">No documents uploaded yet.</div>'; return; }
+            if (curriculumDocs.length === 0) { listDiv.innerHTML = '<div style="color: var(--text-dim); text-align: center; padding: 20px; font-size:0.8rem;">No documents uploaded yet.</div>'; return; }
             listDiv.innerHTML = curriculumDocs.map((item, index) => `
-                <div style="background:var(--bg-main); border:1px solid var(--border); border-radius:14px; padding:14px; display:flex; flex-direction:column; gap:10px;">
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <span style="font-weight:700; color:var(--primary);"><i data-lucide="file-text"></i> Document ${index + 1}</span>
-                        <button class="btn" style="padding:4px 8px; font-size:0.75rem; color:var(--danger);" onclick="deleteDoc(${item.id})"><i data-lucide="trash-2"></i> Delete</button>
+                <div class="doc-card-compact">
+                    <div class="doc-card-header" onclick="toggleDocCollapse(${item.id})">
+                        <span class="doc-card-title"><i data-lucide="file-text" style="width:14px;height:14px;"></i> Doc ${index + 1}</span>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <button class="btn" style="padding:2px 6px; font-size:0.7rem; color:var(--danger); border:none; background:transparent;" onclick="event.stopPropagation(); deleteDoc(${item.id})"><i data-lucide="trash-2" style="width:14px;height:14px;"></i></button>
+                            <i data-lucide="chevron-down" id="doc-icon-${item.id}" style="width:16px;height:16px;color:var(--text-dim);transition:0.3s;"></i>
+                        </div>
                     </div>
-                    <div style="font-size:0.85rem; color:var(--text-dim); line-height:1.6; max-height:100px; overflow-y:auto; background:var(--surface); padding:10px; border-radius:10px;">${item.concepts}</div>
+                    <div class="doc-card-body" id="doc-body-${item.id}">
+                        ${item.concepts}
+                    </div>
                 </div>
             `).join('');
             lucide.createIcons({root: listDiv});
@@ -974,11 +1050,11 @@ HTML_CODE = """<!DOCTYPE html>
             const data = await res.json();
             const list = document.getElementById('teacherDocsList');
             list.innerHTML = data.docs.map(d => `
-                <div style="background:var(--card); padding:12px; border-radius:12px; border:1px solid var(--border); display:flex; justify-content:space-between;">
-                    <span style="font-weight:600;"><i data-lucide="file-check"></i> ${d.title}</span>
-                    <span style="font-size:0.8rem; color:var(--text-dim);">Compressed (zlib)</span>
+                <div style="background:var(--card); padding:10px 14px; border-radius:12px; border:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-weight:600; font-size:0.85rem;"><i data-lucide="file-check" style="width:14px;height:14px; margin-right:4px;"></i> ${d.title}</span>
+                    <span style="font-size:0.75rem; color:var(--text-dim);">Compressed</span>
                 </div>
-            `).join('') || "<div style='color:var(--text-dim)'>No materials uploaded yet.</div>";
+            `).join('') || "<div style='color:var(--text-dim); font-size:0.85rem; text-align:center;'>No materials uploaded yet.</div>";
             lucide.createIcons({root: list});
         }
 
@@ -1011,24 +1087,34 @@ HTML_CODE = """<!DOCTYPE html>
             let userTextDisplay = query.replace(/\\n/g, '<br>');
             if (attachedQuestionBase64) { userTextDisplay = (query ? userTextDisplay + '<br>' : '') + `<span style="color:var(--primary); font-size:0.85em; display:flex; align-items:center; gap:4px; margin-top:6px;"><i data-lucide="image" style="width:14px;height:14px;"></i> File attached</span>`; }
 
+            // تصميم الأيقونات المصغرة بدون أسماء
             const userRow = document.createElement('div'); userRow.className = 'message-row';
             userRow.style.alignItems = 'flex-end';
-            userRow.innerHTML = `<div class="message-sender" style="justify-content:flex-end;">You <i data-lucide="user" style="width:12px;height:12px;"></i></div><div class="message-text-user">${userTextDisplay}</div>`;
+            userRow.innerHTML = `
+                <div class="message-sender" style="justify-content:flex-end; margin-bottom: 2px;">
+                    <div class="avatar-user"><i data-lucide="user" style="width:14px;height:14px;color:#fff;"></i></div>
+                </div>
+                <div class="message-text-user">${userTextDisplay}</div>`;
             chatFeed.appendChild(userRow); lucide.createIcons({root: userRow});
 
+            // تصميم علامة التفكير النصية الأنيقة (شُطِبت إطارات الخلفية البنفسجية)
             const loadingRow = document.createElement('div'); loadingRow.className = 'message-row loading-bubble-temp';
             loadingRow.innerHTML = `
-                <div class="message-sender" style="color:var(--primary)"><i data-lucide="cpu" style="width:12px;height:12px;"></i> ge_nius</div>
-                <div class="hologram-thinking">
-                    <div class="pulse-dot"></div>
-                    <span>Processing logic...</span>
+                <div class="message-sender" style="margin-bottom: 2px;">
+                    <div class="avatar-ai">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;color:var(--primary);">
+                            <path d="M16 13v-2a2 2 0 0 0-2-2h-1v-2a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v2H7a2 2 0 0 0-2 2v2"/><path d="M4 11h16a2 2 0 0 1 2 2v2a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5v-2a2 2 0 0 1 2-2z"/><circle cx="12" cy="15" r="2"/><path d="M20 15h2"/><path d="M2 15h2"/>
+                        </svg>
+                    </div>
                 </div>
+                <div class="hologram-thinking">Processing logic...</div>
             `;
             chatFeed.appendChild(loadingRow); lucide.createIcons({root: loadingRow});
             
             saveCurrentChatHtml(query);
 
-            const payload = { query: query, file: attachedQuestionBase64, mode: currentMode, isSummary: isSummary };
+            // نمرر الـ persona المختارة إلى الباك-إند
+            const payload = { query: query, file: attachedQuestionBase64, mode: currentMode, isSummary: isSummary, persona: currentPersonaValue };
             queryInput.value = ''; queryInput.style.height = 'auto'; removeQuestionImage(); chatFeed.scrollTop = chatFeed.scrollHeight;
 
             fetch('/api/ask', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
@@ -1037,8 +1123,17 @@ HTML_CODE = """<!DOCTYPE html>
                 chatFeed.removeChild(loadingRow);
                 const aiRow = document.createElement('div'); aiRow.className = 'message-row';
 
+                let avatarHtml = `
+                <div class="message-sender" style="margin-bottom: 2px;">
+                    <div class="avatar-ai">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;color:var(--primary);">
+                            <path d="M16 13v-2a2 2 0 0 0-2-2h-1v-2a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v2H7a2 2 0 0 0-2 2v2"/><path d="M4 11h16a2 2 0 0 1 2 2v2a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5v-2a2 2 0 0 1 2-2z"/><circle cx="12" cy="15" r="2"/><path d="M20 15h2"/><path d="M2 15h2"/>
+                        </svg>
+                    </div>
+                </div>`;
+
                 if (data.status === 'out_of_scope') {
-                    aiRow.innerHTML = `<div class="message-sender" style="color:var(--danger)">ge_nius</div><div class="message-text-ai" style="color:#fca5a5;">Out of curriculum scope. Switch to General mode.</div>`;
+                    aiRow.innerHTML = avatarHtml + `<div class="message-text-ai" style="color:#fca5a5;">Out of curriculum scope. Switch to General mode.</div>`;
                 } else if (data.status === 'success') {
                     let fullText = data.answer;
                     const encoded = encodeURIComponent(fullText);
@@ -1049,26 +1144,24 @@ HTML_CODE = """<!DOCTYPE html>
                     }
                     
                     if (fullText.includes("```") || fullText.length > 500) {
-                        aiRow.innerHTML = `
-                            <div class="message-sender"><i data-lucide="bot" style="width:12px;height:12px;color:var(--primary)"></i> ge_nius</div>
+                        aiRow.innerHTML = avatarHtml + `
                             <div class="complex-card-box">
                                 <div class="complex-card-header">
                                     <span>Detailed Output</span>
-                                    <button class="copy-code-btn" onclick="copyCodeText(this, '${encoded}')"><i data-lucide="copy" style="width:12px;height:12px;"></i> Copy</button>
+                                    <button class="copy-code-btn" onclick="copyCodeText(this)"><i data-lucide="copy" style="width:12px;height:12px;"></i> Copy</button>
                                 </div>
                                 <div class="message-text-ai ai-content">${marked.parse(fullText)}</div>
                             </div>
                             <div><button class="audio-speech-btn" onclick="speakText('${encoded}')"><i data-lucide="volume-2" style="width:14px;height:14px;"></i> Listen</button></div>
                         `;
                     } else {
-                        aiRow.innerHTML = `
-                            <div class="message-sender"><i data-lucide="bot" style="width:12px;height:12px;color:var(--primary)"></i> ge_nius</div>
+                        aiRow.innerHTML = avatarHtml + `
                             <div class="message-text-ai ai-content" style="padding-top:4px;">${marked.parse(fullText)}</div>
                             <div><button class="audio-speech-btn" onclick="speakText('${encoded}')"><i data-lucide="volume-2" style="width:14px;height:14px;"></i> Listen</button></div>
                         `;
                     }
                 } else {
-                    aiRow.innerHTML = `<div class="message-sender" style="color:var(--danger)">ge_nius</div><div class="message-text-ai">Error: ${data.error || 'Failed.'}</div>`;
+                    aiRow.innerHTML = avatarHtml + `<div class="message-text-ai" style="color:var(--danger)">Error: ${data.error || 'Failed.'}</div>`;
                 }
                 
                 chatFeed.appendChild(aiRow); lucide.createIcons({root: aiRow});
@@ -1078,7 +1171,9 @@ HTML_CODE = """<!DOCTYPE html>
             }).catch(err => {
                 chatFeed.removeChild(loadingRow);
                 const errRow = document.createElement('div'); errRow.className = 'message-row';
-                errRow.innerHTML = `<div class="message-sender" style="color:var(--danger)">ge_nius</div><div class="message-text-ai">Connection error.</div>`;
+                errRow.innerHTML = `
+                    <div class="message-sender"><div class="avatar-ai"><i data-lucide="alert-circle" style="width:14px;height:14px;color:var(--danger);"></i></div></div>
+                    <div class="message-text-ai" style="color:var(--danger);">Connection error.</div>`;
                 chatFeed.appendChild(errRow); lucide.createIcons({root: errRow});
             }).finally(() => {
                 isAiThinking = false;
@@ -1171,6 +1266,12 @@ class StudyAppRequestHandler(BaseHTTPRequestHandler):
                     }
                 MOCK_SESSIONS[session_id] = email
                 self.send_json_response({"success": True, "user": MOCK_USERS[email]})
+            
+            # معالجة تسجيل الخروج في الخادم الفعلي وحذف الجلسة
+            elif self.path == "/api/logout":
+                if session_id in MOCK_SESSIONS:
+                    del MOCK_SESSIONS[session_id]
+                self.send_json_response({"success": True})
 
             elif self.path == "/api/teacher/upload":
                 b64_file = req_json.get("file", "")
@@ -1212,6 +1313,7 @@ class StudyAppRequestHandler(BaseHTTPRequestHandler):
                 file_b64 = req_json.get("file")
                 mode = req_json.get("mode", "study") 
                 is_summary = req_json.get("isSummary", False)
+                persona = req_json.get("persona", "human") # جلب الـ Persona
                 docs = load_curriculum(session_id, user)
 
                 messages_content = []
@@ -1221,18 +1323,25 @@ class StudyAppRequestHandler(BaseHTTPRequestHandler):
                     else:
                         messages_content.append({"type": "text", "text": "[File Attached. Read context.]"})
 
+                persona_instructions = {
+                    "strict": "Persona: Strict & Professional. Be highly formal, precise, and academic.",
+                    "humor": "Persona: Entertainment & Light Humor. Keep it witty and fun.",
+                    "roast": "Persona: Witty & Playful Challenge. Gently challenge the user's logic.",
+                    "human": "Persona: Human-like & Warm. Be friendly, empathetic, natural."
+                }.get(persona, "Persona: Human-like & Warm.")
+
                 if mode == "general":
-                    full_prompt = f"You are a global AI assistant named ge_nius.\nUser request: \"{user_query}\"\nIMPORTANT: Respond in the exact same language the user is using."
+                    full_prompt = f"You are a global AI assistant named ge_nius.\n{persona_instructions}\nUser request: \"{user_query}\"\nIMPORTANT: Respond in the exact same language the user is using."
                 elif mode == "games":
                     full_prompt = (
-                        f"You are an interactive Brain Games and Puzzle master named ge_nius.\n"
+                        f"You are an interactive Brain Games and Puzzle master named ge_nius.\n{persona_instructions}\n"
                         f"The user is playing brain/thinking games.\nUser input: \"{user_query}\"\n"
                         f"IMPORTANT: If the user answers WRONG, prefix your response EXACTLY with [WRONG]. If CORRECT, prefix with [CORRECT]. Respond in their language."
                     )
                 else:
                     all_concepts_summary = "\n\n".join([f"Document {i+1}:\n{doc['concepts']}" for i, doc in enumerate(docs)])
                     full_prompt = (
-                        f"You are an expert tutor.\nHere is the student's curriculum study material:\n"
+                        f"You are an expert tutor.\n{persona_instructions}\nHere is the student's curriculum study material:\n"
                         f"--- START CURRICULUM ---\n{all_concepts_summary}\n--- END CURRICULUM ---\n\n"
                     )
                     if is_summary:
