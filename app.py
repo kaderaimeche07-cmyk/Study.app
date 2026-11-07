@@ -91,14 +91,14 @@ def delete_document_from_db(session_id, doc_id):
         MOCK_DB[session_id] = [d for d in MOCK_DB[session_id] if str(d["id"]) != str(doc_id)]
 
 # ==============================================================================
-# HTML Frontend (ge_nius Supreme Pro Edition)
+# HTML Frontend (ge_nius Modern OLED & Glassmorphism Edition)
 # ==============================================================================
 HTML_CODE = """<!DOCTYPE html>
 <html lang="en" dir="auto">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ge_nius Assistant - Supreme Edition</title>
+    <title>ge_nius Assistant - Modern UI</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@700;900&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -114,22 +114,23 @@ HTML_CODE = """<!DOCTYPE html>
 
     <style>
         :root {
-            --bg-main: #090807; 
-            --surface: #151312; 
-            --card: #201d1c;
+            --bg-main: #050505; 
+            --surface: #121212; 
+            --card: #1a1a1a;
             --primary: #3b82f6; 
             --accent-purple: #8b5cf6; 
             --accent-green: #10b981;
             --danger: #ef4444; 
-            --text-main: #fafaf9; 
-            --text-dim: #999490;
-            --border: rgba(255, 255, 255, 0.07); 
+            --text-main: #f3f4f6; 
+            --text-dim: #9ca3af;
+            --border: rgba(255, 255, 255, 0.08); 
+            --glass: rgba(18, 18, 18, 0.85);
         }
 
         body.light-mode {
             --bg-main: #f8fafc; --surface: #ffffff; --card: #f1f5f9;
             --primary: #2563eb; --text-main: #0f172a; --text-dim: #64748b;
-            --border: rgba(0, 0, 0, 0.08); 
+            --border: rgba(0, 0, 0, 0.08); --glass: rgba(255, 255, 255, 0.85);
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -138,51 +139,52 @@ HTML_CODE = """<!DOCTYPE html>
             font-family: 'Inter', sans-serif; 
             background-color: var(--bg-main); color: var(--text-main);
             margin: 0; padding: 0; width: 100vw; height: 100vh; height: 100dvh; overflow: hidden;
-            background-image: radial-gradient(circle at 10% 10%, rgba(139, 92, 246, 0.06), transparent 40%),
-                              radial-gradient(circle at 90% 90%, rgba(59, 130, 246, 0.06), transparent 40%);
+            background-image: radial-gradient(circle at 15% 15%, rgba(139, 92, 246, 0.08), transparent 45%),
+                              radial-gradient(circle at 85% 85%, rgba(59, 130, 246, 0.08), transparent 45%);
             background-attachment: fixed;
         }
 
         .main-wrapper { 
-            padding: 10px; display: flex; flex-direction: column; gap: 8px; 
+            padding: 10px; display: flex; flex-direction: column; gap: 10px; 
             width: 100%; height: 100%; height: 100dvh; max-width: 900px; margin: 0 auto; 
         }
 
+        /* الجزيرة العلوية المتصلة (Capsule Nav) */
         .top-nav-bar {
             display: flex; justify-content: space-between; align-items: center;
-            padding: 4px 6px; flex-shrink: 0; gap: 8px;
+            padding: 6px 8px; flex-shrink: 0; gap: 10px; background: var(--surface);
+            border: 1px solid var(--border); border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         }
 
         .icon-btn {
-            background: var(--surface); border: 1px solid var(--border); color: var(--text-main);
-            border-radius: 12px; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center;
+            background: var(--card); border: 1px solid var(--border); color: var(--text-main);
+            border-radius: 10px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
             cursor: pointer; transition: all 0.2s; flex-shrink: 0;
         }
-        .icon-btn:hover { background: var(--primary); color: white; }
+        .icon-btn:hover { background: var(--primary); color: white; transform: scale(1.05); }
 
-        /* شريط اختيار المناهج والأنماط */
         .mode-switcher-bar {
-            display: flex; gap: 4px; background: var(--surface); padding: 3px; border-radius: 12px;
-            border: 1px solid var(--border); flex: 1; overflow-x: auto;
+            display: flex; gap: 4px; background: var(--bg-main); padding: 3px; border-radius: 12px;
+            border: 1px solid var(--border); flex: 1;
         }
         .mode-tab {
-            flex: 1; padding: 7px 10px; background: transparent; border: none; color: var(--text-dim);
-            font-family: 'Inter', sans-serif; font-weight: 600; font-size: 0.82rem; cursor: pointer;
-            border-radius: 9px; white-space: nowrap; display: flex; align-items: center; justify-content: center; gap: 5px; transition: all 0.2s;
+            flex: 1; padding: 6px 10px; background: transparent; border: none; color: var(--text-dim);
+            font-family: 'Inter', sans-serif; font-weight: 600; font-size: 0.8rem; cursor: pointer;
+            border-radius: 9px; white-space: nowrap; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s;
         }
-        .mode-tab.active { background: var(--primary); color: white; box-shadow: 0 2px 10px rgba(59,130,246,0.3); }
+        .mode-tab.active { background: var(--primary); color: white; box-shadow: 0 2px 10px rgba(59,130,246,0.4); }
 
         .lucide { width: 17px; height: 17px; stroke-width: 2.2; display: inline-block; vertical-align: middle; }
 
         /* Sidebar & Overlay */
-        .sidebar-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 999; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+        .sidebar-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.65); backdrop-filter: blur(6px); z-index: 999; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
         .sidebar-overlay.active { opacity: 1; pointer-events: auto; }
         
         .sidebar {
             position: fixed; top: 0; left: -320px; width: 290px; height: 100vh; height: 100dvh;
             background: var(--surface); border-right: 1px solid var(--border);
             z-index: 1000; transition: left 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-            display: flex; flex-direction: column; padding: 20px; box-shadow: 15px 0 40px rgba(0,0,0,0.4);
+            display: flex; flex-direction: column; padding: 20px; box-shadow: 15px 0 40px rgba(0,0,0,0.5);
         }
         .sidebar.open { left: 0; }
         
@@ -204,16 +206,15 @@ HTML_CODE = """<!DOCTYPE html>
         .tab-section { display: none; flex-direction: column; gap: 8px; flex: 1; min-height: 0; }
         .tab-section.active { display: flex; }
         
-        .card { background: var(--surface); border-radius: 16px; border: 1px solid var(--border); padding: 14px; display: flex; flex-direction: column; gap: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+        .card { background: var(--surface); border-radius: 16px; border: 1px solid var(--border); padding: 14px; display: flex; flex-direction: column; gap: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
 
-        /* لوحة التحكم في الشخصية ونقاط الخبرة للالعاب */
         .persona-panel {
             background: var(--surface); border: 1px solid var(--border); padding: 8px 12px; border-radius: 12px;
             display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; font-size: 0.82rem; gap: 10px;
         }
         .persona-select {
             background: var(--card); color: var(--text-main); border: 1px solid var(--border);
-            padding: 4px 8px; border-radius: 8px; font-family: 'Inter', sans-serif; outline: none; cursor: pointer; font-size: 0.8rem;
+            padding: 5px 10px; border-radius: 8px; font-family: 'Inter', sans-serif; outline: none; cursor: pointer; font-size: 0.8rem;
         }
 
         .games-stats-bar {
@@ -222,14 +223,12 @@ HTML_CODE = """<!DOCTYPE html>
         }
         .games-stats-bar.active { display: flex; }
 
-        /* Chat Feed & Smart Scroll Jumpers */
         .chat-container-wrapper { position: relative; flex: 1; display: flex; flex-direction: column; min-height: 0; }
         .chat-feed {
             display: flex; flex-direction: column; gap: 16px; flex: 1; overflow-y: auto; padding: 10px 4px;
             background: transparent; scroll-behavior: smooth;
         }
         
-        /* الأسهم العائمة تظهر حسب اللمس والمسافة */
         .scroll-jumpers {
             position: absolute; right: 10px; bottom: 10px; display: flex; flex-direction: column; gap: 6px; z-index: 10;
             opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
@@ -242,74 +241,69 @@ HTML_CODE = """<!DOCTYPE html>
         }
         .jump-btn:hover { background: var(--primary); color: white; transform: scale(1.1); }
 
-        /* رسائل المحادثة بدون أطر ثقيلة (صغيرة للمستخدم، كبيرة وواضحة للذكاء) */
-        .message-row { display: flex; flex-direction: column; gap: 3px; width: 100%; animation: fadeIn 0.25s ease; }
+        .message-row { display: flex; flex-direction: column; gap: 4px; width: 100%; animation: fadeIn 0.25s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
         
         .message-sender { font-size: 0.72rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 5px; }
-        
-        /* كلام المستخدم صغير وقليل وفتيح */
-        .message-text-user { font-size: 0.9rem; line-height: 1.5; color: var(--text-dim); font-weight: 400; word-break: break-word; }
-        
-        /* كلام الذكاء الاصطناعي كبير وغامق واحترافي */
+        .message-text-user { font-size: 0.92rem; line-height: 1.5; color: var(--text-dim); font-weight: 400; word-break: break-word; }
         .message-text-ai { font-size: 1.05rem; line-height: 1.75; color: var(--text-main); font-weight: 600; word-break: break-word; }
 
         .complex-card-box {
-            background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px;
-            margin: 4px 0; box-shadow: 0 4px 15px rgba(0,0,0,0.2); position: relative; overflow-x: auto;
+            background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 14px;
+            margin: 4px 0; box-shadow: 0 4px 20px rgba(0,0,0,0.25); position: relative; overflow-x: auto;
         }
-        .complex-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; border-bottom: 1px solid var(--border); padding-bottom: 4px; font-size: 0.78rem; color: var(--accent-purple); font-weight: bold; }
+        .complex-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 1px solid var(--border); padding-bottom: 6px; font-size: 0.78rem; color: var(--accent-purple); font-weight: bold; }
         
-        .copy-code-btn { background: var(--card); color: var(--text-dim); border: 1px solid var(--border); border-radius: 6px; padding: 3px 7px; font-size: 0.72rem; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+        .copy-code-btn { background: var(--card); color: var(--text-dim); border: 1px solid var(--border); border-radius: 6px; padding: 4px 8px; font-size: 0.72rem; cursor: pointer; display: flex; align-items: center; gap: 4px; }
         .copy-code-btn:hover { background: var(--primary); color: white; }
 
-        .audio-speech-btn { background: var(--surface); border: 1px solid var(--border); color: var(--primary); border-radius: 7px; padding: 3px 8px; font-size: 0.78rem; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; margin-top: 4px; }
+        .audio-speech-btn { background: var(--surface); border: 1px solid var(--border); color: var(--primary); border-radius: 8px; padding: 4px 10px; font-size: 0.78rem; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; margin-top: 6px; }
         .audio-speech-btn:hover { background: var(--primary); color: white; }
 
         .hologram-thinking {
             display: flex; align-items: center; gap: 8px; color: var(--accent-purple); font-weight: 600; font-size: 0.85rem;
-            background: rgba(139, 92, 246, 0.08); border: 1px solid rgba(139, 92, 246, 0.15); padding: 7px 12px; border-radius: 10px; width: fit-content;
+            background: rgba(139, 92, 246, 0.08); border: 1px solid rgba(139, 92, 246, 0.2); padding: 8px 12px; border-radius: 10px; width: fit-content;
         }
         .pulse-dot { width: 7px; height: 7px; background: var(--accent-purple); border-radius: 50%; animation: pulse-anim 1.2s infinite ease-in-out; }
         @keyframes pulse-anim { 0%, 100% { transform: scale(0.8); opacity: 0.4; } 50% { transform: scale(1.3); opacity: 1; } }
 
-        /* إطار الكتابة الراقي */
+        /* إطار الكتابة الفاخر */
         .chat-input-container { flex-shrink: 0; }
         .chat-input-box {
-            background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 8px 12px;
-            display: flex; flex-direction: column; gap: 6px; box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+            background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 10px 14px;
+            display: flex; flex-direction: column; gap: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
             transition: border-color 0.2s;
         }
         .chat-input-box:focus-within { border-color: var(--primary); }
 
         textarea {
             background: transparent; color: var(--text-main); border: none; outline: none;
-            font-family: 'Inter', sans-serif; font-size: 0.95rem; resize: none; max-height: 110px; min-height: 22px; line-height: 1.4; width: 100%;
+            font-family: 'Inter', sans-serif; font-size: 0.95rem; resize: none; max-height: 110px; min-height: 24px; line-height: 1.4; width: 100%;
         }
 
         .image-preview-bar {
             display: none; align-items: center; justify-content: space-between; background: rgba(59, 130, 246, 0.15);
-            border: 1px solid var(--primary); padding: 5px 8px; border-radius: 7px; font-size: 0.82rem; color: #93c5fd;
+            border: 1px solid var(--primary); padding: 6px 10px; border-radius: 8px; font-size: 0.82rem; color: #93c5fd;
         }
 
-        .input-actions-bar { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); padding-top: 6px; }
-        .input-left-tools { display: flex; gap: 5px; align-items: center; }
+        .input-actions-bar { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); padding-top: 8px; }
+        .input-left-tools { display: flex; gap: 6px; align-items: center; }
 
         .tool-btn {
-            background: transparent; border: none; color: var(--text-dim); border-radius: 7px; width: 34px; height: 34px;
+            background: transparent; border: none; color: var(--text-dim); border-radius: 8px; width: 36px; height: 36px;
             display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s;
         }
         .tool-btn:hover { background: var(--card); color: var(--text-main); }
-        .tool-btn.recording { color: var(--danger); animation: pulse 1.2s infinite; }
+        .tool-btn.recording { color: var(--danger); }
         .tool-btn.muted { color: var(--danger); }
 
         .send-btn {
-            background: var(--primary); color: white; border: none; border-radius: 9px; width: 36px; height: 36px;
-            display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.1s;
+            background: var(--primary); color: white; border: none; border-radius: 10px; width: 38px; height: 38px;
+            display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.1s; flex-shrink: 0;
         }
         .send-btn:active { transform: scale(0.95); }
 
-        .btn { background: var(--primary); color: white; border: none; padding: 9px 14px; border-radius: 11px; font-family: 'Inter', sans-serif; font-weight: 700; font-size: 0.88rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s; }
+        .btn { background: var(--primary); color: white; border: none; padding: 10px 16px; border-radius: 12px; font-family: 'Inter', sans-serif; font-weight: 700; font-size: 0.88rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s; }
         .btn-purple { background: linear-gradient(135deg, #8b5cf6, #3b82f6); }
         .btn-danger { background: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.3); padding: 5px 10px; border-radius: 7px; font-size: 0.82rem;}
         input[type="file"] { display: none; }
@@ -349,12 +343,12 @@ HTML_CODE = """<!DOCTYPE html>
     </aside>
 
     <div class="main-wrapper">
+        <!-- الجزيرة العلوية المتصلة العصرية -->
         <div class="top-nav-bar">
             <button class="icon-btn" onclick="toggleSidebar()" title="Menu">
                 <i data-lucide="align-right"></i>
             </button>
 
-            <!-- شريط المناهج والأنماط -->
             <div class="mode-switcher-bar">
                 <button class="mode-tab active" id="modeStudy" onclick="switchMode('study')">
                     <i data-lucide="graduation-cap"></i> Study
@@ -372,7 +366,6 @@ HTML_CODE = """<!DOCTYPE html>
             </button>
         </div>
 
-        <!-- لوحة التحكم في مستوى وشخصية الذكاء الاصطناعي -->
         <div class="persona-panel">
             <span style="display:flex; align-items:center; gap:6px; color:var(--text-dim);"><i data-lucide="sliders" style="width:14px; height:14px;"></i> AI Persona:</span>
             <select id="aiPersonaSelect" class="persona-select">
@@ -383,9 +376,8 @@ HTML_CODE = """<!DOCTYPE html>
             </select>
         </div>
 
-        <!-- شريط نقاط الخبرة والألعاب -->
         <div class="games-stats-bar" id="gamesStatsBar">
-            <span>⭐ XP: <strong id="userXp">120</strong></span>
+            <span>⭐ XP: <strong id="userXp">125</strong></span>
             <span>🏆 Win Rate: <strong id="userWinRate">85%</strong></span>
             <span style="color: #a78bfa;" id="gameEncourageMsg">Keep going, genius!</span>
         </div>
@@ -394,13 +386,12 @@ HTML_CODE = """<!DOCTYPE html>
             <div class="chat-container-wrapper">
                 <div class="chat-feed" id="chatFeed" onscroll="checkScrollPosition()" ontouchmove="checkScrollPosition()">
                     <div id="welcomeMsg" style="color: var(--text-dim); text-align: center; padding: 40px 20px; display: flex; flex-direction: column; align-items: center; gap: 8px;">
-                        <i data-lucide="sparkles" style="width: 30px; height: 30px; color: var(--primary);"></i>
-                        <h3 style="margin: 0; color: var(--text-main); font-weight: 700;">ge_nius Supreme</h3>
+                        <i data-lucide="sparkles" style="width: 32px; height: 32px; color: var(--primary);"></i>
+                        <h3 style="margin: 0; color: var(--text-main); font-weight: 700;">ge_nius Modern OLED</h3>
                         <p style="margin: 0; font-size: 0.88rem;">Select a mode above and start exploring.</p>
                     </div>
                 </div>
 
-                <!-- الأسهم العائمة التفاعلية تظهر فقط في المحادثات الطويلة وتتبع اللمس والسحب -->
                 <div class="scroll-jumpers" id="scrollJumpers">
                     <button class="jump-btn" id="jumpUpBtn" onclick="scrollToTop()" title="Scroll to Top" style="display:none;"><i data-lucide="chevron-up"></i></button>
                     <button class="jump-btn" id="jumpDownBtn" onclick="scrollToBottom()" title="Scroll to Bottom" style="display:flex;"><i data-lucide="chevron-down"></i></button>
@@ -440,7 +431,7 @@ HTML_CODE = """<!DOCTYPE html>
                         </div>
 
                         <button class="send-btn" onclick="submitQuestion()" title="Send">
-                            <i data-lucide="send-horizontal" style="width: 17px; height: 17px;"></i>
+                            <i data-lucide="send-horizontal" style="width: 18px; height: 18px;"></i>
                         </button>
                     </div>
                 </div>
@@ -450,7 +441,7 @@ HTML_CODE = """<!DOCTYPE html>
         <div class="tab-section" id="docsTab">
             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
                 <h3 style="margin:0; font-size: 1.05rem; color: var(--text-main);">Curriculum Documents</h3>
-                <button class="btn" onclick="switchSection('askTab')" style="padding: 5px 10px; font-size: 0.78rem;">
+                <button class="btn" onclick="switchSection('askTab')" style="padding: 6px 12px; font-size: 0.78rem;">
                     <i data-lucide="arrow-left"></i> Back to Chat
                 </button>
             </div>
@@ -514,7 +505,6 @@ HTML_CODE = """<!DOCTYPE html>
             el.style.height = (el.scrollHeight) + 'px';
         }
 
-        // ذكاء الأسهم العائمة التفاعلية حسب اتجاه اللمس والمسافة
         let lastScrollTop = 0;
         function checkScrollPosition() {
             const chatFeed = document.getElementById('chatFeed');
@@ -525,18 +515,13 @@ HTML_CODE = """<!DOCTYPE html>
             const st = chatFeed.scrollTop;
             const maxScroll = chatFeed.scrollHeight - chatFeed.clientHeight;
 
-            // تظهر الأسهم فقط إذا كانت المحادثة طويلة نسبياً
             if (chatFeed.scrollHeight > chatFeed.clientHeight + 150) {
                 jumpers.classList.add('visible');
-                
-                // تحديد اتجاه اللمس أو السحب
                 if (st > lastScrollTop) {
-                    // سحب لأسفل -> إظهار سهم الصعود أو إخفاء النزول عند النهاية
                     upBtn.style.display = 'flex';
                     if (st >= maxScroll - 20) downBtn.style.display = 'none';
                     else downBtn.style.display = 'flex';
                 } else {
-                    // سحب لأعلى -> إظهار سهم النزول
                     downBtn.style.display = 'flex';
                     if (st <= 20) upBtn.style.display = 'none';
                     else upBtn.style.display = 'flex';
@@ -557,7 +542,6 @@ HTML_CODE = """<!DOCTYPE html>
             chatFeed.scrollTo({ top: chatFeed.scrollHeight, behavior: 'smooth' });
         }
 
-        // تخزين واجهات مستقلة تماماً لكل نمط (Study, General, Games)
         let modeContents = { study: "", general: "", games: "" };
         let currentMode = 'study';
         let isAudioMuted = false;
@@ -583,8 +567,8 @@ HTML_CODE = """<!DOCTYPE html>
             lucide.createIcons({root: btn});
         }
 
-        let chatSessions = JSON.parse(localStorage.getItem('ge_nius_sessions_supreme')) || {};
-        let currentSessionId = localStorage.getItem('ge_nius_current_session_supreme');
+        let chatSessions = JSON.parse(localStorage.getItem('ge_nius_sessions_modern')) || {};
+        let currentSessionId = localStorage.getItem('ge_nius_current_session_modern');
 
         function initSessions() {
             if (!currentSessionId || !chatSessions[currentSessionId]) {
@@ -608,18 +592,14 @@ HTML_CODE = """<!DOCTYPE html>
             if(document.getElementById('sidebar').classList.contains('open')) toggleSidebar();
         }
 
-        // عند التنقل بين المناهج، يتم تغيير الواجهة فوراً وفصل المحتوى مع الحفاظ على كل وضع
         function switchMode(mode) {
-            // حفظ الواجهة الحالية للنمط الحالي
             modeContents[currentMode] = chatFeed.innerHTML;
-
             currentMode = mode;
             document.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
             if(mode === 'study') document.getElementById('modeStudy').classList.add('active');
             else if(mode === 'general') document.getElementById('modeGeneral').classList.add('active');
             else if(mode === 'games') document.getElementById('modeGames').classList.add('active');
 
-            // إظهار أو إخفاء شريط نقاط الألعاب
             if (mode === 'games') {
                 gamesStatsBar.classList.add('active');
                 updateGameStatsUI();
@@ -627,11 +607,10 @@ HTML_CODE = """<!DOCTYPE html>
                 gamesStatsBar.classList.remove('active');
             }
 
-            // استرجاع واجهة النمط الجديد أو إظهار الترحيب الفارغ
             if (modeContents[mode] && modeContents[mode].trim() !== '') {
                 chatFeed.innerHTML = modeContents[mode];
             } else {
-                chatFeed.innerHTML = `<div id="welcomeMsg" style="color: var(--text-dim); text-align: center; padding: 40px 20px; display: flex; flex-direction: column; align-items: center; gap: 8px;"><i data-lucide="sparkles" style="width: 30px; height: 30px; color: var(--primary);"></i><h3 style="margin: 0; color: var(--text-main); font-weight: 700;">${mode.toUpperCase()} Workspace</h3><p style="margin: 0; font-size: 0.88rem;">Start a fresh conversation in this mode.</p></div>`;
+                chatFeed.innerHTML = `<div id="welcomeMsg" style="color: var(--text-dim); text-align: center; padding: 40px 20px; display: flex; flex-direction: column; align-items: center; gap: 8px;"><i data-lucide="sparkles" style="width: 32px; height: 32px; color: var(--primary);"></i><h3 style="margin: 0; color: var(--text-main); font-weight: 700;">${mode.toUpperCase()} Workspace</h3><p style="margin: 0; font-size: 0.88rem;">Start a fresh conversation in this mode.</p></div>`;
             }
 
             if(chatSessions[currentSessionId]) {
@@ -692,13 +671,10 @@ HTML_CODE = """<!DOCTYPE html>
             }
         }
 
-        // الحفظ التلقائي في السجل لا يتم إلا عند مغادرة الموقع نهائياً أو عند إرسال أول رسالة
         function saveCurrentChatHtml(userQueryText = null) {
             if(!chatSessions[currentSessionId]) return;
             modeContents[currentMode] = chatFeed.innerHTML;
             chatSessions[currentSessionId].modesData = modeContents;
-            
-            // دمج كل النصوص لتكوين عنوان السجل
             if (userQueryText && chatSessions[currentSessionId].title === "New Session") {
                 chatSessions[currentSessionId].title = userQueryText.substring(0, 20) + "...";
             }
@@ -706,8 +682,8 @@ HTML_CODE = """<!DOCTYPE html>
         }
 
         function saveSessionsData() {
-            localStorage.setItem('ge_nius_sessions_supreme', JSON.stringify(chatSessions));
-            localStorage.setItem('ge_nius_current_session_supreme', currentSessionId);
+            localStorage.setItem('ge_nius_sessions_modern', JSON.stringify(chatSessions));
+            localStorage.setItem('ge_nius_current_session_modern', currentSessionId);
             renderChatHistoryList();
         }
 
@@ -744,8 +720,7 @@ HTML_CODE = """<!DOCTYPE html>
             if ('speechSynthesis' in window) {
                 window.speechSynthesis.cancel();
                 const utterance = new SpeechSynthesisUtterance(decodeURIComponent(text));
-                utterance.rate = 1.0;
-                utterance.pitch = 1.0;
+                utterance.rate = 1.0; utterance.pitch = 1.0;
                 window.speechSynthesis.speak(utterance);
             }
         };
@@ -868,7 +843,6 @@ HTML_CODE = """<!DOCTYPE html>
             let userTextDisplay = query.replace(/\\n/g, '<br>');
             if (attachedQuestionBase64) { userTextDisplay = (query ? userTextDisplay + '<br>' : '') + '<span style="color:#60a5fa; font-size:0.85em"><i data-lucide="image" style="width:14px;height:14px;"></i> Image attached</span>'; }
 
-            // كلام المستخدم صغير، قليل وفاتح
             const userRow = document.createElement('div'); userRow.className = 'message-row';
             userRow.innerHTML = `<div class="message-sender"><i data-lucide="user" style="width:12px;height:12px;"></i> You</div><div class="message-text-user">${userTextDisplay}</div>`;
             chatFeed.appendChild(userRow); lucide.createIcons({root: userRow});
@@ -900,7 +874,6 @@ HTML_CODE = """<!DOCTYPE html>
                     const fullText = data.answer;
                     const encoded = encodeURIComponent(fullText);
                     
-                    // تحديث نقاط الالعاب إذا كان النمط هو الألعاب
                     if (currentMode === 'games') {
                         userXP += 15;
                         userTotalGames += 1;
@@ -908,7 +881,6 @@ HTML_CODE = """<!DOCTYPE html>
                         updateGameStatsUI();
                     }
                     
-                    // كلام الذكاء الاصطناعي كبير، غامق واحترافي
                     if (fullText.includes("```") || fullText.length > 500) {
                         aiRow.innerHTML = `
                             <div class="message-sender"><i data-lucide="bot" style="width:12px;height:12px;color:#60a5fa"></i> ge_nius</div>
@@ -952,7 +924,7 @@ HTML_CODE = """<!DOCTYPE html>
 """
 
 # ==============================================================================
-# Python Backend Server (Supreme Optimized)
+# Python Backend Server (Modern OLED Optimized)
 # ==============================================================================
 class StudyAppRequestHandler(BaseHTTPRequestHandler):
 
@@ -1047,7 +1019,6 @@ class StudyAppRequestHandler(BaseHTTPRequestHandler):
                 if question_image_base64:
                     messages_content.append({"type": "image_url", "image_url": {"url": question_image_base64}})
 
-                # توجيه الـ Persona حسب اختيار المستخدم
                 persona_instructions = {
                     "strict": "Persona: Strict & Professional. Be highly formal, objective, precise, and academic.",
                     "humor": "Persona: Entertainment & Light Humor. Keep it witty, fun, and add light jokes while maintaining accuracy.",
@@ -1073,7 +1044,7 @@ class StudyAppRequestHandler(BaseHTTPRequestHandler):
                 else:
                     all_concepts_summary = "\n\n".join([f"Document {i+1}:\n{doc['concepts']}" for i, doc in enumerate(docs)])
                     full_prompt = (
-                        f"You are an expert tutor.\n"
+                        f"You are expert tutor.\n"
                         f"{persona_instructions}\n"
                         f"Here is the student's curriculum study material:\n"
                         f"--- START CURRICULUM ---\n"
