@@ -45,10 +45,8 @@ def load_curriculum(session_id):
         except Exception as e:
             pass
         finally:
-            try:
-                conn.close()
-            except:
-                pass
+            try: conn.close()
+            except: pass
     return MOCK_DB.get(session_id, [])
 
 def add_document_to_db(session_id, title, content):
@@ -66,10 +64,8 @@ def add_document_to_db(session_id, title, content):
         except Exception as e:
             pass
         finally:
-            try:
-                conn.close()
-            except:
-                pass
+            try: conn.close()
+            except: pass
     if session_id not in MOCK_DB:
         MOCK_DB[session_id] = []
     MOCK_DB[session_id].append({"id": MOCK_DB_DOC_ID, "title": title, "concepts": content})
@@ -89,22 +85,20 @@ def delete_document_from_db(session_id, doc_id):
         except Exception as e:
             pass
         finally:
-            try:
-                conn.close()
-            except:
-                pass
+            try: conn.close()
+            except: pass
     if session_id in MOCK_DB:
         MOCK_DB[session_id] = [d for d in MOCK_DB[session_id] if str(d["id"]) != str(doc_id)]
 
 # ==============================================================================
-# HTML Frontend (Ultimate Pro Edition)
+# HTML Frontend (Cyberpunk Luxe & Ultimate Pro Edition)
 # ==============================================================================
 HTML_CODE = """<!DOCTYPE html>
 <html lang="en" dir="auto">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ge_nius Assistant - Ultimate Edition</title>
+    <title>ge_nius Assistant - Elite Pro</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@700;900&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -145,8 +139,8 @@ HTML_CODE = """<!DOCTYPE html>
             font-family: 'Inter', sans-serif; 
             background-color: var(--bg-main); color: var(--text-main);
             margin: 0; padding: 0; width: 100vw; height: 100vh; height: 100dvh; overflow: hidden;
-            background-image: radial-gradient(circle at 10% 20%, rgba(120, 53, 15, 0.1), transparent 40%),
-                              radial-gradient(circle at 90% 80%, rgba(59, 130, 246, 0.06), transparent 40%);
+            background-image: radial-gradient(circle at 15% 15%, rgba(139, 92, 246, 0.08), transparent 40%),
+                              radial-gradient(circle at 85% 85%, rgba(59, 130, 246, 0.08), transparent 40%);
             background-attachment: fixed;
         }
 
@@ -165,7 +159,7 @@ HTML_CODE = """<!DOCTYPE html>
             border-radius: 12px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
             cursor: pointer; transition: all 0.2s; flex-shrink: 0;
         }
-        .icon-btn:hover { background: var(--primary); color: white; }
+        .icon-btn:hover { background: var(--primary); color: white; transform: scale(1.05); }
 
         .mode-switcher-bar {
             display: flex; gap: 6px; background: var(--surface); padding: 4px; border-radius: 14px;
@@ -176,10 +170,11 @@ HTML_CODE = """<!DOCTYPE html>
             font-family: 'Inter', sans-serif; font-weight: 600; font-size: 0.85rem; cursor: pointer;
             border-radius: 10px; white-space: nowrap; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s;
         }
-        .mode-tab.active { background: var(--primary); color: white; box-shadow: 0 2px 10px rgba(59,130,246,0.3); }
+        .mode-tab.active { background: var(--primary); color: white; box-shadow: 0 2px 12px rgba(59,130,246,0.35); }
 
         .lucide { width: 18px; height: 18px; stroke-width: 2.2; display: inline-block; vertical-align: middle; }
 
+        /* Sidebar & Overlay */
         .sidebar-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 999; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
         .sidebar-overlay.active { opacity: 1; pointer-events: auto; }
         
@@ -211,11 +206,24 @@ HTML_CODE = """<!DOCTYPE html>
         
         .card { background: rgba(28, 25, 23, 0.85); backdrop-filter: blur(12px); border-radius: 18px; border: 1px solid var(--border); padding: 16px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 8px 30px rgba(0,0,0,0.1); }
 
+        /* Chat Feed & Scroll Jumpers */
+        .chat-container-wrapper { position: relative; flex: 1; display: flex; flex-direction: column; min-height: 0; }
         .chat-feed {
             display: flex; flex-direction: column; gap: 16px; flex: 1; overflow-y: auto; padding: 12px 6px;
             background: transparent; scroll-behavior: smooth;
         }
         
+        /* أزرار التنقل الفوري للأسفل والأعلى */
+        .scroll-jumpers {
+            position: absolute; right: 12px; bottom: 15px; display: flex; flex-direction: column; gap: 6px; z-index: 10;
+        }
+        .jump-btn {
+            background: var(--surface); border: 1px solid var(--border); color: var(--primary);
+            width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.3); transition: all 0.2s; opacity: 0.85;
+        }
+        .jump-btn:hover { background: var(--primary); color: white; opacity: 1; transform: scale(1.1); }
+
         .message-row { display: flex; flex-direction: column; gap: 4px; width: 100%; animation: fadeIn 0.3s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
@@ -234,9 +242,15 @@ HTML_CODE = """<!DOCTYPE html>
         .audio-speech-btn { background: var(--surface); border: 1px solid var(--border); color: var(--primary); border-radius: 8px; padding: 4px 10px; font-size: 0.8rem; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; margin-top: 6px; }
         .audio-speech-btn:hover { background: var(--primary); color: white; }
 
-        .cursor-blink { animation: blink 1s step-start infinite; color: var(--primary); font-weight: bold; }
-        @keyframes blink { 50% { opacity: 0; } }
+        /* مؤشر التفكير الرقمي الهولوجرام */
+        .hologram-thinking {
+            display: flex; align-items: center; gap: 8px; color: var(--accent-purple); font-weight: 600; font-size: 0.9rem;
+            background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.2); padding: 8px 14px; border-radius: 12px; width: fit-content;
+        }
+        .pulse-dot { width: 8px; height: 8px; background: var(--accent-purple); border-radius: 50%; animation: pulse-anim 1.2s infinite ease-in-out; }
+        @keyframes pulse-anim { 0%, 100% { transform: scale(0.8); opacity: 0.4; } 50% { transform: scale(1.3); opacity: 1; } }
 
+        /* إطار الكتابة الراقي */
         .chat-input-container { flex-shrink: 0; }
         .chat-input-box {
             background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 10px 14px;
@@ -264,7 +278,7 @@ HTML_CODE = """<!DOCTYPE html>
         }
         .tool-btn:hover { background: var(--card); color: var(--text-main); }
         .tool-btn.recording { color: var(--danger); animation: pulse 1.2s infinite; }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.15); } 100% { transform: scale(1); } }
+        .tool-btn.muted { color: var(--danger); }
 
         .send-btn {
             background: var(--primary); color: white; border: none; border-radius: 10px; width: 38px; height: 38px;
@@ -281,9 +295,6 @@ HTML_CODE = """<!DOCTYPE html>
         .doc-header { display: flex; justify-content: space-between; align-items: center; }
         .doc-title { font-weight: 700; font-size: 0.95rem; color: #60a5fa; display: flex; align-items: center; gap: 8px;}
         .doc-body { font-size: 0.85rem; color: var(--text-dim); line-height: 1.6; max-height: 120px; overflow-y: auto; background: var(--surface); padding: 10px; border-radius: 8px; white-space: pre-wrap; }
-
-        .spin-icon { animation: spin 1.2s linear infinite; display: inline-block; }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
         .status-msg { display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.85rem; font-weight: bold;}
     </style>
 </head>
@@ -320,14 +331,15 @@ HTML_CODE = """<!DOCTYPE html>
                 <i data-lucide="align-right"></i>
             </button>
 
+            <!-- شريط تغيير الأنماط مع حفظ واجهة كل منهج مستقلة -->
             <div class="mode-switcher-bar">
-                <button class="mode-tab active" id="modeStudy" onclick="setMode('study')">
+                <button class="mode-tab active" id="modeStudy" onclick="switchMode('study')">
                     <i data-lucide="graduation-cap"></i> Study
                 </button>
-                <button class="mode-tab" id="modeGeneral" onclick="setMode('general')">
+                <button class="mode-tab" id="modeGeneral" onclick="switchMode('general')">
                     <i data-lucide="globe"></i> General
                 </button>
-                <button class="mode-tab" id="modeGames" onclick="setMode('games')">
+                <button class="mode-tab" id="modeGames" onclick="switchMode('games')">
                     <i data-lucide="puzzle"></i> Games
                 </button>
             </div>
@@ -338,11 +350,19 @@ HTML_CODE = """<!DOCTYPE html>
         </div>
 
         <div class="tab-section active" id="askTab">
-            <div class="chat-feed" id="chatFeed">
-                <div id="welcomeMsg" style="color: var(--text-dim); text-align: center; padding: 40px 20px; display: flex; flex-direction: column; align-items: center; gap: 10px;">
-                    <i data-lucide="sparkles" style="width: 32px; height: 32px; color: var(--primary);"></i>
-                    <h3 style="margin: 0; color: var(--text-main); font-weight: 700;">Welcome to ge_nius</h3>
-                    <p style="margin: 0; font-size: 0.9rem;">Ask questions, study documents, or enjoy brain games!</p>
+            <div class="chat-container-wrapper">
+                <div class="chat-feed" id="chatFeed">
+                    <div id="welcomeMsg" style="color: var(--text-dim); text-align: center; padding: 40px 20px; display: flex; flex-direction: column; align-items: center; gap: 10px;">
+                        <i data-lucide="sparkles" style="width: 32px; height: 32px; color: var(--primary);"></i>
+                        <h3 style="margin: 0; color: var(--text-main); font-weight: 700;">Welcome to ge_nius Elite</h3>
+                        <p style="margin: 0; font-size: 0.9rem;">Ask questions, study your curriculum, or play brain games!</p>
+                    </div>
+                </div>
+
+                <!-- أزرار التنقل السريع للأسفل والأعلى -->
+                <div class="scroll-jumpers">
+                    <button class="jump-btn" onclick="scrollToTop()" title="Scroll to Top"><i data-lucide="chevron-up"></i></button>
+                    <button class="jump-btn" onclick="scrollToBottom()" title="Scroll to Bottom"><i data-lucide="chevron-down"></i></button>
                 </div>
             </div>
 
@@ -355,7 +375,7 @@ HTML_CODE = """<!DOCTYPE html>
                         </span>
                     </div>
 
-                    <textarea id="userQuery" placeholder="Type your message or prompt..." rows="1" oninput="autoResizeTextarea(this)"></textarea>
+                    <textarea id="userQuery" placeholder="Type your prompt or question..." rows="1" oninput="autoResizeTextarea(this)"></textarea>
                     
                     <div class="input-actions-bar">
                         <div class="input-left-tools">
@@ -371,6 +391,11 @@ HTML_CODE = """<!DOCTYPE html>
 
                             <button class="tool-btn" id="voiceRecordBtn" onclick="toggleVoiceRecording()" title="Voice Input">
                                 <i data-lucide="mic"></i>
+                            </button>
+
+                            <!-- زر كتم وتشغيل الصوت الاحترافي -->
+                            <button class="tool-btn" id="audioMuteBtn" onclick="toggleAudioMute()" title="Mute/Unmute AI Voice">
+                                <i data-lucide="volume-2" id="muteIcon"></i>
                             </button>
                         </div>
 
@@ -449,23 +474,38 @@ HTML_CODE = """<!DOCTYPE html>
             el.style.height = (el.scrollHeight) + 'px';
         }
 
-        let currentMode = 'study';
-        function setMode(mode) {
-            currentMode = mode;
-            document.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
-            if(mode === 'study') document.getElementById('modeStudy').classList.add('active');
-            else if(mode === 'general') document.getElementById('modeGeneral').classList.add('active');
-            else if(mode === 'games') document.getElementById('modeGames').classList.add('active');
-            
-            if(chatSessions[currentSessionId]) {
-                chatSessions[currentSessionId].mode = mode;
-                saveSessionsData();
-            }
+        function scrollToTop() {
+            const chatFeed = document.getElementById('chatFeed');
+            chatFeed.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        let chatSessions = JSON.parse(localStorage.getItem('ge_nius_sessions_v3')) || {};
-        let currentSessionId = localStorage.getItem('ge_nius_current_session_v3');
+        function scrollToBottom() {
+            const chatFeed = document.getElementById('chatFeed');
+            chatFeed.scrollTo({ top: chatFeed.scrollHeight, behavior: 'smooth' });
+        }
+
+        // نظام الجلسات والمناهج المتعددة مع حفظ حالة كل واجهة بشكل مستقل تماماً
+        let chatSessions = JSON.parse(localStorage.getItem('ge_nius_sessions_elite')) || {};
+        let currentSessionId = localStorage.getItem('ge_nius_current_session_elite');
+        let currentMode = 'study';
+        let isAudioMuted = false;
+
         const chatFeed = document.getElementById('chatFeed');
+
+        function toggleAudioMute() {
+            isAudioMuted = !isAudioMuted;
+            const btn = document.getElementById('audioMuteBtn');
+            const icon = document.getElementById('muteIcon');
+            if (isAudioMuted) {
+                btn.classList.add('muted');
+                icon.setAttribute('data-lucide', 'volume-x');
+                if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+            } else {
+                btn.classList.remove('muted');
+                icon.setAttribute('data-lucide', 'volume-2');
+            }
+            lucide.createIcons({root: btn});
+        }
 
         function initSessions() {
             if (!currentSessionId || !chatSessions[currentSessionId]) {
@@ -478,7 +518,7 @@ HTML_CODE = """<!DOCTYPE html>
 
         function createNewSessionQuiet() {
             const id = Date.now().toString();
-            chatSessions[id] = { id: id, title: "New Chat", html: "", mode: "study" };
+            chatSessions[id] = { id: id, title: "New Session", html: "", mode: "study" };
             currentSessionId = id;
             saveSessionsData();
         }
@@ -489,15 +529,31 @@ HTML_CODE = """<!DOCTYPE html>
             if(document.getElementById('sidebar').classList.contains('open')) toggleSidebar();
         }
 
+        function switchMode(mode) {
+            currentMode = mode;
+            document.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
+            if(mode === 'study') document.getElementById('modeStudy').classList.add('active');
+            else if(mode === 'general') document.getElementById('modeGeneral').classList.add('active');
+            else if(mode === 'games') document.getElementById('modeGames').classList.add('active');
+
+            if(chatSessions[currentSessionId]) {
+                chatSessions[currentSessionId].mode = mode;
+                saveSessionsData();
+            }
+        }
+
         function loadChatSession(id) {
+            // حفظ الواجهة الحالية قبل التبديل
+            saveCurrentChatHtml();
+            
             currentSessionId = id;
             const session = chatSessions[id];
-            if(session && session.mode) setMode(session.mode);
+            if(session && session.mode) switchMode(session.mode);
             
             if (session && session.html && session.html.trim() !== '') {
                 chatFeed.innerHTML = session.html;
             } else {
-                chatFeed.innerHTML = `<div id="welcomeMsg" style="color: var(--text-dim); text-align: center; padding: 40px 20px; display: flex; flex-direction: column; align-items: center; gap: 10px;"><i data-lucide="sparkles" style="width: 32px; height: 32px; color: var(--primary);"></i><h3 style="margin: 0; color: var(--text-main); font-weight: 700;">New Chat Session</h3><p style="margin: 0; font-size: 0.9rem;">Type a prompt or choose a mode above.</p></div>`;
+                chatFeed.innerHTML = `<div id="welcomeMsg" style="color: var(--text-dim); text-align: center; padding: 40px 20px; display: flex; flex-direction: column; align-items: center; gap: 10px;"><i data-lucide="sparkles" style="width: 32px; height: 32px; color: var(--primary);"></i><h3 style="margin: 0; color: var(--text-main); font-weight: 700;">New Elite Session</h3><p style="margin: 0; font-size: 0.9rem;">Type your question or choose a mode above.</p></div>`;
             }
             
             lucide.createIcons({root: chatFeed});
@@ -510,7 +566,7 @@ HTML_CODE = """<!DOCTYPE html>
 
         function deleteSessionItem(e, id) {
             e.stopPropagation();
-            if(confirm('Delete this chat history?')) {
+            if(confirm('Delete this session?')) {
                 delete chatSessions[id];
                 if(id === currentSessionId) {
                     const keys = Object.keys(chatSessions);
@@ -533,15 +589,15 @@ HTML_CODE = """<!DOCTYPE html>
             clones.querySelectorAll('.loading-bubble-temp').forEach(l => l.remove());
             chatSessions[currentSessionId].html = clones.innerHTML;
             
-            if (userQueryText && chatSessions[currentSessionId].title === "New Chat") {
+            if (userQueryText && chatSessions[currentSessionId].title === "New Session") {
                 chatSessions[currentSessionId].title = userQueryText.substring(0, 20) + "...";
             }
             saveSessionsData();
         }
 
         function saveSessionsData() {
-            localStorage.setItem('ge_nius_sessions_v3', JSON.stringify(chatSessions));
-            localStorage.setItem('ge_nius_current_session_v3', currentSessionId);
+            localStorage.setItem('ge_nius_sessions_elite', JSON.stringify(chatSessions));
+            localStorage.setItem('ge_nius_current_session_elite', currentSessionId);
             renderChatHistoryList();
         }
 
@@ -562,7 +618,7 @@ HTML_CODE = """<!DOCTYPE html>
                             <i data-lucide="${icon}" style="width: 14px; height: 14px;"></i>
                             <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${session.title}</span>
                         </div>
-                        <button class="delete-history-btn" onclick="deleteSessionItem(event, '${id}')" title="Delete chat">
+                        <button class="delete-history-btn" onclick="deleteSessionItem(event, '${id}')" title="Delete session">
                             <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
                         </button>
                     </div>
@@ -574,12 +630,13 @@ HTML_CODE = """<!DOCTYPE html>
         initSessions();
 
         window.speakText = function(text) {
+            if (isAudioMuted) return;
             if ('speechSynthesis' in window) {
                 window.speechSynthesis.cancel();
                 const utterance = new SpeechSynthesisUtterance(decodeURIComponent(text));
+                utterance.rate = 1.0;
+                utterance.pitch = 1.0;
                 window.speechSynthesis.speak(utterance);
-            } else {
-                alert('Text-to-speech not supported in this browser.');
             }
         };
 
@@ -703,8 +760,15 @@ HTML_CODE = """<!DOCTYPE html>
             userRow.innerHTML = `<div class="message-sender"><i data-lucide="user" style="width:14px;height:14px;"></i> You</div><div class="message-text">${userTextDisplay}</div>`;
             chatFeed.appendChild(userRow); lucide.createIcons({root: userRow});
 
+            // مؤشر التفكير الرقمي الهولوجرام المتحرك
             const loadingRow = document.createElement('div'); loadingRow.className = 'message-row loading-bubble-temp';
-            loadingRow.innerHTML = `<div class="message-sender" style="color:var(--accent-purple)"><i data-lucide="loader-circle" class="spin-icon" style="width:14px;height:14px;"></i> ge_nius</div><div class="message-text" style="color:var(--text-dim)">Analyzing...</div>`;
+            loadingRow.innerHTML = `
+                <div class="message-sender" style="color:var(--accent-purple)"><i data-lucide="cpu" style="width:14px;height:14px;"></i> ge_nius AI</div>
+                <div class="hologram-thinking">
+                    <div class="pulse-dot"></div>
+                    <span>Neural core processing...</span>
+                </div>
+            `;
             chatFeed.appendChild(loadingRow); lucide.createIcons({root: loadingRow});
             
             saveCurrentChatHtml(query);
@@ -722,9 +786,9 @@ HTML_CODE = """<!DOCTYPE html>
                     aiRow.innerHTML = `<div class="message-sender" style="color:var(--danger)">ge_nius</div><div class="message-text" style="color:#fca5a5;">Out of curriculum scope. Switch to General mode.</div>`;
                 } else if (data.status === 'success') {
                     const fullText = data.answer;
+                    const encoded = encodeURIComponent(fullText);
                     
                     if (fullText.includes("```") || fullText.length > 500) {
-                        const encoded = encodeURIComponent(fullText);
                         aiRow.innerHTML = `
                             <div class="message-sender"><i data-lucide="bot" style="width:14px;height:14px;color:#60a5fa"></i> ge_nius</div>
                             <div class="complex-card-box">
@@ -737,13 +801,15 @@ HTML_CODE = """<!DOCTYPE html>
                             <div><button class="audio-speech-btn" onclick="speakText('${encoded}')"><i data-lucide="volume-2" style="width:14px;height:14px;"></i> Read Aloud</button></div>
                         `;
                     } else {
-                        const encoded = encodeURIComponent(fullText);
                         aiRow.innerHTML = `
                             <div class="message-sender"><i data-lucide="bot" style="width:14px;height:14px;color:#60a5fa"></i> ge_nius</div>
                             <div class="message-text ai-content">${marked.parse(fullText)}</div>
                             <div><button class="audio-speech-btn" onclick="speakText('${encoded}')"><i data-lucide="volume-2" style="width:14px;height:14px;"></i> Read Aloud</button></div>
                         `;
                     }
+                    
+                    // تشغيل الصوت تلقائياً إذا لم يكن مكتوماً
+                    speakText(encoded);
                 } else {
                     aiRow.innerHTML = `<div class="message-sender" style="color:var(--danger)">ge_nius</div><div class="message-text">Error: ${data.error || 'Failed.'}</div>`;
                 }
@@ -765,7 +831,7 @@ HTML_CODE = """<!DOCTYPE html>
 """
 
 # ==============================================================================
-# Python Backend Server (Fixed and Optimized)
+# Python Backend Server (Elite Optimized)
 # ==============================================================================
 class StudyAppRequestHandler(BaseHTTPRequestHandler):
 
@@ -782,7 +848,6 @@ class StudyAppRequestHandler(BaseHTTPRequestHandler):
         headers = { "Content-Type": "application/json", "Authorization": f"Bearer {API_KEY}" }
         ssl_ctx = ssl._create_unverified_context()
         req = urllib.request.Request(API_URL, data=req_data, headers=headers, method="POST")
-        # تم إضافة timeout بحجم 50 ثانية لمنع تجمد السيرفر نهائياً
         with urllib.request.urlopen(req, context=ssl_ctx, timeout=50) as response:
             res_json = json.loads(response.read().decode("utf-8"))
             return res_json["choices"][0]["message"]["content"].strip()
