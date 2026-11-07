@@ -12,7 +12,7 @@ import uuid
 from http import cookies
 
 # ==============================================================================
-# مفتاح Qwen3 الخاص بك
+# AI API Key & Global High-Performance Servers Configuration
 # ==============================================================================
 API_KEY = "sk-FWE5lPc8aegQHHJZvk967w"
 API_URL = "https://app.ai-grid.io/v1/chat/completions"
@@ -20,79 +20,90 @@ PORT = 8080
 
 MODEL_NAME = "Qwen3-30B-A3B-Thinking"
 
+# ==============================================================================
+# Database & Session Management
+# ==============================================================================
+MOCK_DB = {}
+MOCK_DB_DOC_ID = 1
+
 def get_db_connection():
     database_url = os.environ.get("DATABASE_URL")
     if not database_url:
         return None
-    return psycopg2.connect(database_url, sslmode='require')
+    try:
+        return psycopg2.connect(database_url, sslmode='require', connect_timeout=5)
+    except Exception as e:
+        return None
 
 def load_curriculum(session_id):
-    try:
-        conn = get_db_connection()
-        if not conn:
-            return []
-        cur = conn.cursor()
-        cur.execute("CREATE TABLE IF NOT EXISTS user_documents (id SERIAL PRIMARY KEY, session_id VARCHAR(255), title TEXT, content TEXT);")
-        cur.execute("SELECT id, title, content FROM user_documents WHERE session_id = %s ORDER BY id ASC;", (session_id,))
-        rows = cur.fetchall()
-        cur.close()
-        conn.close()
-        return [{"id": r[0], "title": r[1], "concepts": r[2]} for r in rows]
-    except Exception as e:
-        return []
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+            cur.execute("CREATE TABLE IF NOT EXISTS user_documents (id SERIAL PRIMARY KEY, session_id VARCHAR(255), title TEXT, content TEXT);")
+            cur.execute("SELECT id, title, content FROM user_documents WHERE session_id = %s ORDER BY id ASC;", (session_id,))
+            rows = cur.fetchall()
+            cur.close()
+            conn.close()
+            return [{"id": r[0], "title": r[1], "concepts": r[2]} for r in rows]
+        except Exception as e:
+            pass
+    return MOCK_DB.get(session_id, [])
 
 def add_document_to_db(session_id, title, content):
-    try:
-        conn = get_db_connection()
-        if not conn:
+    global MOCK_DB, MOCK_DB_DOC_ID
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+            cur.execute("CREATE TABLE IF NOT EXISTS user_documents (id SERIAL PRIMARY KEY, session_id VARCHAR(255), title TEXT, content TEXT);")
+            cur.execute("INSERT INTO user_documents (session_id, title, content) VALUES (%s, %s, %s);", (session_id, title, content))
+            conn.commit()
+            cur.close()
+            conn.close()
             return
-        cur = conn.cursor()
-        cur.execute("CREATE TABLE IF NOT EXISTS user_documents (id SERIAL PRIMARY KEY, session_id VARCHAR(255), title TEXT, content TEXT);")
-        cur.execute("INSERT INTO user_documents (session_id, title, content) VALUES (%s, %s, %s);", (session_id, title, content))
-        conn.commit()
-        cur.close()
-        conn.close()
-    except Exception as e:
-        pass
+        except Exception as e:
+            pass
+    
+    if session_id not in MOCK_DB:
+        MOCK_DB[session_id] = []
+    MOCK_DB[session_id].append({"id": MOCK_DB_DOC_ID, "title": title, "concepts": content})
+    MOCK_DB_DOC_ID += 1
 
 def delete_document_from_db(session_id, doc_id):
-    try:
-        conn = get_db_connection()
-        if not conn:
+    global MOCK_DB
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+            cur.execute("DELETE FROM user_documents WHERE id = %s AND session_id = %s;", (doc_id, session_id))
+            conn.commit()
+            cur.close()
+            conn.close()
             return
-        cur = conn.cursor()
-        cur.execute("DELETE FROM user_documents WHERE id = %s AND session_id = %s;", (doc_id, session_id))
-        conn.commit()
-        cur.close()
-        conn.close()
-    except Exception as e:
-        pass
+        except Exception as e:
+            pass
+    
+    if session_id in MOCK_DB:
+        MOCK_DB[session_id] = [d for d in MOCK_DB[session_id] if str(d["id"]) != str(doc_id)]
 
 # ==============================================================================
-# الواجهة الاحترافية المتكاملة (النسخة النهائية المطورة)
+# HTML Frontend (World-Class Professional UI - English Edition)
 # ==============================================================================
 HTML_CODE = """<!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ge_nius Assistant - Pro Edition</title>
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Outfit:wght@700;900&display=swap" rel="stylesheet">
     
-    <!-- Lucide Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@700;900&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
-    
-    <!-- Marked.js لتحويل النصوص إلى تنسيق جميل -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
-    <!-- MathJax للمعادلات الرياضية -->
     <script>
       window.MathJax = {
-        tex: {
-          inlineMath: [['$', '$']],
-          displayMath: [['$$', '$$']],
-          processEscapes: true
-        },
+        tex: { inlineMath: [['$', '$']], displayMath: [['$$', '$$']], processEscapes: true },
         options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'] }
       };
     </script>
@@ -100,11 +111,10 @@ HTML_CODE = """<!DOCTYPE html>
 
     <style>
         :root {
-            /* خلفية بلون البصل العميق والأنيق مع تدرجات ملكية */
             --bg-main: #0c0a09; 
             --surface: #1c1917; 
             --card: #292524;
-            --primary: #3b82f6; /* الأزرق الملكي للغواصة والعناصر الأساسية */
+            --primary: #3b82f6; 
             --accent-purple: #8b5cf6; 
             --accent-green: #10b981;
             --danger: #ef4444; 
@@ -114,290 +124,274 @@ HTML_CODE = """<!DOCTYPE html>
             --ai-bubble-bg: #1e1b18;
         }
 
-        /* الوضع النهاري */
         body.light-mode {
-            --bg-main: #f7fee7; --surface: #ffffff; --card: #ecfccb;
-            --primary: #2563eb; --text-main: #1c1917; --text-dim: #57534e;
-            --border: rgba(0, 0, 0, 0.1); --ai-bubble-bg: #fefce8;
+            --bg-main: #f8fafc; --surface: #ffffff; --card: #f1f5f9;
+            --primary: #2563eb; --text-main: #0f172a; --text-dim: #475569;
+            --border: rgba(0, 0, 0, 0.08); --ai-bubble-bg: #ffffff;
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
-        body {
-            font-family: 'Tajawal', sans-serif; background-color: var(--bg-main);
-            color: var(--text-main); margin: 0; padding: 0;
-            height: 100vh; height: 100dvh; display: flex; flex-direction: column; overflow: hidden;
-            background-image: radial-gradient(circle at 10% 20%, rgba(120, 53, 15, 0.15), transparent 40%),
-                              radial-gradient(circle at 90% 80%, rgba(59, 130, 246, 0.1), transparent 40%);
+        html, body {
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--bg-main); color: var(--text-main);
+            margin: 0; padding: 0; width: 100vw; height: 100vh; height: 100dvh; overflow: hidden;
+            background-image: radial-gradient(circle at 10% 20%, rgba(120, 53, 15, 0.12), transparent 40%),
+                              radial-gradient(circle at 90% 80%, rgba(59, 130, 246, 0.08), transparent 40%);
             background-attachment: fixed;
         }
 
-        /* القائمة الجانبية (Sidebar) */
-        .sidebar-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 99; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
-        .sidebar-overlay.active { opacity: 1; pointer-events: auto; }
-        
-        .sidebar {
-            position: fixed; top: 0; left: -320px; width: 280px; height: 100vh; height: 100dvh;
-            background: var(--surface); border-right: 1px solid var(--border);
-            z-index: 100; transition: left 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-            display: flex; flex-direction: column; padding: 20px; box-shadow: 10px 0 30px rgba(0,0,0,0.5);
+        .main-wrapper { 
+            padding: 12px; display: flex; flex-direction: column; gap: 12px; 
+            width: 100%; height: 100%; height: 100dvh; max-width: 950px; margin: 0 auto; 
         }
-        .sidebar.open { left: 0; }
-        
-        .sidebar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 12px;}
-        .sidebar h3 { margin: 0; font-size: 1.1rem; color: var(--text-main); display: flex; align-items: center; gap: 8px;}
-        
-        .mode-selector { margin: 10px 0 15px; background: var(--card); padding: 12px; border-radius: 12px; border: 1px solid var(--border); }
-        .mode-selector label { font-size: 0.85rem; color: var(--text-dim); margin-bottom: 6px; display: block; font-weight: 700; }
-        .mode-selector select {
-            width: 100%; background: var(--surface); color: var(--text-main); border: 1px solid var(--border);
-            padding: 10px; border-radius: 8px; font-family: 'Tajawal', sans-serif; outline: none; cursor: pointer; font-size: 0.95rem;
-        }
-
-        .chat-history-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; margin-top: 5px; }
-        .history-item {
-            background: transparent; border: 1px solid transparent; color: var(--text-main);
-            padding: 10px 12px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; gap: 10px;
-            font-family: 'Tajawal', sans-serif; font-size: 0.9rem; transition: all 0.2s; text-align: right;
-        }
-        .history-item:hover { background: var(--card); }
-        .history-item.active { background: rgba(59, 130, 246, 0.15); border: 1px solid var(--primary); color: var(--primary); font-weight: bold; }
 
         .app-header {
-            background: var(--surface); padding: 12px 16px; border-bottom: 1px solid var(--border);
-            display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;
+            background: rgba(28, 25, 23, 0.85); backdrop-filter: blur(16px);
+            padding: 12px 20px; border-radius: 18px; border: 1px solid var(--border);
+            display: flex; justify-content: space-between; align-items: center;
+            flex-shrink: 0; box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            z-index: 10;
         }
         
-        .header-actions { display: flex; gap: 10px; align-items: center; }
+        .header-actions { display: flex; gap: 12px; align-items: center; }
         
         .icon-btn {
             background: var(--card); border: 1px solid var(--border); color: var(--text-main);
-            border-radius: 10px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
-            cursor: pointer; transition: all 0.2s;
+            border-radius: 12px; width: 42px; height: 42px; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); flex-shrink: 0;
         }
-        .icon-btn:hover { background: var(--primary); color: white; }
+        .icon-btn:hover { background: var(--primary); color: white; transform: translateY(-1px); }
 
         /* الغواصة باللون الأزرق الملكي */
         .submarine-logo {
             position: relative; background: linear-gradient(180deg, #3b82f6, #1d4ed8);
-            padding: 4px 18px; border-radius: 40px; border: 2px solid #1e40af;
+            padding: 6px 20px; border-radius: 40px; border: 2px solid #1e40af;
             display: inline-flex; align-items: center; justify-content: center;
             box-shadow: 0 4px 15px rgba(59, 130, 246, 0.35), inset 0 -3px 5px rgba(0,0,0,0.2);
-            color: #ffffff; font-weight: 900; font-size: 1.15rem; letter-spacing: 1px;
-            font-family: 'Outfit', sans-serif;
+            color: #ffffff; font-weight: 900; font-size: 1.15rem; letter-spacing: 1px; font-family: 'Outfit', sans-serif;
         }
-        .submarine-logo::before {
-            content: ''; position: absolute; top: -12px; left: 60%; width: 8px; height: 12px;
-            background: #3b82f6; border-left: 2px solid #1e40af; border-right: 2px solid #1e40af; z-index: 1;
-        }
-        .submarine-logo::after {
-            content: ''; position: absolute; top: -12px; left: calc(60% + 4px); width: 12px; height: 5px;
-            background: #3b82f6; border: 2px solid #1e40af; border-radius: 2px; z-index: 2;
-        }
-        .submarine-propeller {
-            position: absolute; right: -10px; top: 50%; transform: translateY(-50%); width: 8px; height: 18px;
-            background: #93c5fd; border: 2px solid #1d4ed8; border-radius: 4px;
-        }
-        .submarine-propeller::after {
-            content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 4px; height: 22px;
-            background: #ffffff; border-radius: 2px; animation: spin-propeller 0.15s linear infinite;
-        }
+        .submarine-logo::before { content: ''; position: absolute; top: -14px; left: 60%; width: 8px; height: 14px; background: #3b82f6; border-left: 2px solid #1e40af; border-right: 2px solid #1e40af; z-index: 1; }
+        .submarine-logo::after { content: ''; position: absolute; top: -14px; left: calc(60% + 4px); width: 14px; height: 6px; background: #3b82f6; border: 2px solid #1e40af; border-radius: 2px; z-index: 2; }
+        .submarine-propeller { position: absolute; right: -12px; top: 50%; transform: translateY(-50%); width: 8px; height: 20px; background: #93c5fd; border: 2px solid #1d4ed8; border-radius: 4px; }
+        .submarine-propeller::after { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 4px; height: 24px; background: #ffffff; border-radius: 2px; animation: spin-propeller 0.15s linear infinite; }
         @keyframes spin-propeller { 0% { transform: translate(-50%, -50%) scaleY(1); } 50% { transform: translate(-50%, -50%) scaleY(0.2); } 100% { transform: translate(-50%, -50%) scaleY(1); } }
 
-        .lucide { width: 18px; height: 18px; stroke-width: 2.2; display: inline-block; vertical-align: middle; }
+        .lucide { width: 20px; height: 20px; stroke-width: 2.2; display: inline-block; vertical-align: middle; }
 
-        .tab-bar { display: flex; background: var(--surface); padding: 8px 12px; border-bottom: 1px solid var(--border); flex-shrink: 0; gap: 8px; }
-        .tab-btn {
-            flex: 1; padding: 10px; background: var(--card); border: 1px solid var(--border); color: var(--text-dim);
-            font-family: 'Tajawal', sans-serif; font-weight: 700; font-size: 0.9rem; cursor: pointer;
-            border-radius: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s;
+        /* Sidebar & Overlay */
+        .sidebar-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 999; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+        .sidebar-overlay.active { opacity: 1; pointer-events: auto; }
+        
+        .sidebar {
+            position: fixed; top: 0; left: -340px; width: 310px; height: 100vh; height: 100dvh;
+            background: var(--surface); border-right: 1px solid var(--border);
+            z-index: 1000; transition: left 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex; flex-direction: column; padding: 24px;
+            box-shadow: 15px 0 40px rgba(0,0,0,0.4);
         }
-        .tab-btn.active { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); }
+        .sidebar.open { left: 0; }
+        
+        .sidebar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 15px;}
+        .sidebar h3 { margin: 0; font-size: 1.25rem; color: var(--text-main); display: flex; align-items: center; gap: 10px;}
+        
+        .mode-selector { margin: 15px 0; background: var(--card); padding: 14px; border-radius: 14px; border: 1px solid var(--border); }
+        .mode-selector label { font-size: 0.85rem; color: var(--text-dim); margin-bottom: 8px; display: block; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        .mode-selector select {
+            width: 100%; background: var(--surface); color: var(--text-main); border: 1px solid var(--border);
+            padding: 10px; border-radius: 10px; font-family: 'Inter', sans-serif; outline: none; cursor: pointer; font-size: 0.95rem;
+        }
 
-        .main-container { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; max-width: 800px; width: 100%; margin: 0 auto; }
-        .tab-section { display: none; flex-direction: column; flex: 1; overflow: hidden; height: 100%; }
+        .nav-menu-links { display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px; }
+        .nav-link-btn {
+            background: var(--card); border: 1px solid var(--border); color: var(--text-main);
+            padding: 12px 14px; border-radius: 12px; font-weight: 600; font-size: 0.95rem; cursor: pointer;
+            display: flex; align-items: center; gap: 12px; transition: all 0.2s; text-align: left;
+        }
+        .nav-link-btn:hover { background: var(--primary); color: white; border-color: var(--primary); }
+
+        .chat-history-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; margin-top: 5px; padding-right: 4px; }
+        .history-item {
+            background: transparent; border: 1px solid transparent; color: var(--text-main);
+            padding: 10px 12px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; gap: 10px;
+            font-family: 'Inter', sans-serif; font-size: 0.9rem; transition: all 0.2s; text-align: left;
+        }
+        .history-item:hover { background: var(--card); }
+        .history-item.active { background: rgba(59, 130, 246, 0.15); border: 1px solid var(--primary); color: var(--primary); font-weight: bold; }
+
+        .tab-section { display: none; flex-direction: column; gap: 12px; flex: 1; min-height: 0; }
         .tab-section.active { display: flex; }
+        
+        .card { background: rgba(28, 25, 23, 0.85); backdrop-filter: blur(12px); border-radius: 20px; border: 1px solid var(--border); padding: 18px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.1); }
 
-        /* منطقة المحادثة */
         .chat-feed {
-            flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 16px; scroll-behavior: smooth;
+            display: flex; flex-direction: column; gap: 16px; flex: 1; overflow-y: auto; padding: 10px 6px;
+            background: transparent; scroll-behavior: smooth;
         }
-
-        .chat-bubble {
-            padding: 14px 18px; border-radius: 18px; font-size: 0.95rem; line-height: 1.8; max-width: 88%;
-            display: flex; gap: 12px; align-items: flex-start; position: relative;
-            animation: slideUp 0.25s ease-out forwards; box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        .user-bubble { background: var(--primary); color: white; align-self: flex-start; border-bottom-right-radius: 4px; }
-        .ai-bubble { background: var(--ai-bubble-bg); color: var(--text-main); align-self: flex-end; border-bottom-left-radius: 4px; border: 1px solid var(--border); flex-direction: row-reverse; }
+        .chat-bubble { padding: 16px 20px; border-radius: 20px; font-size: 1rem; line-height: 1.8; max-width: 90%; display: flex; gap: 12px; align-items: flex-start; position: relative; animation: slideUp 0.3s cubic-bezier(0.1, 0.9, 0.2, 1) forwards; box-shadow: 0 4px 20px rgba(0,0,0,0.06); }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .user-bubble { background: linear-gradient(135deg, var(--primary), var(--accent-purple)); color: white; align-self: flex-start; border-bottom-right-radius: 4px; }
+        .ai-bubble { background: var(--ai-bubble-bg); color: var(--text-main); align-self: flex-end; border-bottom-left-radius: 4px; border: 1px solid var(--border); backdrop-filter: blur(8px); }
         .out-of-scope-bubble { background: rgba(239, 68, 68, 0.15); color: #fca5a5; border: 1px solid var(--danger); align-self: center; text-align: center; font-size: 0.9rem; }
         
         .ai-content { width: 100%; overflow-x: auto; }
-        .ai-content h1, .ai-content h2, .ai-content h3 { margin-top: 5px; margin-bottom: 10px; color: #60a5fa; }
-        .ai-content p { margin: 6px 0; }
+        .ai-content h1, .ai-content h2, .ai-content h3 { margin-top: 8px; margin-bottom: 12px; color: #60a5fa; font-weight: 800; }
+        .ai-content p { margin: 8px 0; }
         .ai-content strong { color: #34d399; }
+        .cursor-blink { animation: blink 1s step-start infinite; color: var(--primary); font-weight: bold; }
+        @keyframes blink { 50% { opacity: 0; } }
         
-        .copy-btn {
-            position: absolute; bottom: -12px; left: 14px; background: var(--surface); color: var(--text-dim);
-            border: 1px solid var(--border); border-radius: 8px; padding: 4px 10px; font-size: 0.75rem;
-            cursor: pointer; display: flex; align-items: center; gap: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        }
-        .copy-btn:hover { color: var(--primary); background: var(--card); }
+        .copy-btn { position: absolute; bottom: -16px; left: 16px; background: var(--card); color: var(--text-dim); border: 1px solid var(--border); border-radius: 10px; padding: 5px 12px; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .copy-btn:hover { background: var(--primary); color: white; }
 
-        .bubble-icon { flex-shrink: 0; margin-top: 2px; }
+        .bubble-icon { flex-shrink: 0; margin-top: 3px; }
 
-        /* إطار الكتابة الراقي على غرار ChatGPT */
-        .chat-input-wrapper {
-            padding: 12px 16px 20px; background: var(--surface); border-top: 1px solid var(--border); flex-shrink: 0;
-        }
+        /* إطار الكتابة الأنيق على غرار ChatGPT */
+        .chat-input-container { flex-shrink: 0; }
         .chat-input-box {
-            background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 10px 12px;
-            display: flex; flex-direction: column; gap: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 12px 16px;
+            display: flex; flex-direction: column; gap: 10px; box-shadow: 0 8px 30px rgba(0,0,0,0.2);
             transition: border-color 0.2s;
         }
         .chat-input-box:focus-within { border-color: var(--primary); }
 
         textarea {
             background: transparent; color: var(--text-main); border: none; outline: none;
-            font-family: 'Tajawal', sans-serif; font-size: 0.95rem; resize: none; max-height: 120px; min-height: 24px; line-height: 1.5; width: 100%;
+            font-family: 'Inter', sans-serif; font-size: 1rem; resize: none; max-height: 130px; min-height: 24px; line-height: 1.5; width: 100%;
         }
 
         .image-preview-bar {
             display: none; align-items: center; justify-content: space-between; background: rgba(59, 130, 246, 0.15);
-            border: 1px solid var(--primary); padding: 6px 10px; border-radius: 8px; font-size: 0.85rem; color: #93c5fd;
+            border: 1px solid var(--primary); padding: 8px 12px; border-radius: 10px; font-size: 0.9rem; color: #93c5fd;
         }
 
-        .input-actions-bar { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); padding-top: 8px; }
-        .input-left-tools { display: flex; gap: 6px; align-items: center; }
+        .input-actions-bar { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); padding-top: 10px; }
+        .input-left-tools { display: flex; gap: 8px; align-items: center; }
 
         .tool-btn {
-            background: transparent; border: none; color: var(--text-dim); border-radius: 8px; width: 34px; height: 34px;
+            background: transparent; border: none; color: var(--text-dim); border-radius: 10px; width: 38px; height: 38px;
             display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s;
         }
         .tool-btn:hover { background: var(--surface); color: var(--text-main); }
 
         .send-btn {
-            background: var(--primary); color: white; border: none; border-radius: 10px; width: 36px; height: 36px;
+            background: var(--primary); color: white; border: none; border-radius: 12px; width: 40px; height: 40px;
             display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.1s;
         }
-        .send-btn:active { transform: scale(0.92); }
+        .send-btn:active { transform: scale(0.95); }
+
+        .btn { background: var(--primary); color: white; border: none; padding: 12px 18px; border-radius: 14px; font-family: 'Inter', sans-serif; font-weight: 700; font-size: 1rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3); }
+        .btn-purple { background: linear-gradient(135deg, #8b5cf6, #3b82f6); }
+        .btn-danger { background: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.3); padding: 8px 14px; border-radius: 10px; font-size: 0.9rem;}
         input[type="file"] { display: none; }
 
-        /* قسم وثائق الدروس */
-        .docs-container { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
-        .card { background: var(--surface); border-radius: 16px; border: 1px solid var(--border); padding: 16px; display: flex; flex-direction: column; gap: 10px; }
-        
-        .doc-item { background: var(--card); border-radius: 12px; padding: 12px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 8px; }
+        .doc-item { background: var(--card); border-radius: 16px; padding: 16px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
         .doc-header { display: flex; justify-content: space-between; align-items: center; }
-        .doc-title { font-weight: 700; font-size: 0.95rem; color: #60a5fa; display: flex; align-items: center; gap: 8px;}
-        .doc-body { font-size: 0.85rem; color: var(--text-dim); line-height: 1.5; max-height: 100px; overflow-y: auto; background: var(--surface); padding: 8px; border-radius: 6px; white-space: pre-wrap; }
+        .doc-title { font-weight: 700; font-size: 1rem; color: #60a5fa; display: flex; align-items: center; gap: 10px;}
+        .doc-body { font-size: 0.9rem; color: var(--text-dim); line-height: 1.7; max-height: 140px; overflow-y: auto; background: var(--surface); padding: 12px; border-radius: 12px; white-space: pre-wrap; }
 
-        .btn { background: var(--primary); color: white; border: none; padding: 10px 16px; border-radius: 10px; font-family: 'Tajawal', sans-serif; font-weight: 700; font-size: 0.9rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
-        .btn-danger { background: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.3); }
-        .btn-purple { background: linear-gradient(135deg, #8b5cf6, #3b82f6); }
-
-        .spin-icon { animation: spin 1.2s linear infinite; }
+        .spin-icon { animation: spin 1.2s linear infinite; display: inline-block; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
         
-        .status-msg { display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.85rem; font-weight: bold;}
+        .status-msg { display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.95rem; font-weight: bold;}
     </style>
 </head>
 <body>
 
-    <!-- القائمة الجانبية المتقدمة -->
+    <!-- القائمة الجانبية الاحترافية -->
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <h3><i data-lucide="menu"></i> القائمة الرئيسية</h3>
-            <button class="icon-btn" style="width:32px; height:32px; border:none; background:transparent;" onclick="toggleSidebar()"><i data-lucide="x"></i></button>
+            <h3><i data-lucide="menu"></i> Navigation</h3>
+            <button class="icon-btn" style="width:36px; height:36px; border:none; background:transparent;" onclick="toggleSidebar()"><i data-lucide="x"></i></button>
         </div>
         
-        <button class="btn" onclick="createNewChatSession()" style="width: 100%; justify-content: center; margin-bottom: 10px;">
-            <i data-lucide="plus-circle"></i> نافذة محادثة جديدة
+        <button class="btn" onclick="createNewChatSession()" style="width: 100%; justify-content: center; margin-bottom: 12px;">
+            <i data-lucide="plus-circle"></i> New Chat Session
         </button>
 
+        <div class="nav-menu-links">
+            <button class="nav-link-btn" onclick="switchSection('askTab', this)">
+                <i data-lucide="message-square-text"></i> Smart Chat
+            </button>
+            <button class="nav-link-btn" onclick="switchSection('docsTab', this)">
+                <i data-lucide="folder-kanban"></i> Curriculum Documents
+            </button>
+        </div>
+
         <div class="mode-selector">
-            <label><i data-lucide="sliders" style="width:14px; height:14px;"></i> نمط المساعد الذكي:</label>
+            <label><i data-lucide="sliders" style="width:14px; height:14px;"></i> Assistant Mode:</label>
             <select id="chatModeSelect" onchange="updateChatMode()">
-                <option value="study">🎓 مساعد المنهج (تحليل الوثائق)</option>
-                <option value="general">🌍 محادثة عامة (حرة وسريعة)</option>
+                <option value="study">🎓 Study Material (Curriculum Focus)</option>
+                <option value="general">🌍 General Chat (Open AI)</option>
             </select>
         </div>
 
-        <h4 style="font-size: 0.85rem; color: var(--text-dim); margin: 10px 0 5px;"><i data-lucide="history" style="width:14px; height:14px;"></i> سجل المحادثات:</h4>
+        <h4 style="font-size: 0.85rem; color: var(--text-dim); margin: 10px 0 6px; text-transform: uppercase; letter-spacing: 0.5px;"><i data-lucide="history" style="width:14px; height:14px;"></i> Chat History:</h4>
         <div class="chat-history-list" id="chatHistoryList"></div>
 
         <div style="margin-top: auto; padding-top: 15px; border-top: 1px solid var(--border);">
             <button class="btn" style="width: 100%; background: var(--card); color: var(--text-main); border: 1px solid var(--border);" onclick="toggleTheme()">
-                <i data-lucide="sun" id="themeIcon"></i> تبديل المظهر
+                <i data-lucide="sun" id="themeIcon"></i> Toggle Theme
             </button>
         </div>
     </aside>
 
-    <header class="app-header">
-        <div class="header-actions">
-            <button class="icon-btn" onclick="toggleSidebar()" title="القائمة">
-                <i data-lucide="align-right"></i>
-            </button>
-            <div class="submarine-logo">
-                ge_nius
-                <div class="submarine-propeller"></div>
+    <div class="main-wrapper">
+        <header class="app-header">
+            <div class="header-actions">
+                <button class="icon-btn" onclick="toggleSidebar()" title="Open Menu">
+                    <i data-lucide="align-right"></i>
+                </button>
+                <div class="submarine-logo">
+                    ge_nius
+                    <div class="submarine-propeller"></div>
+                </div>
             </div>
-        </div>
-        <div class="header-actions">
-            <span style="font-size: 0.85rem; color: var(--accent-green); display: flex; align-items: center; gap: 5px; font-weight: 700;" id="docCountBadge">
-                <i data-lucide="database"></i> 0 وثائق
-            </span>
-        </div>
-    </header>
+            
+            <!-- مؤشر الوثائق الاحترافي العصري -->
+            <div style="display: flex; align-items: center; gap: 8px; background: var(--card); padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border);">
+                <i data-lucide="database" style="width: 16px; height: 16px; color: var(--accent-green);"></i>
+                <span style="font-size: 0.85rem; font-weight: 700; color: var(--text-main);" id="docCountBadge">0 Docs</span>
+            </div>
+        </header>
 
-    <div class="tab-bar">
-        <button class="tab-btn active" id="btnAskTab" onclick="switchTab('askTab', this)">
-            <i data-lucide="message-square-text"></i> الدردشة الذكية
-        </button>
-        <button class="tab-btn" id="btnDocsTab" onclick="switchTab('docsTab', this)">
-            <i data-lucide="folder-kanban"></i> وثائق المنهج
-        </button>
-    </div>
-
-    <div class="main-container">
-        <!-- TAB 1: Chat Feed -->
+        <!-- TAB 1: Smart Chat -->
         <div class="tab-section active" id="askTab">
             <div class="chat-feed" id="chatFeed">
-                <div id="welcomeMsg" style="color: var(--text-dim); font-style: italic; text-align: center; padding: 30px 20px; display: flex; flex-direction: column; align-items: center; gap: 10px;">
-                    <i data-lucide="sparkles" style="width: 32px; height: 32px; color: var(--primary);"></i>
-                    أهلاً بك! أنا مساعدك الذكي ge_nius. اختر نمط "محادثة عامة" أو ارفع وثائقك وابدأ طرح الأسئلة.
+                <div id="welcomeMsg" style="color: var(--text-dim); text-align: center; padding: 40px 20px; display: flex; flex-direction: column; align-items: center; gap: 12px;">
+                    <i data-lucide="sparkles" style="width: 36px; height: 36px; color: var(--primary);"></i>
+                    <h3 style="margin: 0; color: var(--text-main); font-weight: 700;">How can I help you today?</h3>
+                    <p style="margin: 0; font-size: 0.9rem;">Upload your study materials in the curriculum tab or switch to General Chat.</p>
                 </div>
             </div>
 
-            <!-- إطار الكتابة على غرار ChatGPT -->
-            <div class="chat-input-wrapper">
+            <!-- إطار الكتابة الراقي جداً -->
+            <div class="chat-input-container">
                 <div class="chat-input-box">
                     <div class="image-preview-bar" id="questionImgPreview">
-                        <span style="display: flex; align-items: center; gap: 6px;"><i data-lucide="image" style="width: 14px; height: 14px;"></i> تم إرفاق الصورة بنجاح</span>
+                        <span style="display: flex; align-items: center; gap: 8px;"><i data-lucide="image" style="width: 16px; height: 16px;"></i> Image attached successfully</span>
                         <span style="cursor: pointer; color: #fca5a5; font-weight: bold; display: flex; align-items: center; gap: 4px;" onclick="removeQuestionImage()">
-                            <i data-lucide="x" style="width: 14px; height: 14px;"></i> إزالة
+                            <i data-lucide="x" style="width: 16px; height: 16px;"></i> Remove
                         </span>
                     </div>
 
-                    <textarea id="userQuery" placeholder="أرسل رسالة أو اسأل سؤالاً..." rows="1" oninput="autoResizeTextarea(this)"></textarea>
+                    <textarea id="userQuery" placeholder="Message ge_nius..." rows="1" oninput="autoResizeTextarea(this)"></textarea>
                     
                     <div class="input-actions-bar">
                         <div class="input-left-tools">
-                            <label for="qFileInputCamera" class="tool-btn" title="التقاط صور بالكاميرا">
+                            <label for="qFileInputCamera" class="tool-btn" title="Capture Camera">
                                 <i data-lucide="camera"></i>
                             </label>
                             <input type="file" id="qFileInputCamera" accept="image/*" capture="environment">
 
-                            <label for="qFileInputGallery" class="tool-btn" title="إرفاق صورة من المعرض">
+                            <label for="qFileInputGallery" class="tool-btn" title="Upload from Gallery">
                                 <i data-lucide="image-plus"></i>
                             </label>
                             <input type="file" id="qFileInputGallery" accept="image/*">
                         </div>
 
-                        <button class="send-btn" onclick="submitQuestion()" title="إرسال">
+                        <button class="send-btn" onclick="submitQuestion()" title="Send Message">
                             <i data-lucide="send-horizontal" style="width: 18px; height: 18px;"></i>
                         </button>
                     </div>
@@ -405,36 +399,34 @@ HTML_CODE = """<!DOCTYPE html>
             </div>
         </div>
 
-        <!-- TAB 2: Curriculum Documents Section -->
+        <!-- TAB 2: Curriculum Documents -->
         <div class="tab-section" id="docsTab">
-            <div class="docs-container">
-                <div class="card">
-                    <span style="font-weight: 700; font-size: 1rem; color: #60a5fa; display: flex; align-items: center; gap: 8px;">
-                        <i data-lucide="file-up"></i> رفع صفحة أو درس جديد للمنهج
-                    </span>
-                    <p style="font-size: 0.85rem; color: var(--text-dim); margin: 0;">صور صفحات الكتاب أو ارفع صوراً متعددة لتحليلها وربطها بالمساعد:</p>
-                    
-                    <div style="display: flex; gap: 8px; margin-top: 5px;">
-                        <label for="docFileInputCamera" class="btn btn-purple" style="flex: 1; text-align: center; margin:0;">
-                            <i data-lucide="camera"></i> تصوير مباشر
-                        </label>
-                        <input type="file" id="docFileInputCamera" accept="image/*" capture="environment">
+            <div class="card">
+                <span style="font-weight: 700; font-size: 1.05rem; color: #60a5fa; display: flex; align-items: center; gap: 10px;">
+                    <i data-lucide="file-up"></i> Upload Study Materials & Curriculum
+                </span>
+                <p style="font-size: 0.9rem; color: var(--text-dim); margin: 0;">Capture book pages or upload multiple document images to empower your AI tutor:</p>
+                
+                <div style="display: flex; gap: 10px; margin-top: 8px;">
+                    <label for="docFileInputCamera" class="btn btn-purple" style="flex: 1; text-align: center; margin:0; padding: 14px;">
+                        <i data-lucide="camera"></i> Live Camera
+                    </label>
+                    <input type="file" id="docFileInputCamera" accept="image/*" capture="environment">
 
-                        <label for="docFileInputGallery" class="btn btn-purple" style="flex: 1; text-align: center; margin:0;">
-                            <i data-lucide="images"></i> معرض الصور
-                        </label>
-                        <input type="file" id="docFileInputGallery" accept="image/*" multiple>
-                    </div>
-                    
-                    <div id="uploadStatus" class="status-msg"></div>
+                    <label for="docFileInputGallery" class="btn btn-purple" style="flex: 1; text-align: center; margin:0; padding: 14px;">
+                        <i data-lucide="images"></i> Gallery (Multiple)
+                    </label>
+                    <input type="file" id="docFileInputGallery" accept="image/*" multiple>
                 </div>
+                
+                <div id="uploadStatus" class="status-msg"></div>
+            </div>
 
-                <div class="card" style="flex: 1;">
-                    <span style="font-weight: 700; font-size: 0.9rem; color: var(--text-dim); display: flex; align-items: center; gap: 8px;">
-                        <i data-lucide="archive"></i> الأرشيف والدروس المحللة مسبقاً:
-                    </span>
-                    <div id="docsList" style="display: flex; flex-direction: column; gap: 10px;"></div>
-                </div>
+            <div class="card" style="flex: 1; overflow-y: auto;">
+                <span style="font-weight: 700; font-size: 0.95rem; color: var(--text-dim); display: flex; align-items: center; gap: 10px;">
+                    <i data-lucide="archive"></i> Processed Document Archive:
+                </span>
+                <div id="docsList" style="display: flex; flex-direction: column; gap: 12px; padding-bottom: 20px;"></div>
             </div>
         </div>
     </div>
@@ -442,7 +434,6 @@ HTML_CODE = """<!DOCTYPE html>
     <script>
         lucide.createIcons();
 
-        // التبديل بين المظهر الليلي والنهاري
         function toggleTheme() {
             const isLight = document.body.classList.toggle('light-mode');
             localStorage.setItem('theme', isLight ? 'light' : 'dark');
@@ -452,21 +443,25 @@ HTML_CODE = """<!DOCTYPE html>
         }
         if (localStorage.getItem('theme') === 'light') { document.body.classList.add('light-mode'); document.getElementById('themeIcon').setAttribute('data-lucide', 'moon'); lucide.createIcons(); }
 
-        // إشراف القائمة الجانبية
         function toggleSidebar() {
             document.getElementById('sidebar').classList.toggle('open');
             document.getElementById('sidebarOverlay').classList.toggle('active');
         }
 
-        // تكبير Textarea تلقائياً مثل ChatGPT
+        function switchSection(sectionId, btnElement) {
+            document.querySelectorAll('.tab-section').forEach(s => s.classList.remove('active'));
+            document.getElementById(sectionId).classList.add('active');
+            toggleSidebar();
+        }
+
         function autoResizeTextarea(el) {
             el.style.height = 'auto';
             el.style.height = (el.scrollHeight) + 'px';
         }
 
-        // إدارة جلسات المحادثات المتعددة
-        let chatSessions = JSON.parse(localStorage.getItem('ge_nius_sessions_v2')) || {};
-        let currentSessionId = localStorage.getItem('ge_nius_current_session_v2');
+        // إدارة جلسات مستقلة وخاصة لكل مستخدم
+        let chatSessions = JSON.parse(localStorage.getItem('ge_nius_sessions_pro')) || {};
+        let currentSessionId = localStorage.getItem('ge_nius_current_session_pro');
         const chatFeed = document.getElementById('chatFeed');
         const modeSelect = document.getElementById('chatModeSelect');
 
@@ -481,7 +476,7 @@ HTML_CODE = """<!DOCTYPE html>
 
         function createNewSessionQuiet() {
             const id = Date.now().toString();
-            chatSessions[id] = { id: id, title: "محادثة جديدة", html: "", mode: "study" };
+            chatSessions[id] = { id: id, title: "New Chat", html: "", mode: "study" };
             currentSessionId = id;
             saveSessionsData();
         }
@@ -495,12 +490,12 @@ HTML_CODE = """<!DOCTYPE html>
         function loadChatSession(id) {
             currentSessionId = id;
             const session = chatSessions[id];
-            modeSelect.value = session.mode || 'study';
+            if(session) modeSelect.value = session.mode || 'study';
             
-            if (session.html && session.html.trim() !== '') {
+            if (session && session.html && session.html.trim() !== '') {
                 chatFeed.innerHTML = session.html;
             } else {
-                chatFeed.innerHTML = `<div id="welcomeMsg" style="color: var(--text-dim); font-style: italic; text-align: center; padding: 30px 20px; display: flex; flex-direction: column; align-items: center; gap: 10px;"><i data-lucide="sparkles" style="width: 32px; height: 32px; color: var(--primary);"></i>نافذة محادثة جديدة جاهزة. ابدأ طرح الأسئلة!</div>`;
+                chatFeed.innerHTML = `<div id="welcomeMsg" style="color: var(--text-dim); text-align: center; padding: 40px 20px; display: flex; flex-direction: column; align-items: center; gap: 12px;"><i data-lucide="sparkles" style="width: 36px; height: 36px; color: var(--primary);"></i><h3 style="margin: 0; color: var(--text-main); font-weight: 700;">New Chat Session</h3><p style="margin: 0; font-size: 0.9rem;">Ask any question or send your document image.</p></div>`;
             }
             
             lucide.createIcons({root: chatFeed});
@@ -524,15 +519,15 @@ HTML_CODE = """<!DOCTYPE html>
             clones.querySelectorAll('.loading-bubble-temp').forEach(l => l.remove());
             chatSessions[currentSessionId].html = clones.innerHTML;
             
-            if (userQueryText && chatSessions[currentSessionId].title === "محادثة جديدة") {
+            if (userQueryText && chatSessions[currentSessionId].title === "New Chat") {
                 chatSessions[currentSessionId].title = userQueryText.substring(0, 22) + "...";
             }
             saveSessionsData();
         }
 
         function saveSessionsData() {
-            localStorage.setItem('ge_nius_sessions_v2', JSON.stringify(chatSessions));
-            localStorage.setItem('ge_nius_current_session_v2', currentSessionId);
+            localStorage.setItem('ge_nius_sessions_pro', JSON.stringify(chatSessions));
+            localStorage.setItem('ge_nius_current_session_pro', currentSessionId);
             renderChatHistoryList();
         }
 
@@ -562,7 +557,7 @@ HTML_CODE = """<!DOCTYPE html>
         window.copyText = function(btn, text) {
             navigator.clipboard.writeText(decodeURIComponent(text)).then(() => {
                 const originalHtml = btn.innerHTML;
-                btn.innerHTML = `<i data-lucide="check"></i> تم النسخ`;
+                btn.innerHTML = `<i data-lucide="check"></i> Copied`;
                 lucide.createIcons({root: btn});
                 setTimeout(() => { btn.innerHTML = originalHtml; lucide.createIcons({root: btn}); }, 2000);
             });
@@ -572,13 +567,6 @@ HTML_CODE = """<!DOCTYPE html>
         let attachedQuestionBase64 = null;
         fetchDocs();
 
-        function switchTab(tabId, btnElement) {
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.querySelectorAll('.tab-section').forEach(s => s.classList.remove('active'));
-            if(btnElement) btnElement.classList.add('active');
-            document.getElementById(tabId).classList.add('active');
-        }
-
         function fetchDocs() {
             fetch('/api/docs').then(res => res.json()).then(data => { curriculumDocs = data; renderDocs(); }).catch(err => console.log(err));
         }
@@ -586,14 +574,14 @@ HTML_CODE = """<!DOCTYPE html>
         function renderDocs() {
             const listDiv = document.getElementById('docsList');
             const countBadge = document.getElementById('docCountBadge');
-            if(countBadge) { countBadge.innerHTML = `<i data-lucide="database" style="width: 14px; height: 14px;"></i> ${curriculumDocs.length} وثائق`; lucide.createIcons({root: countBadge}); }
+            if(countBadge) { countBadge.innerHTML = `${curriculumDocs.length} Docs`; }
             if (!listDiv) return;
-            if (curriculumDocs.length === 0) { listDiv.innerHTML = '<div style="color: var(--text-dim); font-style: italic; text-align: center; padding: 10px;">لم تقم برفع أي وثائق دروس بعد.</div>'; return; }
+            if (curriculumDocs.length === 0) { listDiv.innerHTML = '<div style="color: var(--text-dim); font-style: italic; text-align: center; padding: 20px;">No curriculum documents uploaded yet.</div>'; return; }
             listDiv.innerHTML = curriculumDocs.map((item, index) => `
                 <div class="doc-item">
                     <div class="doc-header">
-                        <span class="doc-title"><i data-lucide="file-text"></i> وثيقة ${index + 1}</span>
-                        <button class="btn btn-danger" style="padding: 4px 10px; font-size: 0.8rem;" onclick="deleteDoc(${item.id})"><i data-lucide="trash-2" style="width: 14px; height: 14px;"></i> حذف</button>
+                        <span class="doc-title"><i data-lucide="file-text"></i> Document ${index + 1}</span>
+                        <button class="btn btn-danger" style="padding: 4px 10px; font-size: 0.8rem;" onclick="deleteDoc(${item.id})"><i data-lucide="trash-2" style="width: 14px; height: 14px;"></i> Delete</button>
                     </div>
                     <div class="doc-body">${item.concepts}</div>
                 </div>
@@ -618,7 +606,7 @@ HTML_CODE = """<!DOCTYPE html>
             const files = e.target.files; if (!files || files.length === 0) return;
             const statusDiv = document.getElementById('uploadStatus');
             for (let i = 0; i < files.length; i++) {
-                if(statusDiv) { statusDiv.innerHTML = `<i data-lucide="loader" class="spin-icon"></i> جاري قراءة وتفريغ الوثيقة ${i + 1} من ${files.length}...`; statusDiv.style.color = 'var(--primary)'; lucide.createIcons({root: statusDiv}); }
+                if(statusDiv) { statusDiv.innerHTML = `<i data-lucide="loader" class="spin-icon"></i> Processing & extracting document ${i + 1} of ${files.length}...`; statusDiv.style.color = 'var(--primary)'; lucide.createIcons({root: statusDiv}); }
                 await new Promise((resolve) => {
                     const reader = new FileReader();
                     reader.onload = async function(evt) {
@@ -630,7 +618,7 @@ HTML_CODE = """<!DOCTYPE html>
                 });
             }
             renderDocs();
-            if(statusDiv) { statusDiv.innerHTML = '<i data-lucide="check-circle-2"></i> تم رفع وتحليل الوثيقة بنجاح!'; statusDiv.style.color = 'var(--accent-green)'; lucide.createIcons({root: statusDiv}); }
+            if(statusDiv) { statusDiv.innerHTML = '<i data-lucide="check-circle-2"></i> Documents analyzed & saved successfully!'; statusDiv.style.color = 'var(--accent-green)'; lucide.createIcons({root: statusDiv}); }
         }
         document.getElementById('docFileInputCamera').addEventListener('change', handleDocImageSelect);
         document.getElementById('docFileInputGallery').addEventListener('change', handleDocImageSelect);
@@ -644,20 +632,20 @@ HTML_CODE = """<!DOCTYPE html>
             if (!currentSession) { createNewChatSession(); return; }
             const currentMode = currentSession.mode || 'study';
 
-            if (!query && !attachedQuestionBase64) { alert('يرجى كتابة سؤالك أو إرفاق صورة أولاً!'); return; }
-            if (currentMode === 'study' && curriculumDocs.length === 0) { alert('أنت في وضع المنهج، يرجى رفع وثائق دروسك من قسم "وثائق المنهج" أولاً أو التبديل إلى "محادثة عامة" من القائمة الجانبية!'); return; }
+            if (!query && !attachedQuestionBase64) { alert('Please type a question or attach an image first!'); return; }
+            if (currentMode === 'study' && curriculumDocs.length === 0) { alert('You are in Study mode. Please upload curriculum documents in the menu or switch to General Chat!'); return; }
             
             const welcome = document.getElementById('welcomeMsg'); if(welcome) welcome.remove();
 
             let userTextDisplay = query.replace(/\\n/g, '<br>');
-            if (attachedQuestionBase64) { userTextDisplay = (query ? userTextDisplay + '<br>' : '') + '<span style="color:#60a5fa; font-size:0.85em"><i data-lucide="image" style="width:14px;height:14px;"></i> صورة مرفقة</span>'; }
+            if (attachedQuestionBase64) { userTextDisplay = (query ? userTextDisplay + '<br>' : '') + '<span style="color:#60a5fa; font-size:0.85em"><i data-lucide="image" style="width:14px;height:14px;"></i> Image attached</span>'; }
 
             const userBubble = document.createElement('div'); userBubble.className = 'chat-bubble user-bubble';
             userBubble.innerHTML = `<i data-lucide="user" class="bubble-icon"></i> <div>${userTextDisplay}</div>`;
             chatFeed.appendChild(userBubble); lucide.createIcons({root: userBubble});
 
             const loadingBubble = document.createElement('div'); loadingBubble.className = 'chat-bubble ai-bubble loading-bubble-temp';
-            loadingBubble.innerHTML = `<i data-lucide="loader-circle" class="bubble-icon spin-icon"></i> <div class="thinking-text" style="color: #60a5fa; font-weight: bold;">أفكر وأحلل... ⏳</div>`;
+            loadingBubble.innerHTML = `<i data-lucide="loader-circle" class="bubble-icon spin-icon"></i> <div class="thinking-text" style="color: #60a5fa; font-weight: bold;">Thinking & analyzing... ⏳</div>`;
             chatFeed.appendChild(loadingBubble); lucide.createIcons({root: loadingBubble});
             
             saveCurrentChatHtml(query);
@@ -673,33 +661,46 @@ HTML_CODE = """<!DOCTYPE html>
 
                 if (data.status === 'out_of_scope') {
                     aiBubble.className = 'chat-bubble out-of-scope-bubble';
-                    aiBubble.innerHTML = `<i data-lucide="alert-triangle"></i> عذراً، هذا السؤال خارج نطاق المنهج الدراسي المرفوع. يمكنك التبديل إلى "محادثة عامة" من القائمة الجانبية.`;
+                    aiBubble.innerHTML = `<i data-lucide="alert-triangle"></i> Sorry, this question is out of scope for your uploaded curriculum. Switch to General Chat in the menu.`;
+                    chatFeed.appendChild(aiBubble); lucide.createIcons({root: aiBubble}); chatFeed.scrollTop = chatFeed.scrollHeight; saveCurrentChatHtml();
                 } else if (data.status === 'success') {
                     aiBubble.className = 'chat-bubble ai-bubble';
-                    const formattedHtml = marked.parse(data.answer);
-                    const encodedAnswer = encodeURIComponent(data.answer);
-                    aiBubble.innerHTML = `
-                        <i data-lucide="bot" class="bubble-icon" style="color: #60a5fa"></i> 
-                        <div class="ai-content">${formattedHtml}</div>
-                        <button class="copy-btn" onclick="copyText(this, '${encodedAnswer}')"><i data-lucide="copy" style="width:14px;height:14px;"></i> نسخ</button>
-                    `;
-                    if (window.MathJax && window.MathJax.typesetPromise) {
-                        window.MathJax.typesetPromise([aiBubble]).catch(err => console.log(err));
+                    aiBubble.innerHTML = `<i data-lucide="bot" class="bubble-icon" style="color: #60a5fa"></i> <div class="ai-content"></div>`;
+                    chatFeed.appendChild(aiBubble); lucide.createIcons({root: aiBubble});
+                    
+                    const contentDiv = aiBubble.querySelector('.ai-content'); 
+                    const fullText = data.answer;
+                    let charIndex = 0; 
+                    let currentText = '';
+                    
+                    // ظهور الإجابة ببطء متوسط واحترافي لكي يقرأها المستخدم بسلاسة
+                    function typeWriter() {
+                        if (charIndex < fullText.length) {
+                            currentText += fullText.substring(charIndex, charIndex + 4); 
+                            charIndex += 4;
+                            contentDiv.innerHTML = marked.parse(currentText) + '<span class="cursor-blink"> ▌</span>';
+                            chatFeed.scrollTop = chatFeed.scrollHeight;
+                            setTimeout(typeWriter, 18);
+                        } else {
+                            contentDiv.innerHTML = marked.parse(fullText);
+                            const encodedAnswer = encodeURIComponent(fullText);
+                            aiBubble.insertAdjacentHTML('beforeend', `<button class="copy-btn" onclick="copyText(this, '${encodedAnswer}')"><i data-lucide="copy" style="width:14px;height:14px;"></i> Copy</button>`);
+                            lucide.createIcons({root: aiBubble});
+                            if (window.MathJax) window.MathJax.typesetPromise([aiBubble]).catch(e => console.log(e));
+                            saveCurrentChatHtml();
+                        }
                     }
+                    typeWriter();
                 } else {
                     aiBubble.className = 'chat-bubble ai-bubble';
-                    aiBubble.innerHTML = `<i data-lucide="alert-circle" class="bubble-icon" style="color: var(--danger)"></i> <div>حدث خطأ: ${data.error || 'تعذر المعالجة.'}</div>`;
+                    aiBubble.innerHTML = `<i data-lucide="alert-circle" class="bubble-icon" style="color: var(--danger)"></i> <div>Error: ${data.error || 'Failed to process.'}</div>`;
+                    chatFeed.appendChild(aiBubble); lucide.createIcons({root: aiBubble}); chatFeed.scrollTop = chatFeed.scrollHeight; saveCurrentChatHtml();
                 }
-                
-                chatFeed.appendChild(aiBubble); lucide.createIcons({root: aiBubble});
-                chatFeed.scrollTop = chatFeed.scrollHeight;
-                saveCurrentChatHtml();
             }).catch(err => {
                 chatFeed.removeChild(loadingBubble);
                 const errBubble = document.createElement('div'); errBubble.className = 'chat-bubble ai-bubble';
-                errBubble.innerHTML = `<i data-lucide="wifi-off" class="bubble-icon" style="color: var(--danger)"></i> <div>تعذر الاتصال بالسيرفر.</div>`;
-                chatFeed.appendChild(errBubble); lucide.createIcons({root: errBubble});
-                chatFeed.scrollTop = chatFeed.scrollHeight;
+                errBubble.innerHTML = `<i data-lucide="wifi-off" class="bubble-icon" style="color: var(--danger)"></i> <div>Connection failed. Check your network.</div>`;
+                chatFeed.appendChild(errBubble); lucide.createIcons({root: errBubble}); chatFeed.scrollTop = chatFeed.scrollHeight;
             });
         }
     </script>
@@ -708,7 +709,7 @@ HTML_CODE = """<!DOCTYPE html>
 """
 
 # ==============================================================================
-# سيرفر بايثون الخلفي المحدث
+# Python Backend Server
 # ==============================================================================
 class StudyAppRequestHandler(BaseHTTPRequestHandler):
 
@@ -755,7 +756,7 @@ class StudyAppRequestHandler(BaseHTTPRequestHandler):
     def do_POST(self):
         session_id = self.get_session_id()
         if not session_id:
-            self.send_json_response({"error": "الجلسة غير صالحة، يرجى تحديث الصفحة."})
+            self.send_json_response({"error": "Invalid session. Please refresh."})
             return
 
         content_length = int(self.headers.get('Content-Length', 0))
@@ -765,17 +766,17 @@ class StudyAppRequestHandler(BaseHTTPRequestHandler):
         if self.path == "/api/docs/upload":
             image_base64 = req_json.get("image")
             if not image_base64:
-                self.send_json_response({"error": "لم يتم إرسال صورة الوثيقة"})
+                self.send_json_response({"error": "No image provided"})
                 return
             try:
-                prompt = "Read this lesson document image and extract all text, concepts, formulas, and rules in Arabic."
+                prompt = "Read this lesson document image and extract all text, concepts, formulas, and rules clearly in English."
                 payload = {
                     "model": MODEL_NAME,
                     "messages": [{"role": "user", "content": [{"type": "text", "text": prompt}, {"type": "image_url", "image_url": {"url": image_base64}}]}],
                     "max_tokens": 4096
                 }
                 extracted_concepts = self.send_api_request(payload)
-                add_document_to_db(session_id, "وثيقة درس", extracted_concepts)
+                add_document_to_db(session_id, "Document Lesson", extracted_concepts)
                 docs = load_curriculum(session_id)
                 self.send_json_response({"status": "success", "docs": docs})
             except Exception as e:
@@ -800,33 +801,31 @@ class StudyAppRequestHandler(BaseHTTPRequestHandler):
 
             if mode == "general":
                 full_prompt = (
-                    f"أنت مساعد ذكي ومثقف واسع المعرفة اسمك ge_nius.\n"
-                    f"سؤال المستخدم أو طلب الصورة هو: \"{user_query}\"\n\n"
-                    f"أجب عن السؤال بأسلوب احترافي، دقيق، وودي باللغة العربية.\n"
-                    f"يمكنك الإجابة عن أي سؤال في الثقافة، البرمجة، العلوم، التاريخ، أو الاستفسارات العامة.\n\n"
-                    f"--- تعليمات التنسيق ---\n"
-                    f"- استخدم Markdown لتنظيم الإجابة.\n"
-                    f"- استخدم رموز الدولار المفردة ($...$) للمتغيرات والمزدوجة ($$...$$) للمعادلات المستقلة."
+                    f"You are a highly intelligent and helpful global AI assistant named ge_nius.\n"
+                    f"User prompt/image request: \"{user_query}\"\n\n"
+                    f"Respond to the question in a professional, accurate, and friendly manner in English.\n"
+                    f"You can answer anything (general knowledge, coding, science, history, etc.).\n\n"
+                    f"--- Formatting Instructions ---\n"
+                    f"- Use Markdown for structuring your response.\n"
+                    f"- Use single dollar signs ($...$) for inline math and double dollar signs ($$...$$) for block math equations."
                 )
             else:
-                all_concepts_summary = "\n\n".join([f"الوثيقة {i+1}:\n{doc['concepts']}" for i, doc in enumerate(docs)])
+                all_concepts_summary = "\n\n".join([f"Document {i+1}:\n{doc['concepts']}" for i, doc in enumerate(docs)])
                 full_prompt = (
-                    f"أنت معلم ومساعد دراسي متخصص.\n"
-                    f"إليك المحتوى والمفاهيم التي استخرجت من وثائق دروس الطالب:\n"
-                    f"--- بداية المحتوى الدراسي ---\n"
+                    f"You are an expert tutor and study assistant.\n"
+                    f"Here is the study material extracted from the student's curriculum documents:\n"
+                    f"--- START CURRICULUM ---\n"
                     f"{all_concepts_summary}\n"
-                    f"--- نهاية المحتوى الدراسي ---\n\n"
-                    f"سؤال الطالب النصي أو المرفق في الصورة هو: \"{user_query}\"\n\n"
-                    f"قم بالتحليل باتباع الخطوات التالية:\n"
-                    f"1. فكّر بدقة: هل يرتبط سؤال التمرين بالمحتوى الدراسي المرفوع أعلى بأي شكل؟\n"
-                    f"2. إذا كان السؤال عن موضوع مختلف تماماً ولا علاقة له بالدروس المضافة، أجب بالكلمة الحرفية التالية فقط بدون زيادة: OUT_OF_SCOPE\n"
-                    f"3. إذا كان ضمن الدروس والمحتوى المرفوع، قدم إجابة شاملة وشارحة خطوة بخطوة باللغة العربية.\n\n"
-                    f"--- تعليمات التنسيق والمعادلات (تطبيق إلزامي) ---\n"
-                    f"- لا تستخدم أبداً الأقواس المربعة \\[ أو \\] أو الأقواس الدائرية \\( أو \\) لتمثيل المعادلات.\n"
-                    f"- لكتابة المتغيرات الرياضية والرموز داخل النص: يجب استخدام رمز الدولار المفرد حصراً، مثال: $x=2$ أو $v$.\n"
-                    f"- لكتابة المعادلات الطويلة والمصفوفات والكسور: يجب كتابتها في سطر جديد ومستقل واستخدام رمز الدولار المزدوج حصراً، مثال:\n"
-                    f"$$ \\vec{{u}} = \\sqrt{{x^2 + y^2}} $$\n"
-                    f"- يمكنك استخدام Markdown لتنظيم العناوين الفرعية (بواسطة ###) والقوائم المقطعية (-)."
+                    f"--- END CURRICULUM ---\n\n"
+                    f"User's question or image attachment: \"{user_query}\"\n\n"
+                    f"Follow these instructions exactly:\n"
+                    f"1. Analyze carefully: Does the question relate to the provided curriculum documents in any way?\n"
+                    f"2. If the question is completely off-topic or out of scope of the uploaded documents, reply with EXACTLY this word and nothing else: OUT_OF_SCOPE\n"
+                    f"3. If it is within scope, provide a comprehensive, step-by-step explanation in English.\n\n"
+                    f"--- Math Formatting ---\n"
+                    f"- For inline variables/math, use single dollar signs strictly, e.g., $x=2$ or $v$.\n"
+                    f"- For block equations, use double dollar signs strictly, e.g.,\n$$ \\vec{{u}} = \\sqrt{{x^2 + y^2}} $$\n"
+                    f"- Use Markdown for headings (###) and lists (-)."
                 )
                 
             messages_content.append({"type": "text", "text": full_prompt})
