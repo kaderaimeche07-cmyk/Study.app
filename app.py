@@ -8,6 +8,8 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 from pathlib import Path
 from datetime import datetime
 import os
+import uuid
+from http import cookies
 
 # ==============================================================================
 # استخدام مفتاح التفكير الفعال والناجح لديك لكافة وظائف التطبيق
@@ -24,14 +26,14 @@ def get_db_connection():
         return None
     return psycopg2.connect(database_url, sslmode='require')
 
-def load_curriculum():
+def load_curriculum(session_id):
     try:
         conn = get_db_connection()
         if not conn:
             return []
         cur = conn.cursor()
-        cur.execute("CREATE TABLE IF NOT EXISTS documents (id SERIAL PRIMARY KEY, title TEXT, content TEXT);")
-        cur.execute("SELECT id, title, content FROM documents ORDER BY id ASC;")
+        cur.execute("CREATE TABLE IF NOT EXISTS user_documents (id SERIAL PRIMARY KEY, session_id VARCHAR(255), title TEXT, content TEXT);")
+        cur.execute("SELECT id, title, content FROM user_documents WHERE session_id = %s ORDER BY id ASC;", (session_id,))
         rows = cur.fetchall()
         cur.close()
         conn.close()
@@ -40,37 +42,35 @@ def load_curriculum():
         print(f"خطأ في قراءة قاعدة البيانات: {e}")
         return []
 
-def add_document_to_db(title, content):
+def add_document_to_db(session_id, title, content):
     try:
         conn = get_db_connection()
         if not conn:
             return
         cur = conn.cursor()
-        cur.execute("CREATE TABLE IF NOT EXISTS documents (id SERIAL PRIMARY KEY, title TEXT, content TEXT);")
-        cur.execute("INSERT INTO documents (title, content) VALUES (%s, %s);", (title, content))
+        cur.execute("CREATE TABLE IF NOT EXISTS user_documents (id SERIAL PRIMARY KEY, session_id VARCHAR(255), title TEXT, content TEXT);")
+        cur.execute("INSERT INTO user_documents (session_id, title, content) VALUES (%s, %s, %s);", (session_id, title, content))
         conn.commit()
         cur.close()
         conn.close()
     except Exception as e:
         print(f"خطأ في الإضافة لقاعدة البيانات: {e}")
 
-def delete_document_from_db(doc_id):
+def delete_document_from_db(session_id, doc_id):
     try:
         conn = get_db_connection()
         if not conn:
             return
         cur = conn.cursor()
-        cur.execute("DELETE FROM documents WHERE id = %s;", (doc_id,))
+        cur.execute("DELETE FROM user_documents WHERE id = %s AND session_id = %s;", (doc_id, session_id))
         conn.commit()
         cur.close()
         conn.close()
     except Exception as e:
         print(f"خطأ في الحذف من قاعدة البيانات: {e}")
 
-
-
 # ==============================================================================
-# الواجهة الرسومية المدعومة برفع الصور وتصوير الدروس والأسئلة
+# الواجهة الرسومية (تتضمن أزرار الكاميرا المباشرة و MathJax)
 # ==============================================================================
 HTML_CODE = """<!DOCTYPE html>
 <html lang="ar" dir="rtl">
@@ -82,8 +82,8 @@ HTML_CODE = """<!DOCTYPE html>
     <script>
       window.MathJax = {
         tex: {
-          inlineMath: [['$', '$'], ['\\(', '\\)']],
-          displayMath: [['$$', '$$'], ['\\[', '\\]']],
+          inlineMath: [['$', '$']],
+          displayMath: [['$$', '$$']],
           processEscapes: true
         },
         options: {
@@ -95,40 +95,28 @@ HTML_CODE = """<!DOCTYPE html>
 
     <style>
         :root {
-            --bg-dark: #0f172a;
-            --surface-dark: #1e293b;
-            --card-dark: #334155;
-            --primary: #6366f1;
-            --accent-purple: #8b5cf6;
-            --accent-green: #10b981;
-            --danger: #ef4444;
-            --text-light: #f8fafc;
-            --text-dim: #94a3b8;
+            --bg-dark: #0f172a; --surface-dark: #1e293b; --card-dark: #334155;
+            --primary: #6366f1; --accent-purple: #8b5cf6; --accent-green: #10b981;
+            --danger: #ef4444; --text-light: #f8fafc; --text-dim: #94a3b8;
             --border: rgba(255, 255, 255, 0.08);
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
         body {
-            font-family: 'Tajawal', sans-serif;
-            background-color: var(--bg-dark);
-            color: var(--text-light);
-            margin: 0; padding: 12px;
-            min-height: 100vh;
-            display: flex; flex-direction: column; gap: 12px;
+            font-family: 'Tajawal', sans-serif; background-color: var(--bg-dark);
+            color: var(--text-light); margin: 0; padding: 12px;
+            min-height: 100vh; display: flex; flex-direction: column; gap: 12px;
         }
 
         .app-header {
-            background: var(--surface-dark);
-            padding: 14px 18px; border-radius: 16px;
-            border: 1px solid var(--border);
-            display: flex; justify-content: space-between; align-items: center;
+            background: var(--surface-dark); padding: 14px 18px; border-radius: 16px;
+            border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;
         }
         .app-title { font-size: 1.1rem; font-weight: 800; margin: 0; color: #a5b4fc; }
 
         .tab-bar {
-            display: flex; background: var(--surface-dark);
-            border-radius: 12px; padding: 4px; border: 1px solid var(--border);
+            display: flex; background: var(--surface-dark); border-radius: 12px; padding: 4px; border: 1px solid var(--border);
         }
         .tab-btn {
             flex: 1; padding: 12px; background: none; border: none;
@@ -149,37 +137,30 @@ HTML_CODE = """<!DOCTYPE html>
 
         .chat-feed {
             display: flex; flex-direction: column; gap: 12px;
-            max-height: 45vh; overflow-y: auto; padding: 8px;
-            background: var(--card-dark); border-radius: 12px;
-            border: 1px solid var(--border);
+            max-height: 50vh; overflow-y: auto; padding: 8px;
+            background: var(--card-dark); border-radius: 12px; border: 1px solid var(--border);
         }
 
         .chat-bubble {
-            padding: 12px 16px; border-radius: 14px;
-            font-size: 0.92rem; line-height: 1.6; max-width: 90%;
-            white-space: pre-wrap; word-break: break-word;
+            padding: 12px 16px; border-radius: 14px; font-size: 0.95rem; line-height: 1.8;
+            max-width: 90%; white-space: pre-wrap; word-break: break-word;
         }
         .user-bubble {
-            background: var(--primary); color: white;
-            align-self: flex-start; border-bottom-right-radius: 4px;
+            background: var(--primary); color: white; align-self: flex-start; border-bottom-right-radius: 4px;
         }
         .ai-bubble {
-            background: #17223b; color: #e2e8f0;
-            align-self: flex-end; border-bottom-left-radius: 4px;
-            border: 1px solid var(--border);
+            background: #17223b; color: #e2e8f0; align-self: flex-end; border-bottom-left-radius: 4px; border: 1px solid var(--border);
         }
         .out-of-scope-bubble {
             background: rgba(239, 68, 68, 0.15); border: 1px solid var(--danger);
-            color: #fca5a5; font-weight: 800; text-align: center;
-            align-self: center; width: 100%; border-radius: 12px;
+            color: #fca5a5; font-weight: 800; text-align: center; align-self: center; width: 100%; border-radius: 12px;
         }
 
         .input-group { display: flex; flex-direction: column; gap: 6px; }
         textarea {
-            background: var(--card-dark); color: var(--text-light);
-            border: 1px solid var(--border); padding: 12px; border-radius: 10px;
-            font-family: 'Tajawal', sans-serif; font-size: 0.95rem; outline: none;
-            resize: vertical; min-height: 60px;
+            background: var(--card-dark); color: var(--text-light); border: 1px solid var(--border);
+            padding: 12px; border-radius: 10px; font-family: 'Tajawal', sans-serif; font-size: 0.95rem;
+            outline: none; resize: vertical; min-height: 60px;
         }
 
         .image-preview-bar {
@@ -188,14 +169,12 @@ HTML_CODE = """<!DOCTYPE html>
             padding: 8px 12px; border-radius: 10px; font-size: 0.85rem; color: #c4b5fd;
         }
 
-        .btn-controls { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+        .btn-controls { display: grid; grid-template-columns: 1fr auto auto; gap: 8px; }
 
         .btn {
-            background: var(--primary); color: white; border: none;
-            padding: 12px; border-radius: 10px; font-family: 'Tajawal', sans-serif;
-            font-weight: 700; font-size: 0.95rem; cursor: pointer; text-align: center;
-            display: flex; align-items: center; justify-content: center; gap: 8px;
-            text-decoration: none;
+            background: var(--primary); color: white; border: none; padding: 12px; border-radius: 10px;
+            font-family: 'Tajawal', sans-serif; font-weight: 700; font-size: 0.95rem; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none;
         }
         .btn-purple { background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%); }
         .btn-green { background: var(--accent-green); color: #042f2e; }
@@ -203,26 +182,21 @@ HTML_CODE = """<!DOCTYPE html>
         input[type="file"] { display: none; }
 
         .doc-item {
-            background: var(--card-dark); border-radius: 12px; padding: 12px;
-            border: 1px solid var(--border); display: flex; flex-direction: column; gap: 8px;
+            background: var(--card-dark); border-radius: 12px; padding: 12px; border: 1px solid var(--border);
+            display: flex; flex-direction: column; gap: 8px;
         }
         .doc-header { display: flex; justify-content: space-between; align-items: center; }
         .doc-title { font-weight: 700; font-size: 0.9rem; color: #a5b4fc; }
         .btn-del {
-            background: rgba(239, 68, 68, 0.2); color: #fca5a5;
-            border: 1px solid rgba(239, 68, 68, 0.3); padding: 4px 10px;
-            border-radius: 6px; font-size: 0.75rem; cursor: pointer;
+            background: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.3);
+            padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; cursor: pointer;
         }
         .doc-body {
-            font-size: 0.85rem; color: #cbd5e1; line-height: 1.5;
-            max-height: 100px; overflow-y: auto; background: rgba(0,0,0,0.2);
-            padding: 8px; border-radius: 6px; white-space: pre-wrap;
+            font-size: 0.85rem; color: #cbd5e1; line-height: 1.5; max-height: 100px; overflow-y: auto;
+            background: rgba(0,0,0,0.2); padding: 8px; border-radius: 6px; white-space: pre-wrap;
         }
 
-        .spinner {
-            text-align: center; color: #a5b4fc; font-weight: 700; padding: 10px;
-            animation: pulse 1.5s infinite;
-        }
+        .spinner { text-align: center; color: #a5b4fc; font-weight: 700; padding: 10px; animation: pulse 1.5s infinite; }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
     </style>
 </head>
@@ -257,11 +231,16 @@ HTML_CODE = """<!DOCTYPE html>
             </div>
             
             <div class="btn-controls">
-                <button class="btn btn-green" onclick="submitQuestion()">🚀 إرسال السؤال</button>
-                <label for="questionFileInput" class="btn btn-purple" style="padding: 12px 16px; margin: 0;">
-                    <span>📸 صورة السؤال</span>
+                <button class="btn btn-green" onclick="submitQuestion()">🚀 إرسال</button>
+                <label for="qFileInputCamera" class="btn btn-purple" style="padding: 12px 14px; margin: 0;" title="كاميرا مباشرة">
+                    <span>📸</span>
                 </label>
-                <input type="file" id="questionFileInput" accept="image/*">
+                <input type="file" id="qFileInputCamera" accept="image/*" capture="environment">
+
+                <label for="qFileInputGallery" class="btn btn-purple" style="padding: 12px 14px; margin: 0;" title="رفع من المعرض">
+                    <span>🖼️</span>
+                </label>
+                <input type="file" id="qFileInputGallery" accept="image/*">
             </div>
         </div>
     </div>
@@ -269,19 +248,26 @@ HTML_CODE = """<!DOCTYPE html>
     <!-- TAB 2: Curriculum Documents Section -->
     <div class="tab-section" id="docsTab">
         <div class="card">
-            <span style="font-weight: 700; font-size: 1rem; color: #a5b4fc;">➕ تصوير ورفع وثيقة درس جديد</span>
-            <p style="font-size: 0.8rem; color: var(--text-dim); margin: 0;">قم بتصوير صفحة الدرس أو رفع صورتها ليقوم المساعد بقراءتها:</p>
+            <span style="font-weight: 700; font-size: 1rem; color: #a5b4fc;">➕ رفع وثيقة درس جديد</span>
+            <p style="font-size: 0.8rem; color: var(--text-dim); margin: 0;">اختر التصوير المباشر لصفحة الدرس أو رفعها من المعرض:</p>
             
-            <label for="docFileInput" class="btn btn-purple" style="text-align: center; display: block;">
-                <span>📷 / 🖼️ تصوير وتفريغ وثيقة الدرس</span>
-            </label>
-            <input type="file" id="docFileInput" accept="image/*">
+            <div style="display: flex; gap: 8px;">
+                <label for="docFileInputCamera" class="btn btn-purple" style="flex: 1; text-align: center; margin:0;">
+                    <span>📸 تصوير مباشر</span>
+                </label>
+                <input type="file" id="docFileInputCamera" accept="image/*" capture="environment">
+
+                <label for="docFileInputGallery" class="btn btn-purple" style="flex: 1; text-align: center; margin:0;">
+                    <span>🖼️ المعرض</span>
+                </label>
+                <input type="file" id="docFileInputGallery" accept="image/*">
+            </div>
             
-            <div id="uploadStatus" style="font-size: 0.85rem; text-align: center; min-height: 20px;"></div>
+            <div id="uploadStatus" style="font-size: 0.85rem; text-align: center; min-height: 20px; margin-top: 10px;"></div>
         </div>
 
         <div class="card">
-            <span style="font-weight: 700; font-size: 0.9rem; color: var(--text-dim);">الوثائق والأفكار المستخرجة في منهجك:</span>
+            <span style="font-weight: 700; font-size: 0.9rem; color: var(--text-dim);">الوثائق والأفكار المستخرجة الخاصة بك:</span>
             <div id="docsList" style="display: flex; flex-direction: column; gap: 10px;"></div>
         </div>
     </div>
@@ -295,26 +281,20 @@ HTML_CODE = """<!DOCTYPE html>
         function switchTab(tabId, btnElement) {
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.querySelectorAll('.tab-section').forEach(s => s.classList.remove('active'));
-            
             if(btnElement) btnElement.classList.add('active');
             const targetSection = document.getElementById(tabId);
             if(targetSection) targetSection.classList.add('active');
         }
 
         function fetchDocs() {
-            fetch('/api/docs')
-            .then(res => res.json())
-            .then(data => {
-                curriculumDocs = data;
-                renderDocs();
-            })
-            .catch(err => console.error("تعذر جلب الوثائق:", err));
+            fetch('/api/docs').then(res => res.json()).then(data => {
+                curriculumDocs = data; renderDocs();
+            }).catch(err => console.error("تعذر جلب الوثائق:", err));
         }
 
         function renderDocs() {
             const listDiv = document.getElementById('docsList');
             const countBadge = document.getElementById('docCountBadge');
-            
             if(countBadge) countBadge.textContent = curriculumDocs.length + ' وثائق محللة';
             if (!listDiv) return;
 
@@ -327,29 +307,29 @@ HTML_CODE = """<!DOCTYPE html>
                 <div class="doc-item">
                     <div class="doc-header">
                         <span class="doc-title">📖 وثيقة درس رقم ${index + 1}</span>
-                        <button class="btn-del" onclick="deleteDoc(${index})">حذف الوثيقة</button>
+                        <button class="btn-del" onclick="deleteDoc(${index})">حذف</button>
                     </div>
                     <div class="doc-body">${item.concepts}</div>
                 </div>
             `).join('');
         }
 
-        const qInput = document.getElementById('questionFileInput');
-        if(qInput) {
-            qInput.addEventListener('change', function(e) {
-                const file = e.target.files[0];
-                if (!file) return;
-
-                const reader = new FileReader();
-                reader.onload = function(evt) {
-                    attachedQuestionBase64 = evt.target.result;
-                    const preview = document.getElementById('questionImgPreview');
-                    if(preview) preview.style.display = 'flex';
-                };
-                reader.readAsDataURL(file);
-                this.value = '';
-            });
+        // دالة موحدة لقراءة صور الأسئلة
+        function handleQuestionImageSelect(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                attachedQuestionBase64 = evt.target.result;
+                const preview = document.getElementById('questionImgPreview');
+                if(preview) preview.style.display = 'flex';
+            };
+            reader.readAsDataURL(file);
+            e.target.value = '';
         }
+        
+        document.getElementById('qFileInputCamera').addEventListener('change', handleQuestionImageSelect);
+        document.getElementById('qFileInputGallery').addEventListener('change', handleQuestionImageSelect);
 
         function removeQuestionImage() {
             attachedQuestionBase64 = null;
@@ -357,51 +337,39 @@ HTML_CODE = """<!DOCTYPE html>
             if(preview) preview.style.display = 'none';
         }
 
-        const docInput = document.getElementById('docFileInput');
-        if(docInput) {
-            docInput.addEventListener('change', function(e) {
-                const file = e.target.files[0];
-                if (!file) return;
-
-                const statusDiv = document.getElementById('uploadStatus');
-                if(statusDiv) {
-                    statusDiv.textContent = '⚡ جاري قراءة وتفريغ صورة الدرس...';
-                    statusDiv.style.color = '#89b4fa';
-                }
-
-                const reader = new FileReader();
-                reader.onload = function(evt) {
-                    uploadDocImage(evt.target.result);
-                };
-                reader.readAsDataURL(file);
-                this.value = '';
-            });
+        // دالة موحدة لقراءة صور الدروس
+        function handleDocImageSelect(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const statusDiv = document.getElementById('uploadStatus');
+            if(statusDiv) {
+                statusDiv.textContent = '⚡ جاري قراءة وتفريغ صورة الدرس...';
+                statusDiv.style.color = '#89b4fa';
+            }
+            const reader = new FileReader();
+            reader.onload = function(evt) { uploadDocImage(evt.target.result); };
+            reader.readAsDataURL(file);
+            e.target.value = '';
         }
+
+        document.getElementById('docFileInputCamera').addEventListener('change', handleDocImageSelect);
+        document.getElementById('docFileInputGallery').addEventListener('change', handleDocImageSelect);
 
         function uploadDocImage(base64Data) {
             fetch('/api/docs/upload', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ image: base64Data })
             })
             .then(res => res.json())
             .then(data => {
                 const statusDiv = document.getElementById('uploadStatus');
                 if (data.error) {
-                    if(statusDiv) {
-                        statusDiv.textContent = '❌ خطأ: ' + data.error;
-                        statusDiv.style.color = '#f38ba8';
-                    }
+                    if(statusDiv) { statusDiv.textContent = '❌ خطأ: ' + data.error; statusDiv.style.color = '#f38ba8'; }
                 } else {
-                    if(statusDiv) {
-                        statusDiv.textContent = '✓ تم قراءة الوثيقة وحفظها في قاعدة البيانات بنجاح!';
-                        statusDiv.style.color = '#a6e3a1';
-                    }
-                    curriculumDocs = data.docs;
-                    renderDocs();
+                    if(statusDiv) { statusDiv.textContent = '✓ تم قراءة الوثيقة وحفظها بنجاح!'; statusDiv.style.color = '#a6e3a1'; }
+                    curriculumDocs = data.docs; renderDocs();
                 }
-            })
-            .catch(err => {
+            }).catch(err => {
                 const statusDiv = document.getElementById('uploadStatus');
                 if(statusDiv) statusDiv.textContent = '❌ تعذر الاتصال بالسيرفر.';
             });
@@ -409,15 +377,9 @@ HTML_CODE = """<!DOCTYPE html>
 
         function deleteDoc(index) {
             fetch('/api/docs/delete', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ index: index })
-            })
-            .then(res => res.json())
-            .then(data => {
-                curriculumDocs = data;
-                renderDocs();
-            });
+            }).then(res => res.json()).then(data => { curriculumDocs = data; renderDocs(); });
         }
 
         function submitQuestion() {
@@ -425,20 +387,11 @@ HTML_CODE = """<!DOCTYPE html>
             const query = queryInput.value.trim();
             const chatFeed = document.getElementById('chatFeed');
 
-            if (!query && !attachedQuestionBase64) {
-                alert('يرجى كتابة سؤالك أو إرفاق صورة التمرين أولاً!');
-                return;
-            }
-
-            if (curriculumDocs.length === 0) {
-                alert('يرجى تصوير أو رفع وثائق دروسك أولاً في تبويب "وثائق الدروس"!');
-                return;
-            }
+            if (!query && !attachedQuestionBase64) { alert('يرجى كتابة سؤالك أو إرفاق صورة أولاً!'); return; }
+            if (curriculumDocs.length === 0) { alert('يرجى تصوير أو رفع وثائق دروسك أولاً!'); return; }
 
             let userTextDisplay = query;
-            if (attachedQuestionBase64) {
-                userTextDisplay = (query ? query + '\\n' : '') + '[📷 صورة مرفقة للسؤال]';
-            }
+            if (attachedQuestionBase64) { userTextDisplay = (query ? query + '\\n' : '') + '[📷 صورة مرفقة للسؤال]'; }
 
             const userBubble = document.createElement('div');
             userBubble.className = 'chat-bubble user-bubble';
@@ -450,18 +403,11 @@ HTML_CODE = """<!DOCTYPE html>
             loadingBubble.textContent = '🧠 جاري التفكير والتحليل عبر Qwen3...';
             chatFeed.appendChild(loadingBubble);
 
-            const payload = {
-                query: query,
-                image: attachedQuestionBase64
-            };
-
-            queryInput.value = '';
-            removeQuestionImage();
-            chatFeed.scrollTop = chatFeed.scrollHeight;
+            const payload = { query: query, image: attachedQuestionBase64 };
+            queryInput.value = ''; removeQuestionImage(); chatFeed.scrollTop = chatFeed.scrollHeight;
 
             fetch('/api/ask', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             })
             .then(res => res.json())
@@ -476,7 +422,6 @@ HTML_CODE = """<!DOCTYPE html>
                     aiBubble.className = 'chat-bubble ai-bubble';
                     aiBubble.textContent = data.answer;
                     
-                    // تشغيل MathJax فور ظهور الرد لترجمة الرموز ومعادلات LaTeX تلقائياً
                     if (window.MathJax && window.MathJax.typesetPromise) {
                         window.MathJax.typesetPromise([aiBubble]).catch((err) => console.log(err));
                     }
@@ -484,17 +429,13 @@ HTML_CODE = """<!DOCTYPE html>
                     aiBubble.className = 'chat-bubble ai-bubble';
                     aiBubble.textContent = 'حدث خطأ: ' + (data.error || 'تعذر الإجابة.');
                 }
-
-                chatFeed.appendChild(aiBubble);
-                chatFeed.scrollTop = chatFeed.scrollHeight;
-            })
-            .catch(err => {
+                chatFeed.appendChild(aiBubble); chatFeed.scrollTop = chatFeed.scrollHeight;
+            }).catch(err => {
                 chatFeed.removeChild(loadingBubble);
                 const errBubble = document.createElement('div');
                 errBubble.className = 'chat-bubble ai-bubble';
                 errBubble.textContent = '❌ تعذر الاتصال بالسيرفر.';
-                chatFeed.appendChild(errBubble);
-                chatFeed.scrollTop = chatFeed.scrollHeight;
+                chatFeed.appendChild(errBubble); chatFeed.scrollTop = chatFeed.scrollHeight;
             });
         }
     </script>
@@ -503,9 +444,18 @@ HTML_CODE = """<!DOCTYPE html>
 """
 
 # ==============================================================================
-# سيرفر بايثون الموحد (يعمل بمفتاح Qwen3 الفعال لكافة المهام والصور)
+# سيرفر بايثون الموحد
 # ==============================================================================
 class StudyAppRequestHandler(BaseHTTPRequestHandler):
+
+    def get_session_id(self):
+        cookie_header = self.headers.get('Cookie')
+        if cookie_header:
+            c = cookies.SimpleCookie(cookie_header)
+            if 'session_id' in c:
+                return c['session_id'].value
+        return None
+
     def send_api_request(self, payload):
         req_data = json.dumps(payload).encode("utf-8")
         headers = {
@@ -520,15 +470,36 @@ class StudyAppRequestHandler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         if self.path == "/":
+            session_id = self.get_session_id()
+            is_new_session = False
+            
+            if not session_id:
+                session_id = str(uuid.uuid4())
+                is_new_session = True
+
             self.send_response(200)
             self.send_header("Content-type", "text/html; charset=utf-8")
+            
+            if is_new_session:
+                self.send_header("Set-Cookie", f"session_id={session_id}; Path=/; Max-Age=31536000; HttpOnly; SameSite=Lax")
+            
             self.end_headers()
             self.wfile.write(HTML_CODE.encode("utf-8"))
+            
         elif self.path == "/api/docs":
-            docs = load_curriculum()
+            session_id = self.get_session_id()
+            if not session_id:
+                self.send_json_response([])
+                return
+            docs = load_curriculum(session_id)
             self.send_json_response(docs)
 
     def do_POST(self):
+        session_id = self.get_session_id()
+        if not session_id:
+            self.send_json_response({"error": "الجلسة غير صالحة، يرجى تحديث الصفحة."})
+            return
+
         content_length = int(self.headers.get('Content-Length', 0))
         post_data = self.rfile.read(content_length)
         req_json = json.loads(post_data.decode('utf-8')) if post_data else {}
@@ -543,39 +514,29 @@ class StudyAppRequestHandler(BaseHTTPRequestHandler):
                 prompt = "Read this lesson document image and extract all text, concepts, formulas, and rules in Arabic."
                 payload = {
                     "model": MODEL_NAME,
-                    "messages": [
-                        {"role": "user", "content": [
-                            {"type": "text", "text": prompt},
-                            {"type": "image_url", "image_url": {"url": image_base64}}
-                        ]}
-                    ],
+                    "messages": [{"role": "user", "content": [{"type": "text", "text": prompt}, {"type": "image_url", "image_url": {"url": image_base64}}]}],
                     "max_tokens": 4096
                 }
-
                 extracted_concepts = self.send_api_request(payload)
-
-                # حفظ الوثيقة مباشرة وثابتاً في قاعدة بيانات PostgreSQL
-                add_document_to_db("وثيقة درس", extracted_concepts)
-                docs = load_curriculum()
-
+                add_document_to_db(session_id, "وثيقة درس", extracted_concepts)
+                docs = load_curriculum(session_id)
                 self.send_json_response({"status": "success", "docs": docs})
-
             except Exception as e:
                 self.send_json_response({"error": str(e)})
 
         elif self.path == "/api/docs/delete":
-            docs = load_curriculum()
+            docs = load_curriculum(session_id)
             index = req_json.get("index")
             if index is not None and 0 <= index < len(docs):
                 doc_to_delete = docs[index]
-                delete_document_from_db(doc_to_delete["id"])
-            docs = load_curriculum()
+                delete_document_from_db(session_id, doc_to_delete["id"])
+            docs = load_curriculum(session_id)
             self.send_json_response(docs)
 
         elif self.path == "/api/ask":
             user_query = req_json.get("query", "")
             question_image_base64 = req_json.get("image")
-            docs = load_curriculum()
+            docs = load_curriculum(session_id)
 
             messages_content = []
             if question_image_base64:
@@ -594,32 +555,33 @@ class StudyAppRequestHandler(BaseHTTPRequestHandler):
                 f"1. فكّر بدقة: هل يرتبط سؤال التمرين بالمحتوى الدراسي المرفوع أعلى بأي شكل؟\n"
                 f"2. إذا كان السؤال عن موضوع مختلف تماماً ولا علاقة له بالدروس المضافة، أجب بالكلمة الحرفية التالية فقط بدون زيادة: OUT_OF_SCOPE\n"
                 f"3. إذا كان ضمن الدروس والمحتوى المرفوع، قدم إجابة شاملة وشارحة خطوة بخطوة باللغة العربية.\n"
-                f"ملاحظة هامة جداً: عند كتابة أي معادلات رياضية، متجهات (مثل vec{{u}})، جذور، أو رموز، احرص دائماً على وضعها بين رموز الدولار المفردة مثل $...$ أو المزدوجة مثل $$...$$ لكي يتم عرضها بشكل رياضي جميل وواضح."
+                f"\n--- تعليمات التنسيق والمعادلات (تطبيق إلزامي) ---\n"
+                f"- لا تستخدم أبداً النجمات ** للخط العريض لأنها لن تظهر بشكل صحيح. رتب الخطوات باستخدام الأرقام والأسطر الجديدة.\n"
+                f"- لا تستخدم أبداً الأقواس المربعة \\[ أو \\] أو الأقواس الدائرية \\( أو \\) لتمثيل المعادلات.\n"
+                f"- لكتابة المتغيرات الرياضية والرموز داخل النص: يجب استخدام رمز الدولار المفرد حصراً، مثال: $x=2$ أو $v$.\n"
+                f"- لكتابة المعادلات الطويلة والمصفوفات والكسور: يجب كتابتها في سطر جديد ومستقل واستخدام رمز الدولار المزدوج حصراً، مثال:\n"
+                f"$$ \\vec{{u}} = \\sqrt{{x^2 + y^2}} $$"
             )
             messages_content.append({"type": "text", "text": full_prompt})
 
             payload = {
                 "model": MODEL_NAME,
-                "messages": [
-                    {"role": "user", "content": messages_content}
-                ],
+                "messages": [{"role": "user", "content": messages_content}],
                 "max_tokens": 4096
             }
 
             try:
                 ai_reply = self.send_api_request(payload)
-
                 if "OUT_OF_SCOPE" in ai_reply or ai_reply.startswith("OUT_OF_SCOPE"):
                     self.send_json_response({"status": "out_of_scope"})
                 else:
                     self.send_json_response({"status": "success", "answer": ai_reply})
-
             except Exception as e:
                 self.send_json_response({"status": "error", "error": str(e)})
 
     def send_json_response(self, data):
         self.send_response(200)
-        self.send_header("Content-type", "text/html; charset=utf-8")
+        self.send_header("Content-type", "application/json; charset=utf-8")
         self.end_headers()
         self.wfile.write(json.dumps(data, ensure_ascii=False).encode("utf-8"))
 
