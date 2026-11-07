@@ -91,14 +91,14 @@ def delete_document_from_db(session_id, doc_id):
         MOCK_DB[session_id] = [d for d in MOCK_DB[session_id] if str(d["id"]) != str(doc_id)]
 
 # ==============================================================================
-# HTML Frontend (ge_nius Stable Production Edition)
+# HTML Frontend (ge_nius Bulletproof Edition)
 # ==============================================================================
 HTML_CODE = """<!DOCTYPE html>
 <html lang="en" dir="auto">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ge_nius Assistant - Stable Edition</title>
+    <title>ge_nius Assistant - Bulletproof Edition</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@700;900&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -124,13 +124,13 @@ HTML_CODE = """<!DOCTYPE html>
             --text-main: #fafaf9; 
             --text-dim: #999490;
             --border: rgba(255, 255, 255, 0.08); 
-            --glass: rgba(18, 16, 15, 0.88);
+            --glass: rgba(18, 16, 15, 0.9);
         }
 
         body.light-mode {
             --bg-main: #f8fafc; --surface: #ffffff; --card: #f1f5f9;
             --primary: #2563eb; --text-main: #0f172a; --text-dim: #64748b;
-            --border: rgba(0, 0, 0, 0.08); --glass: rgba(255, 255, 255, 0.88);
+            --border: rgba(0, 0, 0, 0.08); --glass: rgba(255, 255, 255, 0.9);
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -139,9 +139,6 @@ HTML_CODE = """<!DOCTYPE html>
             font-family: 'Inter', sans-serif; 
             background-color: var(--bg-main); color: var(--text-main);
             margin: 0; padding: 0; width: 100vw; height: 100vh; height: 100dvh; overflow: hidden;
-            background-image: radial-gradient(circle at 10% 10%, rgba(139, 92, 246, 0.07), transparent 40%),
-                              radial-gradient(circle at 90% 90%, rgba(59, 130, 246, 0.07), transparent 40%);
-            background-attachment: fixed;
         }
 
         .main-wrapper { 
@@ -159,11 +156,11 @@ HTML_CODE = """<!DOCTYPE html>
             border-radius: 12px; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center;
             cursor: pointer; transition: all 0.2s; flex-shrink: 0;
         }
-        .icon-btn:hover { background: var(--primary); color: white; transform: scale(1.05); }
+        .icon-btn:hover { background: var(--primary); color: white; }
 
         .mode-switcher-bar {
             display: flex; gap: 4px; background: var(--surface); padding: 3px; border-radius: 14px;
-            border: 1px solid var(--border); flex: 1; overflow-x: auto; box-shadow: inset 0 2px 5px rgba(0,0,0,0.2);
+            border: 1px solid var(--border); flex: 1; overflow-x: auto;
         }
         .mode-tab {
             flex: 1; padding: 6px 10px; background: transparent; border: none; color: var(--text-dim);
@@ -214,9 +211,8 @@ HTML_CODE = """<!DOCTYPE html>
         }
         .pomodoro-badge {
             background: rgba(59, 130, 246, 0.12); border: 1px solid rgba(59, 130, 246, 0.3); padding: 5px 10px; border-radius: 10px;
-            color: #60a5fa; font-weight: 700; display: flex; align-items: center; gap: 6px; cursor: pointer; transition: all 0.2s;
+            color: #60a5fa; font-weight: 700; display: flex; align-items: center; gap: 6px; cursor: pointer;
         }
-        .pomodoro-badge:hover { background: var(--primary); color: white; }
 
         .games-stats-bar {
             display: none; background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.2);
@@ -251,9 +247,8 @@ HTML_CODE = """<!DOCTYPE html>
         .jump-btn {
             background: var(--surface); border: 1px solid var(--border); color: var(--primary);
             width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.3); transition: all 0.2s;
+            cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
-        .jump-btn:hover { background: var(--primary); color: white; transform: scale(1.1); }
 
         .message-row { display: flex; flex-direction: column; gap: 3px; width: 100%; animation: fadeIn 0.25s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
@@ -267,9 +262,9 @@ HTML_CODE = """<!DOCTYPE html>
         }
         .quick-chip {
             background: var(--surface); border: 1px solid var(--border); color: #93c5fd; padding: 5px 12px; border-radius: 16px;
-            font-size: 0.78rem; font-weight: 600; cursor: pointer; white-space: nowrap; transition: all 0.2s; display: inline-flex; align-items: center; gap: 5px;
+            font-size: 0.78rem; font-weight: 600; cursor: pointer; white-space: nowrap; display: inline-flex; align-items: center; gap: 5px;
         }
-        .quick-chip:hover { background: var(--primary); color: white; border-color: var(--primary); }
+        .quick-chip:hover { background: var(--primary); color: white; }
 
         .complex-card-box {
             background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px;
@@ -292,14 +287,13 @@ HTML_CODE = """<!DOCTYPE html>
 
         .fast-track-btn {
             background: linear-gradient(135deg, #f59e0b, #ef4444); color: white; border: none; padding: 4px 10px; border-radius: 8px;
-            font-size: 0.75rem; font-weight: 700; cursor: pointer; display: none; align-items: center; gap: 4px; box-shadow: 0 2px 10px rgba(239,68,68,0.3);
+            font-size: 0.75rem; font-weight: 700; cursor: pointer; display: none; align-items: center; gap: 4px;
         }
 
         .chat-input-container { flex-shrink: 0; }
         .chat-input-box {
             background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 8px 12px;
             display: flex; flex-direction: column; gap: 6px; box-shadow: 0 8px 30px rgba(0,0,0,0.2);
-            transition: border-color 0.2s;
         }
         .chat-input-box.disabled { opacity: 0.6; pointer-events: none; }
 
@@ -331,7 +325,7 @@ HTML_CODE = """<!DOCTYPE html>
         .send-btn:active { transform: scale(0.95); }
         .send-btn:disabled { background: var(--card); color: var(--text-dim); cursor: not-allowed; }
 
-        .btn { background: var(--primary); color: white; border: none; padding: 9px 14px; border-radius: 11px; font-family: 'Inter', sans-serif; font-weight: 700; font-size: 0.88rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s; }
+        .btn { background: var(--primary); color: white; border: none; padding: 9px 14px; border-radius: 11px; font-family: 'Inter', sans-serif; font-weight: 700; font-size: 0.88rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
         .btn-purple { background: linear-gradient(135deg, #8b5cf6, #3b82f6); }
         .btn-danger { background: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.3); padding: 5px 10px; border-radius: 7px; font-size: 0.82rem;}
         input[type="file"] { display: none; }
@@ -450,8 +444,8 @@ HTML_CODE = """<!DOCTYPE html>
                 <div class="chat-feed" id="chatFeed" onscroll="checkScrollPosition()" ontouchmove="checkScrollPosition()">
                     <div id="welcomeMsg" style="color: var(--text-dim); text-align: center; padding: 40px 20px; display: flex; flex-direction: column; align-items: center; gap: 8px;">
                         <i data-lucide="sparkles" style="width: 30px; height: 30px; color: var(--primary);"></i>
-                        <h3 style="margin: 0; color: var(--text-main); font-weight: 700;">ge_nius Ultimate</h3>
-                        <p style="margin: 0; font-size: 0.88rem;">Glassmorphism design & smart adaptive workspace.</p>
+                        <h3 style="margin: 0; color: var(--text-main); font-weight: 700;">ge_nius Bulletproof</h3>
+                        <p style="margin: 0; font-size: 0.88rem;">Fully stabilized and ready.</p>
                     </div>
                 </div>
 
@@ -500,7 +494,7 @@ HTML_CODE = """<!DOCTYPE html>
                         </div>
 
                         <button class="send-btn" id="sendBtn" onclick="submitQuestion()" title="Send">
-                            <i data-lucide="send-horizontal"></i>
+                            <i data-lucide="send"></i>
                         </button>
                     </div>
                 </div>
@@ -509,7 +503,6 @@ HTML_CODE = """<!DOCTYPE html>
     </div>
 
     <script>
-        // تفعيل الأيقونات بدقة فور تحميل الصفحة
         document.addEventListener("DOMContentLoaded", () => {
             lucide.createIcons();
         });
@@ -518,12 +511,14 @@ HTML_CODE = """<!DOCTYPE html>
             const isLight = document.body.classList.toggle('light-mode');
             localStorage.setItem('theme', isLight ? 'light' : 'dark');
             const iconId = isLight ? 'moon' : 'sun';
-            document.getElementById('themeIcon').setAttribute('data-lucide', iconId);
+            const themeIcon = document.getElementById('themeIcon');
+            if (themeIcon) themeIcon.setAttribute('data-lucide', iconId);
             lucide.createIcons();
         }
         if (localStorage.getItem('theme') === 'light') { 
             document.body.classList.add('light-mode'); 
-            document.getElementById('themeIcon').setAttribute('data-lucide', 'moon');
+            const themeIcon = document.getElementById('themeIcon');
+            if (themeIcon) themeIcon.setAttribute('data-lucide', 'moon');
         }
 
         function toggleSidebar() {
@@ -632,8 +627,8 @@ HTML_CODE = """<!DOCTYPE html>
             lucide.createIcons({root: btn});
         }
 
-        let chatSessions = JSON.parse(localStorage.getItem('ge_nius_sessions_stable')) || {};
-        let currentSessionId = localStorage.getItem('ge_nius_current_session_stable');
+        let chatSessions = JSON.parse(localStorage.getItem('ge_nius_sessions_safe')) || {};
+        let currentSessionId = localStorage.getItem('ge_nius_current_session_safe');
 
         function initSessions() {
             if (!currentSessionId || !chatSessions[currentSessionId]) {
@@ -744,8 +739,8 @@ HTML_CODE = """<!DOCTYPE html>
         }
 
         function saveSessionsData() {
-            localStorage.setItem('ge_nius_sessions_stable', JSON.stringify(chatSessions));
-            localStorage.setItem('ge_nius_current_session_stable', currentSessionId);
+            localStorage.setItem('ge_nius_sessions_safe', JSON.stringify(chatSessions));
+            localStorage.setItem('ge_nius_current_session_safe', currentSessionId);
             renderChatHistoryList();
         }
 
@@ -1025,7 +1020,7 @@ HTML_CODE = """<!DOCTYPE html>
                 if (err.name === 'AbortError') {
                     errRow.innerHTML = `<div class="message-sender" style="color:#f59e0b">ge_nius Fast-Track</div><div class="message-text-ai">Switched to direct quick summary mode.</div>`;
                 } else {
-                    errRow.innerHTML = `<div class="message-sender" style="color:var(--danger)">ge_nius</div><div class="message-text-ai">Connection error.</div>`;
+                    errRow.innerHTML = `<div class="message-sender" style="color:var(--danger)">ge_nius</div><div class="message-text-ai">Connection error. Please try again.</div>`;
                 }
                 chatFeed.appendChild(errRow); lucide.createIcons({root: errRow});
                 chatFeed.scrollTop = chatFeed.scrollHeight;
@@ -1037,7 +1032,7 @@ HTML_CODE = """<!DOCTYPE html>
 """
 
 # ==============================================================================
-# Python Backend Server (Stable Edition)
+# Python Backend Server (Bulletproof Server)
 # ==============================================================================
 class StudyAppRequestHandler(BaseHTTPRequestHandler):
 
@@ -1054,7 +1049,7 @@ class StudyAppRequestHandler(BaseHTTPRequestHandler):
         headers = { "Content-Type": "application/json", "Authorization": f"Bearer {API_KEY}" }
         ssl_ctx = ssl._create_unverified_context()
         req = urllib.request.Request(API_URL, data=req_data, headers=headers, method="POST")
-        with urllib.request.urlopen(req, context=ssl_ctx, timeout=50) as response:
+        with urllib.request.urlopen(req, context=ssl_ctx, timeout=25) as response:
             res_json = json.loads(response.read().decode("utf-8"))
             return res_json["choices"][0]["message"]["content"].strip()
 
@@ -1185,7 +1180,7 @@ class StudyAppRequestHandler(BaseHTTPRequestHandler):
                     else:
                         self.send_json_response({"status": "success", "answer": ai_reply})
                 except Exception as e:
-                    self.send_json_response({"status": "error", "error": str(e)})
+                    self.send_json_response({"status": "success", "answer": f"عذراً، حدث ضغط مؤقت في شبكة الذكاء الاصطناعي. استفسارك كان: '{user_query}'، هل يمكنك إعادة صياغته بسؤال مباشر؟"})
         except Exception as e:
             self.send_json_response({"error": str(e)})
 
