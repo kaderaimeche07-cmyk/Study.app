@@ -88,7 +88,7 @@ def delete_document_from_db(session_id, doc_id):
         MOCK_DB[session_id] = [d for d in MOCK_DB[session_id] if str(d["id"]) != str(doc_id)]
 
 # ==============================================================================
-# HTML Frontend (Onion Gradient Theme, Safe Loading, Fixed LocalStorage)
+# HTML Frontend (Pure Emojis & Robust UI - Zero Icon Dependency)
 # ==============================================================================
 HTML_CODE = """<!DOCTYPE html>
 <html lang="en" dir="ltr">
@@ -98,9 +98,6 @@ HTML_CODE = """<!DOCTYPE html>
     <title>ge_nius</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@700;900&display=swap" rel="stylesheet">
-    
-    <!-- FIX 1: Safest CDN for icons -->
-    <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
     <script>
@@ -161,7 +158,7 @@ HTML_CODE = """<!DOCTYPE html>
         
         .icon-btn {
             background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: var(--text-main);
-            border-radius: 10px; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; cursor: pointer;
+            border-radius: 10px; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.1rem;
         }
 
         .submarine-logo {
@@ -176,8 +173,6 @@ HTML_CODE = """<!DOCTYPE html>
         .submarine-propeller { position: absolute; right: -10px; top: 50%; transform: translateY(-50%); width: 6px; height: 16px; background: #94a3b8; border: 2px solid #475569; border-radius: 4px; }
         .submarine-propeller::after { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 4px; height: 20px; background: #cbd5e1; border-radius: 2px; animation: spin-propeller 0.15s linear infinite; }
         @keyframes spin-propeller { 0% { transform: translate(-50%, -50%) scaleY(1); } 50% { transform: translate(-50%, -50%) scaleY(0.2); } 100% { transform: translate(-50%, -50%) scaleY(1); } }
-
-        .lucide { width: 18px; height: 18px; stroke-width: 2.2; }
 
         .sidebar-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(2px); z-index: 99; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
         .sidebar-overlay.active { opacity: 1; pointer-events: auto; }
@@ -228,7 +223,7 @@ HTML_CODE = """<!DOCTYPE html>
         
         .copy-btn { margin-top: 8px; background: transparent; color: var(--text-dim); border: none; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; gap: 4px; padding: 0; }
         
-        .bubble-icon { flex-shrink: 0; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .bubble-icon { flex-shrink: 0; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1rem; }
         .user-bubble .bubble-icon { background: var(--primary); color: white; }
         .ai-bubble .bubble-icon { background: linear-gradient(180deg, #3b82f6, #1d4ed8); color: #ffffff; box-shadow: 0 2px 5px rgba(37, 99, 235, 0.3); }
 
@@ -242,9 +237,9 @@ HTML_CODE = """<!DOCTYPE html>
             font-family: 'Inter', sans-serif; font-size: 0.95rem; resize: none; max-height: 100px;
             outline: none; padding: 10px 0; line-height: 1.4;
         }
-        .chat-input-actions { display: flex; gap: 4px; padding-bottom: 6px; }
-        .action-icon { color: var(--text-dim); cursor: pointer; padding: 6px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-        .send-btn { background: var(--text-main); color: var(--bg-main); border: none; width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; }
+        .chat-input-actions { display: flex; gap: 6px; padding-bottom: 6px; align-items: center; }
+        .action-icon { color: var(--text-dim); cursor: pointer; padding: 6px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
+        .send-btn { background: var(--text-main); color: var(--bg-main); border: none; width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; font-size: 1rem; font-weight: bold; }
 
         .image-preview-bar { display: none; align-items: center; justify-content: space-between; background: rgba(201, 24, 74, 0.1); border: 1px solid var(--primary); padding: 8px 12px; border-radius: 12px; font-size: 0.85rem; color: var(--primary); margin-bottom: 10px; }
 
@@ -259,7 +254,7 @@ HTML_CODE = """<!DOCTYPE html>
         .doc-title { font-weight: 600; font-size: 0.95rem; display: flex; align-items: center; gap: 8px;}
         .doc-body { font-size: 0.85rem; color: var(--text-dim); max-height: 100px; overflow-y: auto; background: var(--bg-main); padding: 10px; border-radius: 8px; white-space: pre-wrap; }
 
-        .spin-icon { animation: spin 1.2s linear infinite; }
+        .spin-icon { animation: spin 1.2s linear infinite; display: inline-block; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
         ::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.2); border-radius: 10px; }
     </style>
@@ -270,23 +265,23 @@ HTML_CODE = """<!DOCTYPE html>
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <h3><i data-lucide="menu"></i> Menu</h3>
-            <button class="icon-btn" style="width:30px; height:30px; border:none; background:transparent;" onclick="toggleSidebar()"><i data-lucide="x"></i></button>
+            <h3>📂 Menu</h3>
+            <button class="icon-btn" style="width:30px; height:30px; border:none; background:transparent;" onclick="toggleSidebar()">✕</button>
         </div>
         <button class="btn btn-primary" onclick="createNewChat()" style="margin-bottom: 15px;">
-            <i data-lucide="plus"></i> New Chat
+            ➕ New Chat
         </button>
         <div style="font-size: 0.8rem; color: var(--text-dim); margin-bottom: 5px; font-weight: 600;">Assistant Mode</div>
         <div class="mode-toggle" id="modeToggle">
             <div class="mode-slider" id="modeSlider" style="left: 4px;"></div>
-            <div class="mode-btn active" id="btnModeStudy" onclick="setMode('study')"><i data-lucide="graduation-cap"></i> Study</div>
-            <div class="mode-btn" id="btnModeGeneral" onclick="setMode('general')"><i data-lucide="globe"></i> General</div>
+            <div class="mode-btn active" id="btnModeStudy" onclick="setMode('study')">🎓 Study</div>
+            <div class="mode-btn" id="btnModeGeneral" onclick="setMode('general')">🌍 General</div>
         </div>
-        <h4 style="font-size: 0.85rem; color: var(--text-dim); margin-bottom: 5px; margin-top: 10px;"><i data-lucide="history" style="width:14px; height:14px;"></i> Chat History</h4>
+        <h4 style="font-size: 0.85rem; color: var(--text-dim); margin-bottom: 5px; margin-top: 10px;">🕒 Chat History</h4>
         <div class="chat-history-list" id="chatHistoryList"></div>
         <div style="margin-top: auto; padding-top: 15px; border-top: 1px solid var(--border);">
             <button class="btn" style="width: 100%;" onclick="toggleTheme()">
-                <i data-lucide="sun" id="themeIcon"></i> Toggle Theme
+                <span id="themeIcon">☀️</span> Toggle Theme
             </button>
         </div>
     </aside>
@@ -294,17 +289,17 @@ HTML_CODE = """<!DOCTYPE html>
     <div class="main-wrapper">
         <header class="app-header">
             <div class="header-actions">
-                <button class="icon-btn" onclick="toggleSidebar()"><i data-lucide="menu"></i></button>
+                <button class="icon-btn" onclick="toggleSidebar()">☰</button>
                 <div class="submarine-logo">ge_nius<div class="submarine-propeller"></div></div>
             </div>
             <span style="font-size: 0.85rem; color: var(--text-dim); display: flex; align-items: center; gap: 5px;" id="docCountBadge">
-                <i data-lucide="database"></i> <span>0</span> Docs
+                🗄️ <span>0</span> Docs
             </span>
         </header>
 
         <div class="tab-bar">
-            <button class="tab-btn active" id="btnAskTab" onclick="switchTab('askTab', this)"><i data-lucide="message-square"></i> Chat</button>
-            <button class="tab-btn" id="btnDocsTab" onclick="switchTab('docsTab', this)"><i data-lucide="folder-open"></i> My Documents</button>
+            <button class="tab-btn active" id="btnAskTab" onclick="switchTab('askTab', this)">💬 Chat</button>
+            <button class="tab-btn" id="btnDocsTab" onclick="switchTab('docsTab', this)">📁 My Documents</button>
         </div>
 
         <div class="tab-section active" id="askTab">
@@ -312,19 +307,19 @@ HTML_CODE = """<!DOCTYPE html>
 
             <div class="chat-input-container">
                 <div id="questionImgPreview" class="image-preview-bar">
-                    <span style="display: flex; align-items: center; gap: 6px;"><i data-lucide="image-check"></i> Image attached</span>
-                    <span style="cursor: pointer; display: flex; align-items: center; gap: 4px;" onclick="removeQuestionImage()"><i data-lucide="x"></i> Remove</span>
+                    <span style="display: flex; align-items: center; gap: 6px;">📷 Image attached</span>
+                    <span style="cursor: pointer; display: flex; align-items: center; gap: 4px;" onclick="removeQuestionImage()">✕ Remove</span>
                 </div>
                 <div class="chat-input-wrapper">
                     <div class="chat-input-actions">
-                        <label for="qFileInputCamera" class="action-icon" title="Camera"><i data-lucide="camera"></i></label>
+                        <label for="qFileInputCamera" class="action-icon" title="Camera">📸</label>
                         <input type="file" id="qFileInputCamera" accept="image/*" capture="environment">
-                        <label for="qFileInputGallery" class="action-icon" title="Gallery"><i data-lucide="image"></i></label>
+                        <label for="qFileInputGallery" class="action-icon" title="Gallery">🖼️</label>
                         <input type="file" id="qFileInputGallery" accept="image/*">
                     </div>
                     <textarea id="userQuery" placeholder="Message ge_nius..." rows="1"></textarea>
                     <div class="chat-input-actions">
-                        <button class="send-btn" onclick="submitQuestion()" title="Send"><i data-lucide="arrow-up"></i></button>
+                        <button class="send-btn" onclick="submitQuestion()" title="Send">⬆</button>
                     </div>
                 </div>
             </div>
@@ -332,34 +327,23 @@ HTML_CODE = """<!DOCTYPE html>
 
         <div class="tab-section" id="docsTab">
             <div class="card" style="flex-shrink: 0;">
-                <span style="font-weight: 600; font-size: 1rem; display: flex; align-items: center; gap: 8px;"><i data-lucide="upload-cloud"></i> Upload Documents</span>
+                <span style="font-weight: 600; font-size: 1rem; display: flex; align-items: center; gap: 8px;">☁️ Upload Documents</span>
                 <div style="display: flex; gap: 8px; margin-top: 5px;">
-                    <label for="docFileInputCamera" class="btn" style="flex: 1;"><i data-lucide="camera"></i> Camera</label>
+                    <label for="docFileInputCamera" class="btn" style="flex: 1;">📸 Camera</label>
                     <input type="file" id="docFileInputCamera" accept="image/*" capture="environment">
-                    <label for="docFileInputGallery" class="btn btn-primary" style="flex: 1;"><i data-lucide="images"></i> Gallery</label>
+                    <label for="docFileInputGallery" class="btn btn-primary" style="flex: 1;">🖼️ Gallery</label>
                     <input type="file" id="docFileInputGallery" accept="image/*" multiple>
                 </div>
                 <div id="uploadStatus" style="display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.85rem; margin-top: 10px; font-weight: 500; color: var(--text-dim);"></div>
             </div>
             <div class="card" style="flex: 1;">
-                <span style="font-weight: 600; font-size: 0.9rem; display: flex; align-items: center; gap: 8px;"><i data-lucide="archive"></i> Processed Documents:</span>
+                <span style="font-weight: 600; font-size: 0.9rem; display: flex; align-items: center; gap: 8px;">📦 Processed Documents:</span>
                 <div id="docsList" style="display: flex; flex-direction: column; gap: 10px; padding-bottom: 20px;"></div>
             </div>
         </div>
     </div>
 
     <script>
-        // FIX 2: Safest way to render icons to prevent crashes
-        function renderIcons(element) {
-            if (typeof lucide !== 'undefined') {
-                if (element) lucide.createIcons({root: element});
-                else lucide.createIcons();
-            }
-        }
-        
-        // Initial render
-        renderIcons();
-
         const userQuery = document.getElementById('userQuery');
         const chatFeed = document.getElementById('chatFeed');
 
@@ -407,20 +391,20 @@ HTML_CODE = """<!DOCTYPE html>
         function toggleTheme() {
             const isLight = document.body.classList.toggle('light-mode');
             localStorage.setItem('theme', isLight ? 'light' : 'dark');
-            const themeIcon = document.getElementById('themeIcon');
-            themeIcon.setAttribute('data-lucide', isLight ? 'moon' : 'sun');
-            renderIcons(themeIcon.parentElement);
+            document.getElementById('themeIcon').textContent = isLight ? '🌙' : '☀️';
         }
-        if (localStorage.getItem('theme') === 'light') { document.body.classList.add('light-mode'); document.getElementById('themeIcon').setAttribute('data-lucide', 'moon'); renderIcons(); }
+        if (localStorage.getItem('theme') === 'light') { 
+            document.body.classList.add('light-mode'); 
+            document.getElementById('themeIcon').textContent = '🌙'; 
+        }
 
         function toggleSidebar() {
             document.getElementById('sidebar').classList.toggle('open');
             document.getElementById('sidebarOverlay').classList.toggle('active');
         }
 
-        // FIX 3: Reset LocalStorage to prevent old Arabic HTML from breaking the new English design
-        let chatSessions = JSON.parse(localStorage.getItem('ge_nius_sessions_v3')) || {};
-        let currentSessionId = localStorage.getItem('ge_nius_current_session_v3');
+        let chatSessions = JSON.parse(localStorage.getItem('ge_nius_sessions_v4')) || {};
+        let currentSessionId = localStorage.getItem('ge_nius_current_session_v4');
         
         function setMode(mode) {
             const slider = document.getElementById('modeSlider');
@@ -453,7 +437,6 @@ HTML_CODE = """<!DOCTYPE html>
             } else { 
                 chatFeed.innerHTML = `<div id="welcomeMsg" style="color: var(--text-dim); text-align: center; padding: 40px 20px; display: flex; flex-direction: column; align-items: center; gap: 12px;"><div class="submarine-logo" style="transform: scale(1.2); margin-bottom:10px;">ge_nius<div class="submarine-propeller"></div></div><h3 style="margin:0; font-weight:600; color:var(--text-main);">How can I help you today?</h3></div>`;
             }
-            renderIcons(chatFeed);
             if (window.MathJax) MathJax.typesetPromise([chatFeed]);
             setTimeout(() => { chatFeed.scrollTop = chatFeed.scrollHeight; }, 100);
             saveSessionsData(); renderChatList();
@@ -468,8 +451,8 @@ HTML_CODE = """<!DOCTYPE html>
         }
 
         function saveSessionsData() {
-            localStorage.setItem('ge_nius_sessions_v3', JSON.stringify(chatSessions));
-            localStorage.setItem('ge_nius_current_session_v3', currentSessionId);
+            localStorage.setItem('ge_nius_sessions_v4', JSON.stringify(chatSessions));
+            localStorage.setItem('ge_nius_current_session_v4', currentSessionId);
             renderChatList();
         }
 
@@ -478,11 +461,10 @@ HTML_CODE = """<!DOCTYPE html>
             const sortedIds = Object.keys(chatSessions).sort((a, b) => b - a);
             sortedIds.forEach(id => {
                 const session = chatSessions[id];
-                const icon = session.mode === 'general' ? 'globe' : 'graduation-cap';
+                const icon = session.mode === 'general' ? '🌍' : '🎓';
                 const isActive = id === currentSessionId ? 'active' : '';
-                listDiv.innerHTML += `<div class="history-item ${isActive}" onclick="loadChat('${id}')"><i data-lucide="${icon}"></i><span style="flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; direction: ltr;">${session.title}</span></div>`;
+                listDiv.innerHTML += `<div class="history-item ${isActive}" onclick="loadChat('${id}')"><span>${icon}</span><span style="flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; direction: ltr;">${session.title}</span></div>`;
             });
-            renderIcons(listDiv);
         }
 
         initSessions();
@@ -490,18 +472,17 @@ HTML_CODE = """<!DOCTYPE html>
         window.copyText = function(btn, text) {
             navigator.clipboard.writeText(decodeURIComponent(text)).then(() => {
                 const originalHtml = btn.innerHTML;
-                btn.innerHTML = `<i data-lucide="check"></i> Copied`;
-                renderIcons(btn);
-                setTimeout(() => { btn.innerHTML = originalHtml; renderIcons(btn); }, 2000);
+                btn.innerHTML = `✓ Copied`;
+                setTimeout(() => { btn.innerHTML = originalHtml; }, 2000);
             });
         };
 
         function showLocalMessage(msg, isWarning = true) {
             const welcome = document.getElementById('welcomeMsg'); if(welcome) welcome.remove();
             const bubble = document.createElement('div'); bubble.className = 'chat-bubble ai-bubble';
-            const icon = isWarning ? 'alert-triangle' : 'info'; const color = isWarning ? 'var(--danger)' : 'var(--text-main)';
-            bubble.innerHTML = `<div class="bubble-icon" style="background:transparent; color:${color};"><i data-lucide="${icon}"></i></div> <div class="bubble-content" style="color:${color}; border:1px solid ${color}33; background:transparent;">${msg}</div>`;
-            chatFeed.appendChild(bubble); renderIcons(bubble);
+            const icon = isWarning ? '⚠️' : 'ℹ️'; const color = isWarning ? 'var(--danger)' : 'var(--text-main)';
+            bubble.innerHTML = `<div class="bubble-icon" style="background:transparent; color:${color};">${icon}</div> <div class="bubble-content" style="color:${color}; border:1px solid ${color}33; background:transparent;">${msg}</div>`;
+            chatFeed.appendChild(bubble);
             chatFeed.scrollTop = chatFeed.scrollHeight; saveCurrentChatHtml();
         }
 
@@ -520,19 +501,18 @@ HTML_CODE = """<!DOCTYPE html>
 
         function renderDocs() {
             const listDiv = document.getElementById('docsList'); const countBadge = document.getElementById('docCountBadge');
-            if(countBadge) { countBadge.innerHTML = `<i data-lucide="database"></i> <span>${curriculumDocs.length}</span> Docs`; renderIcons(countBadge); }
+            if(countBadge) { countBadge.innerHTML = `🗄️ <span>${curriculumDocs.length}</span> Docs`; }
             if (!listDiv) return;
             if (curriculumDocs.length === 0) { listDiv.innerHTML = '<div style="color: var(--text-dim); text-align: center; padding: 20px;">No documents uploaded yet.</div>'; return; }
             listDiv.innerHTML = curriculumDocs.map((item, i) => `
                 <div class="doc-item">
                     <div class="doc-header">
-                        <span class="doc-title"><i data-lucide="file-text"></i> Document ${i + 1}</span>
-                        <button class="btn btn-danger" style="padding: 6px 10px;" onclick="deleteDoc(${item.id})"><i data-lucide="trash-2" style="width:14px; height:14px;"></i></button>
+                        <span class="doc-title">📄 Document ${i + 1}</span>
+                        <button class="btn btn-danger" style="padding: 6px 10px;" onclick="deleteDoc(${item.id})">🗑️</button>
                     </div>
                     <div class="doc-body">${item.concepts}</div>
                 </div>
             `).join('');
-            renderIcons(listDiv);
         }
 
         async function handleQuestionImageSelect(e) {
@@ -549,7 +529,7 @@ HTML_CODE = """<!DOCTYPE html>
             const files = e.target.files; if (!files || files.length === 0) return;
             const statusDiv = document.getElementById('uploadStatus');
             for (let i = 0; i < files.length; i++) {
-                if(statusDiv) { statusDiv.innerHTML = `<i data-lucide="loader" class="spin-icon"></i> Uploading doc ${i + 1}/${files.length}...`; statusDiv.style.color = 'var(--text-main)'; renderIcons(statusDiv); }
+                if(statusDiv) { statusDiv.innerHTML = `<span class="spin-icon">⏳</span> Uploading doc ${i + 1}/${files.length}...`; statusDiv.style.color = 'var(--text-main)'; }
                 try {
                     const compressedBase64 = await compressImage(files[i]);
                     const res = await fetch('/api/docs/upload', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ image: compressedBase64 }) });
@@ -557,12 +537,12 @@ HTML_CODE = """<!DOCTYPE html>
                     if (data.error) throw new Error(data.error);
                     if (data.docs) curriculumDocs = data.docs;
                 } catch (err) {
-                    if(statusDiv) { statusDiv.innerHTML = `<i data-lucide="alert-circle"></i> Upload failed: ${err.message}`; statusDiv.style.color = 'var(--danger)'; renderIcons(statusDiv); }
+                    if(statusDiv) { statusDiv.innerHTML = `⚠️ Upload failed: ${err.message}`; statusDiv.style.color = 'var(--danger)'; }
                     return;
                 }
             }
             renderDocs();
-            if(statusDiv) { statusDiv.innerHTML = '<i data-lucide="check-circle-2"></i> Documents saved successfully.'; statusDiv.style.color = 'var(--accent-green)'; renderIcons(statusDiv); }
+            if(statusDiv) { statusDiv.innerHTML = '✅ Documents saved successfully.'; statusDiv.style.color = 'var(--accent-green)'; }
         }
         document.getElementById('docFileInputCamera').addEventListener('change', handleDocImageSelect);
         document.getElementById('docFileInputGallery').addEventListener('change', handleDocImageSelect);
@@ -584,15 +564,15 @@ HTML_CODE = """<!DOCTYPE html>
             const welcome = document.getElementById('welcomeMsg'); if(welcome) welcome.remove();
 
             let userTextDisplay = query.replace(/\n/g, '<br>'); 
-            if (attachedQuestionBase64) { userTextDisplay = (query ? userTextDisplay + '<br><br>' : '') + '<span style="color:var(--text-dim); font-size:0.85em"><i data-lucide="image" style="width:14px;height:14px; vertical-align:middle;"></i> Image Attached</span>'; }
+            if (attachedQuestionBase64) { userTextDisplay = (query ? userTextDisplay + '<br><br>' : '') + '<span style="color:var(--text-dim); font-size:0.85em">📷 Image Attached</span>'; }
 
             const userBubble = document.createElement('div'); userBubble.className = 'chat-bubble user-bubble';
             userBubble.innerHTML = `<div class="bubble-content" dir="auto">${userTextDisplay}</div>`;
-            chatFeed.appendChild(userBubble); renderIcons(userBubble);
+            chatFeed.appendChild(userBubble);
 
             const loadingBubble = document.createElement('div'); loadingBubble.className = 'chat-bubble ai-bubble loading-bubble-temp';
-            loadingBubble.innerHTML = `<div class="bubble-icon"><i data-lucide="bot"></i></div> <div class="bubble-content"><i data-lucide="loader-circle" class="spin-icon" style="width:16px;height:16px;"></i> <span class="thinking-text" style="color:var(--text-dim);">Thinking...</span></div>`;
-            chatFeed.appendChild(loadingBubble); renderIcons(loadingBubble);
+            loadingBubble.innerHTML = `<div class="bubble-icon">🤖</div> <div class="bubble-content"><span class="spin-icon">⏳</span> <span class="thinking-text" style="color:var(--text-dim);">Thinking...</span></div>`;
+            chatFeed.appendChild(loadingBubble);
             
             saveCurrentChatHtml(query);
 
@@ -605,12 +585,12 @@ HTML_CODE = """<!DOCTYPE html>
                 chatFeed.removeChild(loadingBubble);
                 const aiBubble = document.createElement('div');
                 if (data.status === 'out_of_scope') {
-                    aiBubble.className = 'chat-bubble ai-bubble'; aiBubble.innerHTML = `<div class="bubble-icon" style="background:var(--danger);"><i data-lucide="alert-triangle"></i></div> <div class="bubble-content">I'm sorry, this is outside your curriculum scope. Please switch to General mode for unrestricted chat.</div>`;
-                    chatFeed.appendChild(aiBubble); renderIcons(aiBubble); chatFeed.scrollTop = chatFeed.scrollHeight; saveCurrentChatHtml();
+                    aiBubble.className = 'chat-bubble ai-bubble'; aiBubble.innerHTML = `<div class="bubble-icon" style="background:var(--danger);">⚠️</div> <div class="bubble-content">I'm sorry, this is outside your curriculum scope. Please switch to General mode for unrestricted chat.</div>`;
+                    chatFeed.appendChild(aiBubble); chatFeed.scrollTop = chatFeed.scrollHeight; saveCurrentChatHtml();
                 } else if (data.status === 'success') {
                     aiBubble.className = 'chat-bubble ai-bubble';
-                    aiBubble.innerHTML = `<div class="bubble-icon"><i data-lucide="bot"></i></div> <div class="bubble-content" dir="auto"><div class="ai-content"></div></div>`;
-                    chatFeed.appendChild(aiBubble); renderIcons(aiBubble);
+                    aiBubble.innerHTML = `<div class="bubble-icon">🤖</div> <div class="bubble-content" dir="auto"><div class="ai-content"></div></div>`;
+                    chatFeed.appendChild(aiBubble);
                     
                     const contentDiv = aiBubble.querySelector('.ai-content'); const fullText = data.answer;
                     let charIndex = 0; let currentText = '';
@@ -623,21 +603,20 @@ HTML_CODE = """<!DOCTYPE html>
                         } else {
                             contentDiv.innerHTML = marked.parse(fullText);
                             const encodedAnswer = encodeURIComponent(fullText);
-                            aiBubble.querySelector('.bubble-content').insertAdjacentHTML('beforeend', `<button class="copy-btn" onclick="copyText(this, '${encodedAnswer}')"><i data-lucide="copy" style="width:14px;height:14px;"></i> Copy</button>`);
-                            renderIcons(aiBubble);
+                            aiBubble.querySelector('.bubble-content').insertAdjacentHTML('beforeend', `<button class="copy-btn" onclick="copyText(this, '${encodedAnswer}')">📋 Copy</button>`);
                             if (window.MathJax) window.MathJax.typesetPromise([aiBubble]).catch(e => console.log(e));
                             saveCurrentChatHtml();
                         }
                     }
                     typeWriter();
                 } else {
-                    aiBubble.className = 'chat-bubble ai-bubble'; aiBubble.innerHTML = `<div class="bubble-icon" style="background:var(--danger);"><i data-lucide="alert-circle"></i></div> <div class="bubble-content">API Error: ${data.error}</div>`;
-                    chatFeed.appendChild(aiBubble); renderIcons(aiBubble); chatFeed.scrollTop = chatFeed.scrollHeight; saveCurrentChatHtml();
+                    aiBubble.className = 'chat-bubble ai-bubble'; aiBubble.innerHTML = `<div class="bubble-icon" style="background:var(--danger);">❌</div> <div class="bubble-content">API Error: ${data.error}</div>`;
+                    chatFeed.appendChild(aiBubble); chatFeed.scrollTop = chatFeed.scrollHeight; saveCurrentChatHtml();
                 }
             }).catch(err => {
                 chatFeed.removeChild(loadingBubble);
-                const errBubble = document.createElement('div'); errBubble.className = 'chat-bubble ai-bubble'; errBubble.innerHTML = `<div class="bubble-icon" style="background:var(--danger);"><i data-lucide="wifi-off"></i></div> <div class="bubble-content">Connection Failed. Check your internet or API key.</div>`;
-                chatFeed.appendChild(errBubble); renderIcons(errBubble); chatFeed.scrollTop = chatFeed.scrollHeight; saveCurrentChatHtml();
+                const errBubble = document.createElement('div'); errBubble.className = 'chat-bubble ai-bubble'; errBubble.innerHTML = `<div class="bubble-icon" style="background:var(--danger);">📡</div> <div class="bubble-content">Connection Failed. Check your internet or API key.</div>`;
+                chatFeed.appendChild(errBubble); chatFeed.scrollTop = chatFeed.scrollHeight; saveCurrentChatHtml();
             });
         }
     </script>
@@ -646,7 +625,7 @@ HTML_CODE = """<!DOCTYPE html>
 """
 
 # ==============================================================================
-# Python Backend Server (Fixed Image & Text Payload Array)
+# Python Backend Server
 # ==============================================================================
 class StudyAppRequestHandler(BaseHTTPRequestHandler):
 
@@ -713,12 +692,10 @@ class StudyAppRequestHandler(BaseHTTPRequestHandler):
                 return
             try:
                 prompt = "Read this lesson document image and extract all text, concepts, formulas, and rules clearly in English."
-                
                 content_payload = [
                     {"type": "text", "text": prompt},
                     {"type": "image_url", "image_url": {"url": image_base64}}
                 ]
-                
                 payload = {
                     "model": MODEL_NAME,
                     "messages": [{"role": "user", "content": content_payload}],
@@ -770,11 +747,10 @@ class StudyAppRequestHandler(BaseHTTPRequestHandler):
                     f"3. If it is within scope, provide a comprehensive, step-by-step explanation.\n\n"
                     f"--- Math Formatting ---\n"
                     f"- For inline variables/math, use single dollar signs strictly, e.g., $x=2$ or $v$.\n"
-                    f"- For block equations, use double dollar signs strictly, e.g.,\n$$ \\vec{{u}} = \\sqrt{{x^2 + y^2}} $$\n"
+                    f"- For block equations, use double dollar signs strictly, e.g.,\n$$ \\vec{{u}} = \sqrt{{x^2 + y^2}} $$\n"
                     f"- Use Markdown for headings (###) and lists (-)."
                 )
 
-            # FIX 4: Ensured strict API payload structure for both text and image formats
             if question_image_base64:
                 content_payload = [
                     {"type": "text", "text": full_prompt},
