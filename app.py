@@ -91,14 +91,14 @@ def delete_document_from_db(session_id, doc_id):
         MOCK_DB[session_id] = [d for d in MOCK_DB[session_id] if str(d["id"]) != str(doc_id)]
 
 # ==============================================================================
-# HTML Frontend (ge_nius Modern OLED & Glassmorphism Edition)
+# HTML Frontend (ge_nius Royal Blue & Onion-Gradient Edition)
 # ==============================================================================
 HTML_CODE = """<!DOCTYPE html>
 <html lang="en" dir="auto">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ge_nius Assistant - Modern UI</title>
+    <title>ge_nius Assistant - Royal Edition</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@700;900&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -114,17 +114,17 @@ HTML_CODE = """<!DOCTYPE html>
 
     <style>
         :root {
-            --bg-main: #050505; 
-            --surface: #121212; 
-            --card: #1a1a1a;
-            --primary: #3b82f6; 
+            /* نظام ألوان OLED و Royal Blue */
+            --bg-main: #030304; 
+            --surface: #0f1014; 
+            --card: #18191f;
+            --primary: #4169E1; /* الأزرق الملكي */
             --accent-purple: #8b5cf6; 
-            --accent-green: #10b981;
             --danger: #ef4444; 
-            --text-main: #f3f4f6; 
-            --text-dim: #9ca3af;
-            --border: rgba(255, 255, 255, 0.08); 
-            --glass: rgba(18, 18, 18, 0.85);
+            --text-main: #f8fafc; 
+            --text-dim: #94a3b8;
+            --border: rgba(255, 255, 255, 0.06); 
+            --glass: rgba(15, 16, 20, 0.7);
         }
 
         body.light-mode {
@@ -135,56 +135,76 @@ HTML_CODE = """<!DOCTYPE html>
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
+        /* تأثير Onion-Gradient في الخلفية */
         html, body {
             font-family: 'Inter', sans-serif; 
             background-color: var(--bg-main); color: var(--text-main);
             margin: 0; padding: 0; width: 100vw; height: 100vh; height: 100dvh; overflow: hidden;
-            background-image: radial-gradient(circle at 15% 15%, rgba(139, 92, 246, 0.08), transparent 45%),
-                              radial-gradient(circle at 85% 85%, rgba(59, 130, 246, 0.08), transparent 45%);
+            background-image: 
+                radial-gradient(ellipse at 20% 0%, rgba(65, 105, 225, 0.12) 0%, transparent 45%),
+                radial-gradient(ellipse at 80% 100%, rgba(139, 92, 246, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(30, 58, 138, 0.04) 0%, transparent 60%);
             background-attachment: fixed;
         }
 
         .main-wrapper { 
-            padding: 10px; display: flex; flex-direction: column; gap: 10px; 
+            padding: 12px 10px; display: flex; flex-direction: column; gap: 12px; 
             width: 100%; height: 100%; height: 100dvh; max-width: 900px; margin: 0 auto; 
         }
 
-        /* الجزيرة العلوية المتصلة (Capsule Nav) */
+        /* شريط التنقل العلوي (Capsule Nav) */
         .top-nav-bar {
             display: flex; justify-content: space-between; align-items: center;
-            padding: 6px 8px; flex-shrink: 0; gap: 10px; background: var(--surface);
-            border: 1px solid var(--border); border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            padding: 6px; flex-shrink: 0; gap: 10px; background: var(--glass);
+            backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border); border-radius: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.2);
         }
 
         .icon-btn {
-            background: var(--card); border: 1px solid var(--border); color: var(--text-main);
-            border-radius: 10px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
-            cursor: pointer; transition: all 0.2s; flex-shrink: 0;
+            background: transparent; border: none; color: var(--text-main);
+            border-radius: 14px; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: background 0.2s, color 0.2s; flex-shrink: 0;
         }
-        .icon-btn:hover { background: var(--primary); color: white; transform: scale(1.05); }
+        .icon-btn:hover { background: var(--card); color: var(--primary); }
 
         .mode-switcher-bar {
-            display: flex; gap: 4px; background: var(--bg-main); padding: 3px; border-radius: 12px;
-            border: 1px solid var(--border); flex: 1;
+            display: flex; gap: 4px; flex: 1;
         }
         .mode-tab {
-            flex: 1; padding: 6px 10px; background: transparent; border: none; color: var(--text-dim);
-            font-family: 'Inter', sans-serif; font-weight: 600; font-size: 0.8rem; cursor: pointer;
-            border-radius: 9px; white-space: nowrap; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s;
+            flex: 1; padding: 8px 10px; background: transparent; border: none; color: var(--text-dim);
+            font-family: 'Inter', sans-serif; font-weight: 600; font-size: 0.82rem; cursor: pointer;
+            border-radius: 14px; white-space: nowrap; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
         }
-        .mode-tab.active { background: var(--primary); color: white; box-shadow: 0 2px 10px rgba(59,130,246,0.4); }
+        .mode-tab.active { background: var(--card); color: var(--text-main); box-shadow: 0 2px 10px rgba(0,0,0,0.1); border: 1px solid var(--border); }
 
         .lucide { width: 17px; height: 17px; stroke-width: 2.2; display: inline-block; vertical-align: middle; }
 
+        /* استبدال القائمة المنسدلة بأزرار تفاعلية (Interactive Chips) */
+        .persona-chips-container {
+            display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; flex-shrink: 0; padding: 0 4px;
+        }
+        .persona-chips-container::-webkit-scrollbar { display: none; }
+        .persona-chip {
+            background: var(--surface); border: 1px solid var(--border); border-radius: 20px;
+            padding: 7px 14px; font-size: 0.78rem; font-family: 'Inter', sans-serif; font-weight: 600;
+            color: var(--text-dim); cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+            transition: all 0.3s ease; white-space: nowrap;
+        }
+        .persona-chip:hover { background: var(--card); color: var(--text-main); }
+        .persona-chip.active { 
+            background: rgba(65, 105, 225, 0.15); color: var(--primary); border-color: var(--primary); 
+            box-shadow: 0 0 12px rgba(65, 105, 225, 0.2); 
+        }
+
         /* Sidebar & Overlay */
-        .sidebar-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.65); backdrop-filter: blur(6px); z-index: 999; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+        .sidebar-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.65); backdrop-filter: blur(8px); z-index: 999; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
         .sidebar-overlay.active { opacity: 1; pointer-events: auto; }
         
         .sidebar {
-            position: fixed; top: 0; left: -320px; width: 290px; height: 100vh; height: 100dvh;
+            position: fixed; top: 0; left: -320px; width: 300px; height: 100vh; height: 100dvh;
             background: var(--surface); border-right: 1px solid var(--border);
-            z-index: 1000; transition: left 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-            display: flex; flex-direction: column; padding: 20px; box-shadow: 15px 0 40px rgba(0,0,0,0.5);
+            z-index: 1000; transition: left 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex; flex-direction: column; padding: 20px; box-shadow: 15px 0 50px rgba(0,0,0,0.5);
         }
         .sidebar.open { left: 0; }
         
@@ -194,38 +214,29 @@ HTML_CODE = """<!DOCTYPE html>
         .chat-history-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; margin-top: 5px; }
         .history-item {
             background: transparent; border: 1px solid transparent; color: var(--text-main);
-            padding: 9px 10px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: space-between;
+            padding: 10px 12px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: space-between;
             font-family: 'Inter', sans-serif; font-size: 0.88rem; transition: all 0.2s;
         }
         .history-item:hover { background: var(--card); }
-        .history-item.active { background: rgba(59, 130, 246, 0.15); border: 1px solid var(--primary); color: var(--primary); font-weight: bold; }
+        .history-item.active { background: rgba(65, 105, 225, 0.1); border: 1px solid var(--primary); color: var(--primary); font-weight: bold; }
         .history-item-content { display: flex; align-items: center; gap: 8px; flex: 1; overflow: hidden; }
         .delete-history-btn { background: none; border: none; color: var(--text-dim); cursor: pointer; padding: 4px; border-radius: 6px; }
         .delete-history-btn:hover { color: var(--danger); background: rgba(239, 68, 68, 0.1); }
 
-        .tab-section { display: none; flex-direction: column; gap: 8px; flex: 1; min-height: 0; }
+        .tab-section { display: none; flex-direction: column; gap: 10px; flex: 1; min-height: 0; }
         .tab-section.active { display: flex; }
         
-        .card { background: var(--surface); border-radius: 16px; border: 1px solid var(--border); padding: 14px; display: flex; flex-direction: column; gap: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
-
-        .persona-panel {
-            background: var(--surface); border: 1px solid var(--border); padding: 8px 12px; border-radius: 12px;
-            display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; font-size: 0.82rem; gap: 10px;
-        }
-        .persona-select {
-            background: var(--card); color: var(--text-main); border: 1px solid var(--border);
-            padding: 5px 10px; border-radius: 8px; font-family: 'Inter', sans-serif; outline: none; cursor: pointer; font-size: 0.8rem;
-        }
+        .card { background: var(--surface); border-radius: 20px; border: 1px solid var(--border); padding: 16px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
 
         .games-stats-bar {
-            display: none; background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.2);
-            padding: 6px 12px; border-radius: 10px; align-items: center; justify-content: space-between; font-size: 0.82rem; color: #c4b5fd; flex-shrink: 0;
+            display: none; background: rgba(65, 105, 225, 0.1); border: 1px solid rgba(65, 105, 225, 0.2);
+            padding: 8px 14px; border-radius: 14px; align-items: center; justify-content: space-between; font-size: 0.82rem; color: #93c5fd; flex-shrink: 0;
         }
         .games-stats-bar.active { display: flex; }
 
         .chat-container-wrapper { position: relative; flex: 1; display: flex; flex-direction: column; min-height: 0; }
         .chat-feed {
-            display: flex; flex-direction: column; gap: 16px; flex: 1; overflow-y: auto; padding: 10px 4px;
+            display: flex; flex-direction: column; gap: 20px; flex: 1; overflow-y: auto; padding: 10px 4px 20px 4px;
             background: transparent; scroll-behavior: smooth;
         }
         
@@ -236,82 +247,102 @@ HTML_CODE = """<!DOCTYPE html>
         .scroll-jumpers.visible { opacity: 1; pointer-events: auto; }
         .jump-btn {
             background: var(--surface); border: 1px solid var(--border); color: var(--primary);
-            width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.3); transition: all 0.2s;
+            width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.3); transition: transform 0.2s;
         }
-        .jump-btn:hover { background: var(--primary); color: white; transform: scale(1.1); }
+        .jump-btn:hover { transform: scale(1.1); }
 
-        .message-row { display: flex; flex-direction: column; gap: 4px; width: 100%; animation: fadeIn 0.25s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+        .message-row { display: flex; flex-direction: column; gap: 4px; width: 100%; animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
-        .message-sender { font-size: 0.72rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 5px; }
-        .message-text-user { font-size: 0.92rem; line-height: 1.5; color: var(--text-dim); font-weight: 400; word-break: break-word; }
-        .message-text-ai { font-size: 1.05rem; line-height: 1.75; color: var(--text-main); font-weight: 600; word-break: break-word; }
+        .message-sender { font-size: 0.75rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px; }
+        
+        /* رسائل المستخدم بخلفية زجاجية شفافة وهادئة */
+        .message-text-user { 
+            font-size: 0.95rem; line-height: 1.5; color: var(--text-main); font-weight: 400; word-break: break-word;
+            background: var(--surface); padding: 10px 14px; border-radius: 18px; border-top-left-radius: 4px; width: fit-content; max-width: 90%;
+            border: 1px solid var(--border);
+        }
+        
+        /* رسائل الذكاء الاصطناعي واضحة وبارزة */
+        .message-text-ai { font-size: 1.05rem; line-height: 1.75; color: var(--text-main); font-weight: 500; word-break: break-word; }
+
+        /* شعار الغواصة باللون الأزرق الملكي */
+        .submarine-logo {
+            width: 48px; height: 48px; margin-bottom: 8px;
+            filter: drop-shadow(0 0 12px rgba(65, 105, 225, 0.4));
+        }
 
         .complex-card-box {
-            background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 14px;
-            margin: 4px 0; box-shadow: 0 4px 20px rgba(0,0,0,0.25); position: relative; overflow-x: auto;
+            background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 16px;
+            margin: 6px 0; box-shadow: 0 4px 25px rgba(0,0,0,0.25); position: relative; overflow-x: auto;
         }
-        .complex-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 1px solid var(--border); padding-bottom: 6px; font-size: 0.78rem; color: var(--accent-purple); font-weight: bold; }
+        .complex-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid var(--border); padding-bottom: 8px; font-size: 0.8rem; color: var(--primary); font-weight: bold; }
         
-        .copy-code-btn { background: var(--card); color: var(--text-dim); border: 1px solid var(--border); border-radius: 6px; padding: 4px 8px; font-size: 0.72rem; cursor: pointer; display: flex; align-items: center; gap: 4px; }
-        .copy-code-btn:hover { background: var(--primary); color: white; }
+        .copy-code-btn { background: var(--card); color: var(--text-dim); border: 1px solid var(--border); border-radius: 8px; padding: 5px 10px; font-size: 0.75rem; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: all 0.2s; }
+        .copy-code-btn:hover { background: var(--primary); color: white; border-color: var(--primary); }
 
-        .audio-speech-btn { background: var(--surface); border: 1px solid var(--border); color: var(--primary); border-radius: 8px; padding: 4px 10px; font-size: 0.78rem; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; margin-top: 6px; }
-        .audio-speech-btn:hover { background: var(--primary); color: white; }
+        .audio-speech-btn { background: transparent; border: 1px solid var(--border); color: var(--text-dim); border-radius: 10px; padding: 5px 12px; font-size: 0.8rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; margin-top: 8px; transition: all 0.2s;}
+        .audio-speech-btn:hover { background: var(--card); color: var(--primary); }
 
         .hologram-thinking {
-            display: flex; align-items: center; gap: 8px; color: var(--accent-purple); font-weight: 600; font-size: 0.85rem;
-            background: rgba(139, 92, 246, 0.08); border: 1px solid rgba(139, 92, 246, 0.2); padding: 8px 12px; border-radius: 10px; width: fit-content;
+            display: flex; align-items: center; gap: 10px; color: var(--primary); font-weight: 600; font-size: 0.85rem;
+            background: rgba(65, 105, 225, 0.08); border: 1px solid rgba(65, 105, 225, 0.2); padding: 10px 16px; border-radius: 14px; width: fit-content;
         }
-        .pulse-dot { width: 7px; height: 7px; background: var(--accent-purple); border-radius: 50%; animation: pulse-anim 1.2s infinite ease-in-out; }
+        .pulse-dot { width: 8px; height: 8px; background: var(--primary); border-radius: 50%; animation: pulse-anim 1.2s infinite ease-in-out; }
         @keyframes pulse-anim { 0%, 100% { transform: scale(0.8); opacity: 0.4; } 50% { transform: scale(1.3); opacity: 1; } }
 
-        /* إطار الكتابة الفاخر */
-        .chat-input-container { flex-shrink: 0; }
-        .chat-input-box {
-            background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 10px 14px;
-            display: flex; flex-direction: column; gap: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            transition: border-color 0.2s;
+        /* إطار الكتابة المستوحى من ChatGPT (Advanced Squircle) */
+        .chat-input-container { flex-shrink: 0; padding-bottom: 4px; }
+        .input-glass-panel {
+            background: rgba(21, 19, 18, 0.85); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+            border: 1px solid var(--border); border-radius: 26px; padding: 12px 16px;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.4); display: flex; flex-direction: column; gap: 8px;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
         }
-        .chat-input-box:focus-within { border-color: var(--primary); }
+        .input-glass-panel:focus-within { border-color: var(--primary); box-shadow: 0 12px 40px rgba(65, 105, 225, 0.15); }
 
         textarea {
             background: transparent; color: var(--text-main); border: none; outline: none;
-            font-family: 'Inter', sans-serif; font-size: 0.95rem; resize: none; max-height: 110px; min-height: 24px; line-height: 1.4; width: 100%;
+            font-family: 'Inter', sans-serif; font-size: 1rem; resize: none; max-height: 120px; min-height: 24px; line-height: 1.5; width: 100%;
         }
+        textarea::placeholder { color: #64748b; }
 
         .image-preview-bar {
-            display: none; align-items: center; justify-content: space-between; background: rgba(59, 130, 246, 0.15);
-            border: 1px solid var(--primary); padding: 6px 10px; border-radius: 8px; font-size: 0.82rem; color: #93c5fd;
+            display: none; align-items: center; justify-content: space-between; background: rgba(65, 105, 225, 0.1);
+            border: 1px solid rgba(65, 105, 225, 0.3); padding: 8px 12px; border-radius: 12px; font-size: 0.82rem; color: #93c5fd;
         }
 
-        .input-actions-bar { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); padding-top: 8px; }
-        .input-left-tools { display: flex; gap: 6px; align-items: center; }
+        .input-actions-row { display: flex; justify-content: space-between; align-items: center; }
+        .input-left-tools { display: flex; gap: 4px; align-items: center; }
 
         .tool-btn {
-            background: transparent; border: none; color: var(--text-dim); border-radius: 8px; width: 36px; height: 36px;
+            background: transparent; border: none; color: var(--text-dim); border-radius: 10px; width: 38px; height: 38px;
             display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s;
         }
-        .tool-btn:hover { background: var(--card); color: var(--text-main); }
-        .tool-btn.recording { color: var(--danger); }
+        .tool-btn:hover { background: rgba(255,255,255,0.05); color: var(--text-main); }
+        .tool-btn.recording { color: var(--danger); animation: pulse 1.2s infinite; }
         .tool-btn.muted { color: var(--danger); }
 
-        .send-btn {
-            background: var(--primary); color: white; border: none; border-radius: 10px; width: 38px; height: 38px;
-            display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.1s; flex-shrink: 0;
+        .send-btn-royal {
+            background: var(--primary); color: white; border: none; border-radius: 50%; width: 40px; height: 40px;
+            display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 4px 15px rgba(65, 105, 225, 0.4); flex-shrink: 0;
         }
-        .send-btn:active { transform: scale(0.95); }
+        .send-btn-royal:active { transform: scale(0.9); }
+        .send-btn-royal i { width: 18px; height: 18px; margin-left: -2px; }
 
-        .btn { background: var(--primary); color: white; border: none; padding: 10px 16px; border-radius: 12px; font-family: 'Inter', sans-serif; font-weight: 700; font-size: 0.88rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s; }
-        .btn-purple { background: linear-gradient(135deg, #8b5cf6, #3b82f6); }
-        .btn-danger { background: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.3); padding: 5px 10px; border-radius: 7px; font-size: 0.82rem;}
+        .btn { background: var(--card); color: var(--text-main); border: 1px solid var(--border); padding: 12px 18px; border-radius: 16px; font-family: 'Inter', sans-serif; font-weight: 600; font-size: 0.9rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s; }
+        .btn:hover { background: var(--surface); border-color: var(--primary); color: var(--primary); }
+        .btn-purple { background: linear-gradient(135deg, #1d4ed8, #4169E1); color: white; border: none; box-shadow: 0 4px 20px rgba(65, 105, 225, 0.3);}
+        .btn-purple:hover { opacity: 0.9; color: white; }
+        .btn-danger { background: rgba(239, 68, 68, 0.1); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.2); padding: 6px 12px; border-radius: 10px; font-size: 0.8rem;}
         input[type="file"] { display: none; }
 
-        .doc-item { background: var(--card); border-radius: 12px; padding: 12px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 8px; }
+        .doc-item { background: var(--bg-main); border-radius: 14px; padding: 14px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 10px; }
         .doc-header { display: flex; justify-content: space-between; align-items: center; }
-        .doc-title { font-weight: 700; font-size: 0.9rem; color: #60a5fa; display: flex; align-items: center; gap: 6px;}
-        .doc-body { font-size: 0.82rem; color: var(--text-dim); line-height: 1.5; max-height: 110px; overflow-y: auto; background: var(--surface); padding: 8px; border-radius: 7px; white-space: pre-wrap; }
+        .doc-title { font-weight: 700; font-size: 0.95rem; color: var(--primary); display: flex; align-items: center; gap: 6px;}
+        .doc-body { font-size: 0.85rem; color: var(--text-dim); line-height: 1.6; max-height: 120px; overflow-y: auto; background: var(--surface); padding: 10px; border-radius: 10px; white-space: pre-wrap; border: 1px solid var(--border); }
         .status-msg { display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 0.82rem; font-weight: bold;}
     </style>
 </head>
@@ -321,32 +352,31 @@ HTML_CODE = """<!DOCTYPE html>
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <h3><i data-lucide="menu"></i> Menu & History</h3>
-            <button class="icon-btn" style="width:32px; height:32px; border:none; background:transparent;" onclick="toggleSidebar()"><i data-lucide="x"></i></button>
+            <button class="icon-btn" style="width:34px; height:34px;" onclick="toggleSidebar()"><i data-lucide="x"></i></button>
         </div>
         
-        <button class="btn" onclick="createNewChatSession()" style="width: 100%; justify-content: center; margin-bottom: 8px;">
+        <button class="btn" onclick="createNewChatSession()" style="width: 100%; justify-content: center; margin-bottom: 12px; border-radius: 14px;">
             <i data-lucide="plus-circle"></i> New Session
         </button>
 
-        <button class="btn btn-purple" onclick="switchSection('docsTab')" style="width: 100%; justify-content: center; margin-bottom: 10px;">
-            <i data-lucide="folder-kanban"></i> Curriculum Documents (<span id="docCountBadgeSidebar">0</span>)
+        <button class="btn btn-purple" onclick="switchSection('docsTab')" style="width: 100%; justify-content: center; margin-bottom: 15px; border-radius: 14px;">
+            <i data-lucide="scan-line"></i> Curriculum Documents (<span id="docCountBadgeSidebar">0</span>)
         </button>
 
-        <h4 style="font-size: 0.78rem; color: var(--text-dim); margin: 8px 0 4px; text-transform: uppercase;"><i data-lucide="history" style="width:13px; height:13px;"></i> Saved History:</h4>
+        <h4 style="font-size: 0.75rem; color: var(--text-dim); margin: 8px 0 6px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;"><i data-lucide="history" style="width:13px; height:13px; display:inline-block; vertical-align:text-bottom;"></i> Saved History:</h4>
         <div class="chat-history-list" id="chatHistoryList"></div>
 
-        <div style="margin-top: auto; padding-top: 10px; border-top: 1px solid var(--border);">
-            <button class="btn" style="width: 100%; background: var(--card); color: var(--text-main); border: 1px solid var(--border);" onclick="toggleTheme()">
+        <div style="margin-top: auto; padding-top: 15px; border-top: 1px solid var(--border);">
+            <button class="btn" style="width: 100%; justify-content: center;" onclick="toggleTheme()">
                 <i data-lucide="sun" id="themeIcon"></i> Toggle Theme
             </button>
         </div>
     </aside>
 
     <div class="main-wrapper">
-        <!-- الجزيرة العلوية المتصلة العصرية -->
         <div class="top-nav-bar">
             <button class="icon-btn" onclick="toggleSidebar()" title="Menu">
-                <i data-lucide="align-right"></i>
+                <i data-lucide="align-left"></i>
             </button>
 
             <div class="mode-switcher-bar">
@@ -357,7 +387,7 @@ HTML_CODE = """<!DOCTYPE html>
                     <i data-lucide="globe"></i> General
                 </button>
                 <button class="mode-tab" id="modeGames" onclick="switchMode('games')">
-                    <i data-lucide="puzzle"></i> Games
+                    <i data-lucide="gamepad-2"></i> Games
                 </button>
             </div>
 
@@ -366,29 +396,36 @@ HTML_CODE = """<!DOCTYPE html>
             </button>
         </div>
 
-        <div class="persona-panel">
-            <span style="display:flex; align-items:center; gap:6px; color:var(--text-dim);"><i data-lucide="sliders" style="width:14px; height:14px;"></i> AI Persona:</span>
-            <select id="aiPersonaSelect" class="persona-select">
-                <option value="strict">Strict & Professional</option>
-                <option value="humor">Entertainment & Light Humor</option>
-                <option value="roast">Witty & Playful Challenge</option>
-                <option value="human" selected>Human-like & Warm</option>
-            </select>
+        <!-- أزرار اختيار الشخصية (Interactive Chips) بدلاً من القائمة المنسدلة -->
+        <div class="persona-chips-container" id="personaContainer">
+            <button class="persona-chip" data-val="strict" onclick="selectPersona('strict', this)"><i data-lucide="briefcase"></i> Strict</button>
+            <button class="persona-chip" data-val="humor" onclick="selectPersona('humor', this)"><i data-lucide="smile"></i> Humor</button>
+            <button class="persona-chip" data-val="roast" onclick="selectPersona('roast', this)"><i data-lucide="flame"></i> Roast</button>
+            <button class="persona-chip active" data-val="human" onclick="selectPersona('human', this)"><i data-lucide="heart"></i> Human Warm</button>
         </div>
 
         <div class="games-stats-bar" id="gamesStatsBar">
-            <span>⭐ XP: <strong id="userXp">125</strong></span>
-            <span>🏆 Win Rate: <strong id="userWinRate">85%</strong></span>
-            <span style="color: #a78bfa;" id="gameEncourageMsg">Keep going, genius!</span>
+            <span style="display:flex; align-items:center; gap:4px;"><i data-lucide="star" style="width:14px;height:14px;"></i> XP: <strong id="userXp">125</strong></span>
+            <span style="display:flex; align-items:center; gap:4px;"><i data-lucide="trophy" style="width:14px;height:14px;"></i> Win Rate: <strong id="userWinRate">85%</strong></span>
+            <span style="color: #a78bfa; font-weight:600;" id="gameEncourageMsg">Keep going, genius!</span>
         </div>
 
         <div class="tab-section active" id="askTab">
             <div class="chat-container-wrapper">
                 <div class="chat-feed" id="chatFeed" onscroll="checkScrollPosition()" ontouchmove="checkScrollPosition()">
-                    <div id="welcomeMsg" style="color: var(--text-dim); text-align: center; padding: 40px 20px; display: flex; flex-direction: column; align-items: center; gap: 8px;">
-                        <i data-lucide="sparkles" style="width: 32px; height: 32px; color: var(--primary);"></i>
-                        <h3 style="margin: 0; color: var(--text-main); font-weight: 700;">ge_nius Modern OLED</h3>
-                        <p style="margin: 0; font-size: 0.88rem;">Select a mode above and start exploring.</p>
+                    <div id="welcomeMsg" style="color: var(--text-dim); text-align: center; padding: 60px 20px; display: flex; flex-direction: column; align-items: center; gap: 12px;">
+                        
+                        <!-- شعار الغواصة الأزرق الملكي المخصص -->
+                        <svg class="submarine-logo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M16 13v-2a2 2 0 0 0-2-2h-1v-2a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v2H7a2 2 0 0 0-2 2v2"/>
+                            <path d="M4 11h16a2 2 0 0 1 2 2v2a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5v-2a2 2 0 0 1 2-2z"/>
+                            <circle cx="12" cy="15" r="2"/>
+                            <path d="M20 15h2"/>
+                            <path d="M2 15h2"/>
+                        </svg>
+
+                        <h2 style="margin: 0; color: var(--text-main); font-weight: 800; font-size: 1.5rem; letter-spacing: -0.5px;">ge_nius</h2>
+                        <p style="margin: 0; font-size: 0.95rem; max-width: 250px; line-height: 1.5;">Royal Blue design & smart adaptive workspace.</p>
                     </div>
                 </div>
 
@@ -398,26 +435,27 @@ HTML_CODE = """<!DOCTYPE html>
                 </div>
             </div>
 
+            <!-- إطار الإدخال الفاخر (ChatGPT-Inspired) -->
             <div class="chat-input-container">
-                <div class="chat-input-box">
+                <div class="input-glass-panel">
                     <div class="image-preview-bar" id="questionImgPreview">
-                        <span style="display: flex; align-items: center; gap: 6px;"><i data-lucide="image" style="width: 14px; height: 14px;"></i> Image attached</span>
+                        <span style="display: flex; align-items: center; gap: 6px;"><i data-lucide="image" style="width: 14px; height: 14px;"></i> Document attached</span>
                         <span style="cursor: pointer; color: #fca5a5; font-weight: bold; display: flex; align-items: center; gap: 4px;" onclick="removeQuestionImage()">
-                            <i data-lucide="x" style="width: 14px; height: 14px;"></i> Remove
+                            <i data-lucide="x" style="width: 14px; height: 14px;"></i>
                         </span>
                     </div>
 
-                    <textarea id="userQuery" placeholder="Type your prompt..." rows="1" oninput="autoResizeTextarea(this)"></textarea>
+                    <textarea id="userQuery" placeholder="Ask ge_nius..." rows="1" oninput="autoResizeTextarea(this)"></textarea>
                     
-                    <div class="input-actions-bar">
+                    <div class="input-actions-row">
                         <div class="input-left-tools">
-                            <label for="qFileInputCamera" class="tool-btn" title="Camera">
-                                <i data-lucide="camera"></i>
+                            <label for="qFileInputCamera" class="tool-btn" title="Live Scan">
+                                <i data-lucide="scan-line"></i>
                             </label>
                             <input type="file" id="qFileInputCamera" accept="image/*" capture="environment">
 
                             <label for="qFileInputGallery" class="tool-btn" title="Gallery">
-                                <i data-lucide="image-plus"></i>
+                                <i data-lucide="paperclip"></i>
                             </label>
                             <input type="file" id="qFileInputGallery" accept="image/*">
 
@@ -425,13 +463,13 @@ HTML_CODE = """<!DOCTYPE html>
                                 <i data-lucide="mic"></i>
                             </button>
 
-                            <button class="tool-btn" id="audioMuteBtn" onclick="toggleAudioMute()" title="Mute/Unmute AI Voice">
+                            <button class="tool-btn" id="audioMuteBtn" onclick="toggleAudioMute()" title="Mute AI Voice">
                                 <i data-lucide="volume-2" id="muteIcon"></i>
                             </button>
                         </div>
 
-                        <button class="send-btn" onclick="submitQuestion()" title="Send">
-                            <i data-lucide="send-horizontal" style="width: 18px; height: 18px;"></i>
+                        <button class="send-btn-royal" onclick="submitQuestion()" title="Send">
+                            <i data-lucide="send"></i>
                         </button>
                     </div>
                 </div>
@@ -439,54 +477,64 @@ HTML_CODE = """<!DOCTYPE html>
         </div>
 
         <div class="tab-section" id="docsTab">
-            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
-                <h3 style="margin:0; font-size: 1.05rem; color: var(--text-main);">Curriculum Documents</h3>
-                <button class="btn" onclick="switchSection('askTab')" style="padding: 6px 12px; font-size: 0.78rem;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+                <h3 style="margin:0; font-size: 1.15rem; color: var(--text-main); font-weight: 700;">Curriculum</h3>
+                <button class="btn" style="padding: 8px 12px; font-size: 0.8rem;" onclick="switchSection('askTab')">
                     <i data-lucide="arrow-left"></i> Back to Chat
                 </button>
             </div>
 
-            <div class="card">
-                <span style="font-weight: 700; font-size: 0.9rem; color: #60a5fa; display: flex; align-items: center; gap: 6px;">
+            <div class="card" style="background: rgba(65, 105, 225, 0.05); border-color: rgba(65, 105, 225, 0.2);">
+                <span style="font-weight: 700; font-size: 0.95rem; color: var(--primary); display: flex; align-items: center; gap: 8px;">
                     <i data-lucide="file-up"></i> Upload Study Materials
                 </span>
-                <div style="display: flex; gap: 6px; margin-top: 4px;">
-                    <label for="docFileInputCamera" class="btn btn-purple" style="flex: 1; text-align: center; margin:0; padding: 9px;">
-                        <i data-lucide="camera"></i> Camera
+                <p style="font-size: 0.8rem; color: var(--text-dim); margin: 0 0 10px 0;">Live document scanning is supported.</p>
+                <div style="display: flex; gap: 8px;">
+                    <label for="docFileInputCamera" class="btn btn-purple" style="flex: 1; text-align: center; margin:0;">
+                        <i data-lucide="scan"></i> Scan
                     </label>
                     <input type="file" id="docFileInputCamera" accept="image/*" capture="environment">
 
-                    <label for="docFileInputGallery" class="btn btn-purple" style="flex: 1; text-align: center; margin:0; padding: 9px;">
+                    <label for="docFileInputGallery" class="btn btn-purple" style="flex: 1; text-align: center; margin:0;">
                         <i data-lucide="images"></i> Gallery
                     </label>
                     <input type="file" id="docFileInputGallery" accept="image/*" multiple>
                 </div>
-                <div id="uploadStatus" class="status-msg"></div>
+                <div id="uploadStatus" class="status-msg" style="margin-top:8px;"></div>
             </div>
 
             <div class="card" style="flex: 1; overflow-y: auto;">
-                <span style="font-weight: 700; font-size: 0.85rem; color: var(--text-dim);">Stored Documents Archive:</span>
-                <div id="docsList" style="display: flex; flex-direction: column; gap: 8px;"></div>
+                <span style="font-weight: 700; font-size: 0.85rem; color: var(--text-dim); margin-bottom: 5px; display:block;">Stored Documents Archive:</span>
+                <div id="docsList" style="display: flex; flex-direction: column; gap: 10px;"></div>
             </div>
         </div>
     </div>
 
     <script>
-        lucide.createIcons();
+        document.addEventListener("DOMContentLoaded", () => {
+            lucide.createIcons();
+        });
+
+        // إدارة الـ Persona
+        let currentPersonaValue = 'human';
+        window.selectPersona = function(val, btnElement) {
+            currentPersonaValue = val;
+            document.querySelectorAll('.persona-chip').forEach(btn => btn.classList.remove('active'));
+            btnElement.classList.add('active');
+        };
 
         function toggleTheme() {
             const isLight = document.body.classList.toggle('light-mode');
             localStorage.setItem('theme', isLight ? 'light' : 'dark');
             const iconId = isLight ? 'moon' : 'sun';
-            document.getElementById('themeIcon').setAttribute('data-lucide', iconId);
-            document.getElementById('themeIconTop').setAttribute('data-lucide', iconId);
+            const themeIcons = [document.getElementById('themeIcon'), document.getElementById('themeIconTop')];
+            themeIcons.forEach(icon => { if(icon) icon.setAttribute('data-lucide', iconId); });
             lucide.createIcons();
         }
         if (localStorage.getItem('theme') === 'light') { 
             document.body.classList.add('light-mode'); 
-            document.getElementById('themeIcon').setAttribute('data-lucide', 'moon');
-            document.getElementById('themeIconTop').setAttribute('data-lucide', 'moon');
-            lucide.createIcons(); 
+            const themeIcons = [document.getElementById('themeIcon'), document.getElementById('themeIconTop')];
+            themeIcons.forEach(icon => { if(icon) icon.setAttribute('data-lucide', 'moon'); });
         }
 
         function toggleSidebar() {
@@ -532,15 +580,8 @@ HTML_CODE = """<!DOCTYPE html>
             lastScrollTop = st <= 0 ? 0 : st;
         }
 
-        function scrollToTop() {
-            const chatFeed = document.getElementById('chatFeed');
-            chatFeed.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        function scrollToBottom() {
-            const chatFeed = document.getElementById('chatFeed');
-            chatFeed.scrollTo({ top: chatFeed.scrollHeight, behavior: 'smooth' });
-        }
+        function scrollToTop() { document.getElementById('chatFeed').scrollTo({ top: 0, behavior: 'smooth' }); }
+        function scrollToBottom() { const chatFeed = document.getElementById('chatFeed'); chatFeed.scrollTo({ top: chatFeed.scrollHeight, behavior: 'smooth' }); }
 
         let modeContents = { study: "", general: "", games: "" };
         let currentMode = 'study';
@@ -567,8 +608,8 @@ HTML_CODE = """<!DOCTYPE html>
             lucide.createIcons({root: btn});
         }
 
-        let chatSessions = JSON.parse(localStorage.getItem('ge_nius_sessions_modern')) || {};
-        let currentSessionId = localStorage.getItem('ge_nius_current_session_modern');
+        let chatSessions = JSON.parse(localStorage.getItem('ge_nius_sessions_royal')) || {};
+        let currentSessionId = localStorage.getItem('ge_nius_current_session_royal');
 
         function initSessions() {
             if (!currentSessionId || !chatSessions[currentSessionId]) {
@@ -610,7 +651,7 @@ HTML_CODE = """<!DOCTYPE html>
             if (modeContents[mode] && modeContents[mode].trim() !== '') {
                 chatFeed.innerHTML = modeContents[mode];
             } else {
-                chatFeed.innerHTML = `<div id="welcomeMsg" style="color: var(--text-dim); text-align: center; padding: 40px 20px; display: flex; flex-direction: column; align-items: center; gap: 8px;"><i data-lucide="sparkles" style="width: 32px; height: 32px; color: var(--primary);"></i><h3 style="margin: 0; color: var(--text-main); font-weight: 700;">${mode.toUpperCase()} Workspace</h3><p style="margin: 0; font-size: 0.88rem;">Start a fresh conversation in this mode.</p></div>`;
+                chatFeed.innerHTML = `<div id="welcomeMsg" style="color: var(--text-dim); text-align: center; padding: 60px 20px; display: flex; flex-direction: column; align-items: center; gap: 12px;"><svg class="submarine-logo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 13v-2a2 2 0 0 0-2-2h-1v-2a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v2H7a2 2 0 0 0-2 2v2"/><path d="M4 11h16a2 2 0 0 1 2 2v2a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5v-2a2 2 0 0 1 2-2z"/><circle cx="12" cy="15" r="2"/><path d="M20 15h2"/><path d="M2 15h2"/></svg><h2 style="margin: 0; color: var(--text-main); font-weight: 800; font-size: 1.5rem; letter-spacing: -0.5px;">${mode.toUpperCase()} Workspace</h2><p style="margin: 0; font-size: 0.95rem; max-width: 250px; line-height: 1.5;">Ready for your input.</p></div>`;
             }
 
             if(chatSessions[currentSessionId]) {
@@ -626,28 +667,14 @@ HTML_CODE = """<!DOCTYPE html>
             document.getElementById('userXp').innerText = userXP;
             const rate = Math.round((userWins / userTotalGames) * 100);
             document.getElementById('userWinRate').innerText = rate + '%';
-            const quotes = [
-                "Brilliant tactical move! Keep pushing.",
-                "Your intellectual sharpness is unmatched.",
-                "Every puzzle solved adds power to your neural core.",
-                "Fascinating deduction! Ready for the next riddle?"
-            ];
-            document.getElementById('gameEncourageMsg').innerText = quotes[Math.floor(Math.random() * quotes.length)];
         }
 
         function loadChatSession(id) {
             currentSessionId = id;
             const session = chatSessions[id];
-            if (session && session.modesData) {
-                modeContents = session.modesData;
-            } else {
-                modeContents = { study: "", general: "", games: "" };
-            }
-            if(session && session.mode) {
-                switchMode(session.mode);
-            } else {
-                switchMode('study');
-            }
+            if (session && session.modesData) { modeContents = session.modesData; } 
+            else { modeContents = { study: "", general: "", games: "" }; }
+            if(session && session.mode) switchMode(session.mode); else switchMode('study');
             renderChatHistoryList();
             if(document.getElementById('sidebar').classList.contains('open')) toggleSidebar();
         }
@@ -658,16 +685,9 @@ HTML_CODE = """<!DOCTYPE html>
                 delete chatSessions[id];
                 if(id === currentSessionId) {
                     const keys = Object.keys(chatSessions);
-                    if(keys.length > 0) {
-                        currentSessionId = keys[0];
-                        loadChatSession(currentSessionId);
-                    } else {
-                        createNewChatSession();
-                    }
-                } else {
-                    saveSessionsData();
-                    renderChatHistoryList();
-                }
+                    if(keys.length > 0) { currentSessionId = keys[0]; loadChatSession(currentSessionId); } 
+                    else { createNewChatSession(); }
+                } else { saveSessionsData(); renderChatHistoryList(); }
             }
         }
 
@@ -682,8 +702,8 @@ HTML_CODE = """<!DOCTYPE html>
         }
 
         function saveSessionsData() {
-            localStorage.setItem('ge_nius_sessions_modern', JSON.stringify(chatSessions));
-            localStorage.setItem('ge_nius_current_session_modern', currentSessionId);
+            localStorage.setItem('ge_nius_sessions_royal', JSON.stringify(chatSessions));
+            localStorage.setItem('ge_nius_current_session_royal', currentSessionId);
             renderChatHistoryList();
         }
 
@@ -695,20 +715,9 @@ HTML_CODE = """<!DOCTYPE html>
             
             sortedIds.forEach(id => {
                 const session = chatSessions[id];
-                const icon = session.mode === 'games' ? 'puzzle' : (session.mode === 'general' ? 'globe' : 'graduation-cap');
+                const icon = session.mode === 'games' ? 'gamepad-2' : (session.mode === 'general' ? 'globe' : 'graduation-cap');
                 const isActive = id === currentSessionId ? 'active' : '';
-                
-                listDiv.innerHTML += `
-                    <div class="history-item ${isActive}" onclick="loadChatSession('${id}')">
-                        <div class="history-item-content">
-                            <i data-lucide="${icon}" style="width: 13px; height: 13px;"></i>
-                            <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${session.title}</span>
-                        </div>
-                        <button class="delete-history-btn" onclick="deleteSessionItem(event, '${id}')" title="Delete">
-                            <i data-lucide="trash-2" style="width: 13px; height: 13px;"></i>
-                        </button>
-                    </div>
-                `;
+                listDiv.innerHTML += `<div class="history-item ${isActive}" onclick="loadChatSession('${id}')"><div class="history-item-content"><i data-lucide="${icon}" style="width: 14px; height: 14px;"></i><span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${session.title}</span></div><button class="delete-history-btn" onclick="deleteSessionItem(event, '${id}')" title="Delete"><i data-lucide="trash-2" style="width: 14px; height: 14px;"></i></button></div>`;
             });
             lucide.createIcons({root: listDiv});
         }
@@ -731,14 +740,12 @@ HTML_CODE = """<!DOCTYPE html>
             const queryInput = document.getElementById('userQuery');
             
             if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-                alert('Speech recognition is not supported in your browser.');
-                return;
+                alert('Speech recognition is not supported in your browser.'); return;
             }
 
             if (btn.classList.contains('recording')) {
                 if(recognition) recognition.stop();
-                btn.classList.remove('recording');
-                return;
+                btn.classList.remove('recording'); return;
             }
 
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -748,14 +755,12 @@ HTML_CODE = """<!DOCTYPE html>
 
             recognition.onstart = () => { btn.classList.add('recording'); };
             recognition.onresult = (event) => {
-                const transcript = event.results[0][0].transcript;
-                queryInput.value = transcript;
+                queryInput.value = event.results[0][0].transcript;
                 autoResizeTextarea(queryInput);
                 btn.classList.remove('recording');
             };
             recognition.onerror = () => { btn.classList.remove('recording'); };
             recognition.onend = () => { btn.classList.remove('recording'); };
-
             recognition.start();
         }
 
@@ -781,12 +786,12 @@ HTML_CODE = """<!DOCTYPE html>
             const countBadge = document.getElementById('docCountBadgeSidebar');
             if(countBadge) { countBadge.innerHTML = curriculumDocs.length; }
             if (!listDiv) return;
-            if (curriculumDocs.length === 0) { listDiv.innerHTML = '<div style="color: var(--text-dim); font-style: italic; text-align: center; padding: 10px;">No curriculum documents uploaded.</div>'; return; }
+            if (curriculumDocs.length === 0) { listDiv.innerHTML = '<div style="color: var(--text-dim); font-style: italic; text-align: center; padding: 15px;">No curriculum documents uploaded yet.</div>'; return; }
             listDiv.innerHTML = curriculumDocs.map((item, index) => `
                 <div class="doc-item">
                     <div class="doc-header">
                         <span class="doc-title"><i data-lucide="file-text"></i> Document ${index + 1}</span>
-                        <button class="btn btn-danger" onclick="deleteDoc(${item.id})"><i data-lucide="trash-2" style="width: 13px; height: 13px;"></i> Delete</button>
+                        <button class="btn btn-danger" onclick="deleteDoc(${item.id})"><i data-lucide="trash-2" style="width: 14px; height: 14px;"></i> Delete</button>
                     </div>
                     <div class="doc-body">${item.concepts}</div>
                 </div>
@@ -833,7 +838,7 @@ HTML_CODE = """<!DOCTYPE html>
         function submitQuestion() {
             const queryInput = document.getElementById('userQuery');
             const query = queryInput.value.trim();
-            const personaVal = document.getElementById('aiPersonaSelect').value;
+            const personaVal = currentPersonaValue;
 
             if (!query && !attachedQuestionBase64) { alert('Please type a prompt or attach an image!'); return; }
             if (currentMode === 'study' && curriculumDocs.length === 0) { alert('Study mode requires uploaded curriculum documents. Switch to General or Games!'); return; }
@@ -841,18 +846,19 @@ HTML_CODE = """<!DOCTYPE html>
             const welcome = document.getElementById('welcomeMsg'); if(welcome) welcome.remove();
 
             let userTextDisplay = query.replace(/\\n/g, '<br>');
-            if (attachedQuestionBase64) { userTextDisplay = (query ? userTextDisplay + '<br>' : '') + '<span style="color:#60a5fa; font-size:0.85em"><i data-lucide="image" style="width:14px;height:14px;"></i> Image attached</span>'; }
+            if (attachedQuestionBase64) { userTextDisplay = (query ? userTextDisplay + '<br>' : '') + '<span style="color:var(--primary); font-size:0.85em; display:flex; align-items:center; gap:4px; margin-top:4px;"><i data-lucide="image" style="width:14px;height:14px;"></i> Image attached</span>'; }
 
             const userRow = document.createElement('div'); userRow.className = 'message-row';
-            userRow.innerHTML = `<div class="message-sender"><i data-lucide="user" style="width:12px;height:12px;"></i> You</div><div class="message-text-user">${userTextDisplay}</div>`;
+            userRow.style.alignItems = 'flex-end'; // محاذاة رسائل المستخدم لليمين
+            userRow.innerHTML = `<div class="message-sender" style="justify-content:flex-end;">You <i data-lucide="user" style="width:12px;height:12px;"></i></div><div class="message-text-user">${userTextDisplay}</div>`;
             chatFeed.appendChild(userRow); lucide.createIcons({root: userRow});
 
             const loadingRow = document.createElement('div'); loadingRow.className = 'message-row loading-bubble-temp';
             loadingRow.innerHTML = `
-                <div class="message-sender" style="color:var(--accent-purple)"><i data-lucide="cpu" style="width:12px;height:12px;"></i> ge_nius AI</div>
+                <div class="message-sender" style="color:var(--primary)"><i data-lucide="cpu" style="width:12px;height:12px;"></i> ge_nius</div>
                 <div class="hologram-thinking">
                     <div class="pulse-dot"></div>
-                    <span>Analyzing...</span>
+                    <span>Analyzing logic...</span>
                 </div>
             `;
             chatFeed.appendChild(loadingRow); lucide.createIcons({root: loadingRow});
@@ -874,33 +880,27 @@ HTML_CODE = """<!DOCTYPE html>
                     const fullText = data.answer;
                     const encoded = encodeURIComponent(fullText);
                     
-                    if (currentMode === 'games') {
-                        userXP += 15;
-                        userTotalGames += 1;
-                        userWins += 1;
-                        updateGameStatsUI();
-                    }
+                    if (currentMode === 'games') { userXP += 15; userTotalGames += 1; userWins += 1; updateGameStatsUI(); }
                     
                     if (fullText.includes("```") || fullText.length > 500) {
                         aiRow.innerHTML = `
-                            <div class="message-sender"><i data-lucide="bot" style="width:12px;height:12px;color:#60a5fa"></i> ge_nius</div>
+                            <div class="message-sender"><i data-lucide="bot" style="width:12px;height:12px;color:var(--primary)"></i> ge_nius</div>
                             <div class="complex-card-box">
                                 <div class="complex-card-header">
-                                    <span>Detailed Solution / Code Block</span>
-                                    <button class="copy-code-btn" onclick="copyCodeText(this, '${encoded}')"><i data-lucide="copy" style="width:11px;height:11px;"></i> Copy</button>
+                                    <span>Step-by-Step Rendering</span>
+                                    <button class="copy-code-btn" onclick="copyCodeText(this, '${encoded}')"><i data-lucide="copy" style="width:12px;height:12px;"></i> Copy</button>
                                 </div>
                                 <div class="message-text-ai ai-content">${marked.parse(fullText)}</div>
                             </div>
-                            <div><button class="audio-speech-btn" onclick="speakText('${encoded}')"><i data-lucide="volume-2" style="width:13px;height:13px;"></i> Read Aloud</button></div>
+                            <div><button class="audio-speech-btn" onclick="speakText('${encoded}')"><i data-lucide="volume-2" style="width:14px;height:14px;"></i> Read Aloud</button></div>
                         `;
                     } else {
                         aiRow.innerHTML = `
-                            <div class="message-sender"><i data-lucide="bot" style="width:12px;height:12px;color:#60a5fa"></i> ge_nius</div>
-                            <div class="message-text-ai ai-content">${marked.parse(fullText)}</div>
-                            <div><button class="audio-speech-btn" onclick="speakText('${encoded}')"><i data-lucide="volume-2" style="width:13px;height:13px;"></i> Read Aloud</button></div>
+                            <div class="message-sender"><i data-lucide="bot" style="width:12px;height:12px;color:var(--primary)"></i> ge_nius</div>
+                            <div class="message-text-ai ai-content" style="padding-top:4px;">${marked.parse(fullText)}</div>
+                            <div><button class="audio-speech-btn" onclick="speakText('${encoded}')"><i data-lucide="volume-2" style="width:14px;height:14px;"></i> Read Aloud</button></div>
                         `;
                     }
-                    
                     speakText(encoded);
                 } else {
                     aiRow.innerHTML = `<div class="message-sender" style="color:var(--danger)">ge_nius</div><div class="message-text-ai">Error: ${data.error || 'Failed.'}</div>`;
@@ -924,7 +924,7 @@ HTML_CODE = """<!DOCTYPE html>
 """
 
 # ==============================================================================
-# Python Backend Server (Modern OLED Optimized)
+# Python Backend Server
 # ==============================================================================
 class StudyAppRequestHandler(BaseHTTPRequestHandler):
 
@@ -1044,7 +1044,7 @@ class StudyAppRequestHandler(BaseHTTPRequestHandler):
                 else:
                     all_concepts_summary = "\n\n".join([f"Document {i+1}:\n{doc['concepts']}" for i, doc in enumerate(docs)])
                     full_prompt = (
-                        f"You are expert tutor.\n"
+                        f"You are an expert tutor.\n"
                         f"{persona_instructions}\n"
                         f"Here is the student's curriculum study material:\n"
                         f"--- START CURRICULUM ---\n"
