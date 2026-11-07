@@ -80,20 +80,18 @@ HTML_CODE = """<!DOCTYPE html>
     <title>مساعد المنهج الذكي (Qwen3)</title>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
     <script>
-  window.MathJax = {
-    tex: {
-      inlineMath: [['$', '$'], ['\\(', '\\)']],
-      displayMath: [['$$', '$$'], ['\\[', '\\]']],
-      processEscapes: true
-    },
-    options: {
-      skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
-    }
-  };
-</script>
-<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" id="MathJax-script" async></script>
-
-
+      window.MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']],
+          processEscapes: true
+        },
+        options: {
+          skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+        }
+      };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" id="MathJax-script" async></script>
 
     <style>
         :root {
@@ -477,6 +475,11 @@ HTML_CODE = """<!DOCTYPE html>
                 } else if (data.status === 'success') {
                     aiBubble.className = 'chat-bubble ai-bubble';
                     aiBubble.textContent = data.answer;
+                    
+                    // تشغيل MathJax فور ظهور الرد لترجمة الرموز ومعادلات LaTeX تلقائياً
+                    if (window.MathJax && window.MathJax.typesetPromise) {
+                        window.MathJax.typesetPromise([aiBubble]).catch((err) => console.log(err));
+                    }
                 } else {
                     aiBubble.className = 'chat-bubble ai-bubble';
                     aiBubble.textContent = 'حدث خطأ: ' + (data.error || 'تعذر الإجابة.');
@@ -590,7 +593,8 @@ class StudyAppRequestHandler(BaseHTTPRequestHandler):
                 f"قم بالتحليل باتباع الخطوات التالية:\n"
                 f"1. فكّر بدقة: هل يرتبط سؤال التمرين بالمحتوى الدراسي المرفوع أعلى بأي شكل؟\n"
                 f"2. إذا كان السؤال عن موضوع مختلف تماماً ولا علاقة له بالدروس المضافة، أجب بالكلمة الحرفية التالية فقط بدون زيادة: OUT_OF_SCOPE\n"
-                f"3. إذا كان ضمن الدروس والمحتوى المرفوع، قدم إجابة شاملة وشارحة خطوة بخطوة باللغة العربية."
+                f"3. إذا كان ضمن الدروس والمحتوى المرفوع، قدم إجابة شاملة وشارحة خطوة بخطوة باللغة العربية.\n"
+                f"ملاحظة هامة جداً: عند كتابة أي معادلات رياضية، متجهات (مثل vec{{u}})، جذور، أو رموز، احرص دائماً على وضعها بين رموز الدولار المفردة مثل $...$ أو المزدوجة مثل $$...$$ لكي يتم عرضها بشكل رياضي جميل وواضح."
             )
             messages_content.append({"type": "text", "text": full_prompt})
 
