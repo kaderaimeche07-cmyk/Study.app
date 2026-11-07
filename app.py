@@ -91,14 +91,14 @@ def delete_document_from_db(session_id, doc_id):
         MOCK_DB[session_id] = [d for d in MOCK_DB[session_id] if str(d["id"]) != str(doc_id)]
 
 # ==============================================================================
-# HTML Frontend (ge_nius Supreme Lock & Fast-Track Edition)
+# HTML Frontend (ge_nius Stable Production Edition)
 # ==============================================================================
 HTML_CODE = """<!DOCTYPE html>
 <html lang="en" dir="auto">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ge_nius Assistant - Supreme Edition</title>
+    <title>ge_nius Assistant - Stable Edition</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@700;900&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -124,13 +124,13 @@ HTML_CODE = """<!DOCTYPE html>
             --text-main: #fafaf9; 
             --text-dim: #999490;
             --border: rgba(255, 255, 255, 0.08); 
-            --glass: rgba(18, 16, 15, 0.85);
+            --glass: rgba(18, 16, 15, 0.88);
         }
 
         body.light-mode {
             --bg-main: #f8fafc; --surface: #ffffff; --card: #f1f5f9;
             --primary: #2563eb; --text-main: #0f172a; --text-dim: #64748b;
-            --border: rgba(0, 0, 0, 0.08); --glass: rgba(255, 255, 255, 0.85);
+            --border: rgba(0, 0, 0, 0.08); --glass: rgba(255, 255, 255, 0.88);
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -174,7 +174,6 @@ HTML_CODE = """<!DOCTYPE html>
 
         .lucide { width: 17px; height: 17px; stroke-width: 2.2; display: inline-block; vertical-align: middle; }
 
-        /* Sidebar & Overlay */
         .sidebar-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(6px); z-index: 999; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
         .sidebar-overlay.active { opacity: 1; pointer-events: auto; }
         
@@ -291,22 +290,17 @@ HTML_CODE = """<!DOCTYPE html>
         .pulse-dot { width: 7px; height: 7px; background: var(--accent-purple); border-radius: 50%; animation: pulse-anim 1.2s infinite ease-in-out; }
         @keyframes pulse-anim { 0%, 100% { transform: scale(0.8); opacity: 0.4; } 50% { transform: scale(1.3); opacity: 1; } }
 
-        /* زر الإجابة السريعة (Fast-Track Override Button) */
         .fast-track-btn {
             background: linear-gradient(135deg, #f59e0b, #ef4444); color: white; border: none; padding: 4px 10px; border-radius: 8px;
             font-size: 0.75rem; font-weight: 700; cursor: pointer; display: none; align-items: center; gap: 4px; box-shadow: 0 2px 10px rgba(239,68,68,0.3);
-            animation: bounce 1s infinite;
         }
-        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-2px); } }
 
-        /* إطار الكتابة الراقي */
         .chat-input-container { flex-shrink: 0; }
         .chat-input-box {
             background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 8px 12px;
             display: flex; flex-direction: column; gap: 6px; box-shadow: 0 8px 30px rgba(0,0,0,0.2);
             transition: border-color 0.2s;
         }
-        .chat-input-box:focus-within { border-color: var(--primary); }
         .chat-input-box.disabled { opacity: 0.6; pointer-events: none; }
 
         textarea {
@@ -327,12 +321,12 @@ HTML_CODE = """<!DOCTYPE html>
             display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s;
         }
         .tool-btn:hover { background: var(--card); color: var(--text-main); }
-        .tool-btn.recording { color: var(--danger); animation: pulse 1.2s infinite; }
+        .tool-btn.recording { color: var(--danger); }
         .tool-btn.muted { color: var(--danger); }
 
         .send-btn {
             background: var(--primary); color: white; border: none; border-radius: 9px; width: 36px; height: 36px;
-            display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.1s;
+            display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.1s; flex-shrink: 0;
         }
         .send-btn:active { transform: scale(0.95); }
         .send-btn:disabled { background: var(--card); color: var(--text-dim); cursor: not-allowed; }
@@ -473,7 +467,6 @@ HTML_CODE = """<!DOCTYPE html>
                 <button class="quick-chip" onclick="sendQuickPrompt('Test me with a quiz question')"><i data-lucide="help-circle"></i> Quiz me</button>
             </div>
 
-            <!-- إطار الكتابة مع قفل الإرسال أثناء الانتظار -->
             <div class="chat-input-container">
                 <div class="chat-input-box" id="chatInputBox">
                     <div class="image-preview-bar" id="questionImgPreview">
@@ -507,7 +500,7 @@ HTML_CODE = """<!DOCTYPE html>
                         </div>
 
                         <button class="send-btn" id="sendBtn" onclick="submitQuestion()" title="Send">
-                            <i data-lucide="send-horizontal" style="width: 17px; height: 17px;"></i>
+                            <i data-lucide="send-horizontal"></i>
                         </button>
                     </div>
                 </div>
@@ -516,7 +509,10 @@ HTML_CODE = """<!DOCTYPE html>
     </div>
 
     <script>
-        lucide.createIcons();
+        // تفعيل الأيقونات بدقة فور تحميل الصفحة
+        document.addEventListener("DOMContentLoaded", () => {
+            lucide.createIcons();
+        });
 
         function toggleTheme() {
             const isLight = document.body.classList.toggle('light-mode');
@@ -528,7 +524,6 @@ HTML_CODE = """<!DOCTYPE html>
         if (localStorage.getItem('theme') === 'light') { 
             document.body.classList.add('light-mode'); 
             document.getElementById('themeIcon').setAttribute('data-lucide', 'moon');
-            lucide.createIcons(); 
         }
 
         function toggleSidebar() {
@@ -617,7 +612,7 @@ HTML_CODE = """<!DOCTYPE html>
         let userXP = 125;
         let userWins = 18;
         let userTotalGames = 21;
-        let isWaitingForResponse = false; // قفل لمنع تكرار السؤال
+        let isWaitingForResponse = false;
 
         const chatFeed = document.getElementById('chatFeed');
         const gamesStatsBar = document.getElementById('gamesStatsBar');
@@ -637,8 +632,8 @@ HTML_CODE = """<!DOCTYPE html>
             lucide.createIcons({root: btn});
         }
 
-        let chatSessions = JSON.parse(localStorage.getItem('ge_nius_sessions_ultimate')) || {};
-        let currentSessionId = localStorage.getItem('ge_nius_current_session_ultimate');
+        let chatSessions = JSON.parse(localStorage.getItem('ge_nius_sessions_stable')) || {};
+        let currentSessionId = localStorage.getItem('ge_nius_current_session_stable');
 
         function initSessions() {
             if (!currentSessionId || !chatSessions[currentSessionId]) {
@@ -657,14 +652,14 @@ HTML_CODE = """<!DOCTYPE html>
         }
 
         function createNewChatSession() {
-            if (isWaitingForResponse) return; // منع إنشاء جلسة أثناء الرد
+            if (isWaitingForResponse) return;
             createNewSessionQuiet();
             loadChatSession(currentSessionId);
             if(document.getElementById('sidebar').classList.contains('open')) toggleSidebar();
         }
 
         function switchMode(mode) {
-            if (isWaitingForResponse) return; // منع التبديل أثناء انتظار الرد
+            if (isWaitingForResponse) return;
             modeContents[currentMode] = chatFeed.innerHTML;
             currentMode = mode;
             document.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
@@ -749,8 +744,8 @@ HTML_CODE = """<!DOCTYPE html>
         }
 
         function saveSessionsData() {
-            localStorage.setItem('ge_nius_sessions_ultimate', JSON.stringify(chatSessions));
-            localStorage.setItem('ge_nius_current_session_ultimate', currentSessionId);
+            localStorage.setItem('ge_nius_sessions_stable', JSON.stringify(chatSessions));
+            localStorage.setItem('ge_nius_current_session_stable', currentSessionId);
             renderChatHistoryList();
         }
 
@@ -925,17 +920,15 @@ HTML_CODE = """<!DOCTYPE html>
             }
         }
 
-        let fastTrackTimer = null;
         let activeController = null;
-
         function triggerFastTrack() {
             if (activeController) {
-                activeController.abort(); // إلغاء الطلب البطيء الحالي
+                activeController.abort();
             }
         }
 
         function submitQuestion() {
-            if (isWaitingForResponse) return; // قفل تام إذا كان هناك سؤال قيد المعالجة
+            if (isWaitingForResponse) return;
 
             const queryInput = document.getElementById('userQuery');
             const query = queryInput.value.trim();
@@ -946,7 +939,7 @@ HTML_CODE = """<!DOCTYPE html>
             
             const welcome = document.getElementById('welcomeMsg'); if(welcome) welcome.remove();
 
-            setInputLocked(true); // قفل الكتابة والإرسال
+            setInputLocked(true);
 
             let userTextDisplay = query.replace(/\\n/g, '<br>');
             if (attachedQuestionBase64) { userTextDisplay = (query ? userTextDisplay + '<br>' : '') + '<span style="color:#60a5fa; font-size:0.85em"><i data-lucide="image" style="width:14px;height:14px;"></i> Image attached</span>'; }
@@ -968,7 +961,6 @@ HTML_CODE = """<!DOCTYPE html>
             `;
             chatFeed.appendChild(loadingRow); lucide.createIcons({root: loadingRow});
             
-            // إظهار زر الإجابة السريعة تلقائياً إذا تأخر الرد أكثر من 8 ثوانٍ
             let fastTrackTimeout = setTimeout(() => {
                 const btn = document.getElementById('fastTrackBtn');
                 if (btn) btn.style.display = 'inline-flex';
@@ -985,8 +977,8 @@ HTML_CODE = """<!DOCTYPE html>
             .then(res => res.json())
             .then(data => {
                 clearTimeout(fastTrackTimeout);
-                chatFeed.removeChild(loadingRow);
-                setInputLocked(false); // فتح القفل بعد انتهاء الإجابة
+                if (loadingRow.parentNode) chatFeed.removeChild(loadingRow);
+                setInputLocked(false);
                 const aiRow = document.createElement('div'); aiRow.className = 'message-row';
 
                 if (data.status === 'out_of_scope') {
@@ -1027,11 +1019,11 @@ HTML_CODE = """<!DOCTYPE html>
             }).catch(err => {
                 clearTimeout(fastTrackTimeout);
                 if (loadingRow.parentNode) chatFeed.removeChild(loadingRow);
-                setInputLocked(false); // فتح القفل حتى عند الإلغاء أو الخطأ
+                setInputLocked(false);
                 
                 const errRow = document.createElement('div'); errRow.className = 'message-row';
                 if (err.name === 'AbortError') {
-                    errRow.innerHTML = `<div class="message-sender" style="color:#f59e0b">ge_nius Fast-Track</div><div class="message-text-ai">Switched to direct quick summary mode. Please ask a more direct or concise query!</div>`;
+                    errRow.innerHTML = `<div class="message-sender" style="color:#f59e0b">ge_nius Fast-Track</div><div class="message-text-ai">Switched to direct quick summary mode.</div>`;
                 } else {
                     errRow.innerHTML = `<div class="message-sender" style="color:var(--danger)">ge_nius</div><div class="message-text-ai">Connection error.</div>`;
                 }
@@ -1045,7 +1037,7 @@ HTML_CODE = """<!DOCTYPE html>
 """
 
 # ==============================================================================
-# Python Backend Server (Supreme Lock & Fast-Track Optimized)
+# Python Backend Server (Stable Edition)
 # ==============================================================================
 class StudyAppRequestHandler(BaseHTTPRequestHandler):
 
