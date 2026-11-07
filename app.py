@@ -88,7 +88,7 @@ def delete_document_from_db(session_id, doc_id):
         MOCK_DB[session_id] = [d for d in MOCK_DB[session_id] if str(d["id"]) != str(doc_id)]
 
 # ==============================================================================
-# HTML Frontend (Dynamic Height, Image Compression, and Robust API)
+# HTML Frontend (Onion Gradient Theme, Safe Loading, Fixed LocalStorage)
 # ==============================================================================
 HTML_CODE = """<!DOCTYPE html>
 <html lang="en" dir="ltr">
@@ -98,7 +98,9 @@ HTML_CODE = """<!DOCTYPE html>
     <title>ge_nius</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@700;900&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- FIX 1: Safest CDN for icons -->
+    <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
     <script>
@@ -111,7 +113,6 @@ HTML_CODE = """<!DOCTYPE html>
 
     <style>
         :root {
-            /* Onion Dark Theme */
             --bg-main: #1f1025; --surface: #2d1836; --card: #3a1f44;
             --primary: #c9184a; --accent-purple: #9d4edd; --accent-green: #10b981;
             --danger: #ef4444; --text-main: #f8fafc; --text-dim: #d8b4e2;
@@ -132,11 +133,10 @@ HTML_CODE = """<!DOCTYPE html>
             font-family: 'Inter', sans-serif; 
             background-color: var(--bg-main); color: var(--text-main);
             margin: 0; padding: 0; 
-            height: 100%; height: 100dvh; /* FIX for Mobile Keyboard */
-            overflow: hidden; /* Prevent body scrolling */
+            height: 100%; height: 100dvh; 
+            overflow: hidden; 
         }
 
-        /* Fixed Background gradient */
         .bg-layer {
             position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: -1;
             background-image: radial-gradient(circle at 15% 50%, var(--gradient-1), transparent 25%),
@@ -146,7 +146,7 @@ HTML_CODE = """<!DOCTYPE html>
         .main-wrapper {
             display: flex; flex-direction: column; gap: 10px;
             width: 100%; max-width: 900px; margin: 0 auto;
-            height: 100%; height: 100dvh; /* Adapts to keyboard */
+            height: 100%; height: 100dvh; 
             padding: 12px;
         }
 
@@ -160,7 +160,7 @@ HTML_CODE = """<!DOCTYPE html>
         .header-actions { display: flex; gap: 10px; align-items: center; }
         
         .icon-btn {
-            background: var(--card); border: 1px solid var(--border); color: var(--text-main);
+            background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: var(--text-main);
             border-radius: 10px; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; cursor: pointer;
         }
 
@@ -349,12 +349,20 @@ HTML_CODE = """<!DOCTYPE html>
     </div>
 
     <script>
-        lucide.createIcons();
+        // FIX 2: Safest way to render icons to prevent crashes
+        function renderIcons(element) {
+            if (typeof lucide !== 'undefined') {
+                if (element) lucide.createIcons({root: element});
+                else lucide.createIcons();
+            }
+        }
+        
+        // Initial render
+        renderIcons();
 
         const userQuery = document.getElementById('userQuery');
         const chatFeed = document.getElementById('chatFeed');
 
-        // FIX Keyboard Issue: Auto-resize and Scroll on Focus
         userQuery.addEventListener('input', function() {
             this.style.height = 'auto';
             this.style.height = this.scrollHeight + 'px';
@@ -370,7 +378,6 @@ HTML_CODE = """<!DOCTYPE html>
             }
         });
 
-        // SMART COMPRESSION FUNCTION: Fixes the API crash from large mobile images
         function compressImage(file) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
@@ -380,7 +387,7 @@ HTML_CODE = """<!DOCTYPE html>
                     img.src = event.target.result;
                     img.onload = () => {
                         let width = img.width; let height = img.height;
-                        const max_dim = 1024; // Reduce to max 1024px to save API bandwidth
+                        const max_dim = 1024;
                         if (width > max_dim || height > max_dim) {
                             if (width > height) { height = Math.round((height * max_dim) / width); width = max_dim; }
                             else { width = Math.round((width * max_dim) / height); height = max_dim; }
@@ -389,7 +396,7 @@ HTML_CODE = """<!DOCTYPE html>
                         canvas.width = width; canvas.height = height;
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, width, height);
-                        resolve(canvas.toDataURL('image/jpeg', 0.8)); // 80% Quality
+                        resolve(canvas.toDataURL('image/jpeg', 0.8));
                     };
                     img.onerror = reject;
                 };
@@ -402,17 +409,18 @@ HTML_CODE = """<!DOCTYPE html>
             localStorage.setItem('theme', isLight ? 'light' : 'dark');
             const themeIcon = document.getElementById('themeIcon');
             themeIcon.setAttribute('data-lucide', isLight ? 'moon' : 'sun');
-            lucide.createIcons();
+            renderIcons(themeIcon.parentElement);
         }
-        if (localStorage.getItem('theme') === 'light') { document.body.classList.add('light-mode'); document.getElementById('themeIcon').setAttribute('data-lucide', 'moon'); lucide.createIcons(); }
+        if (localStorage.getItem('theme') === 'light') { document.body.classList.add('light-mode'); document.getElementById('themeIcon').setAttribute('data-lucide', 'moon'); renderIcons(); }
 
         function toggleSidebar() {
             document.getElementById('sidebar').classList.toggle('open');
             document.getElementById('sidebarOverlay').classList.toggle('active');
         }
 
-        let chatSessions = JSON.parse(localStorage.getItem('ge_nius_sessions')) || {};
-        let currentSessionId = localStorage.getItem('ge_nius_current_session');
+        // FIX 3: Reset LocalStorage to prevent old Arabic HTML from breaking the new English design
+        let chatSessions = JSON.parse(localStorage.getItem('ge_nius_sessions_v3')) || {};
+        let currentSessionId = localStorage.getItem('ge_nius_current_session_v3');
         
         function setMode(mode) {
             const slider = document.getElementById('modeSlider');
@@ -440,9 +448,12 @@ HTML_CODE = """<!DOCTYPE html>
         function loadChat(id) {
             currentSessionId = id; const session = chatSessions[id];
             setMode(session.mode || 'study');
-            if (session.html && session.html.trim() !== '') chatFeed.innerHTML = session.html;
-            else chatFeed.innerHTML = `<div id="welcomeMsg" style="color: var(--text-dim); text-align: center; padding: 40px 20px; display: flex; flex-direction: column; align-items: center; gap: 12px;"><div class="submarine-logo" style="transform: scale(1.2); margin-bottom:10px;">ge_nius<div class="submarine-propeller"></div></div><h3 style="margin:0; font-weight:600; color:var(--text-main);">How can I help you today?</h3></div>`;
-            lucide.createIcons({root: chatFeed});
+            if (session.html && session.html.trim() !== '') {
+                chatFeed.innerHTML = session.html;
+            } else { 
+                chatFeed.innerHTML = `<div id="welcomeMsg" style="color: var(--text-dim); text-align: center; padding: 40px 20px; display: flex; flex-direction: column; align-items: center; gap: 12px;"><div class="submarine-logo" style="transform: scale(1.2); margin-bottom:10px;">ge_nius<div class="submarine-propeller"></div></div><h3 style="margin:0; font-weight:600; color:var(--text-main);">How can I help you today?</h3></div>`;
+            }
+            renderIcons(chatFeed);
             if (window.MathJax) MathJax.typesetPromise([chatFeed]);
             setTimeout(() => { chatFeed.scrollTop = chatFeed.scrollHeight; }, 100);
             saveSessionsData(); renderChatList();
@@ -457,8 +468,8 @@ HTML_CODE = """<!DOCTYPE html>
         }
 
         function saveSessionsData() {
-            localStorage.setItem('ge_nius_sessions', JSON.stringify(chatSessions));
-            localStorage.setItem('ge_nius_current_session', currentSessionId);
+            localStorage.setItem('ge_nius_sessions_v3', JSON.stringify(chatSessions));
+            localStorage.setItem('ge_nius_current_session_v3', currentSessionId);
             renderChatList();
         }
 
@@ -471,7 +482,7 @@ HTML_CODE = """<!DOCTYPE html>
                 const isActive = id === currentSessionId ? 'active' : '';
                 listDiv.innerHTML += `<div class="history-item ${isActive}" onclick="loadChat('${id}')"><i data-lucide="${icon}"></i><span style="flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; direction: ltr;">${session.title}</span></div>`;
             });
-            lucide.createIcons({root: listDiv});
+            renderIcons(listDiv);
         }
 
         initSessions();
@@ -480,8 +491,8 @@ HTML_CODE = """<!DOCTYPE html>
             navigator.clipboard.writeText(decodeURIComponent(text)).then(() => {
                 const originalHtml = btn.innerHTML;
                 btn.innerHTML = `<i data-lucide="check"></i> Copied`;
-                lucide.createIcons({root: btn});
-                setTimeout(() => { btn.innerHTML = originalHtml; lucide.createIcons({root: btn}); }, 2000);
+                renderIcons(btn);
+                setTimeout(() => { btn.innerHTML = originalHtml; renderIcons(btn); }, 2000);
             });
         };
 
@@ -490,7 +501,7 @@ HTML_CODE = """<!DOCTYPE html>
             const bubble = document.createElement('div'); bubble.className = 'chat-bubble ai-bubble';
             const icon = isWarning ? 'alert-triangle' : 'info'; const color = isWarning ? 'var(--danger)' : 'var(--text-main)';
             bubble.innerHTML = `<div class="bubble-icon" style="background:transparent; color:${color};"><i data-lucide="${icon}"></i></div> <div class="bubble-content" style="color:${color}; border:1px solid ${color}33; background:transparent;">${msg}</div>`;
-            chatFeed.appendChild(bubble); lucide.createIcons({root: bubble});
+            chatFeed.appendChild(bubble); renderIcons(bubble);
             chatFeed.scrollTop = chatFeed.scrollHeight; saveCurrentChatHtml();
         }
 
@@ -509,7 +520,7 @@ HTML_CODE = """<!DOCTYPE html>
 
         function renderDocs() {
             const listDiv = document.getElementById('docsList'); const countBadge = document.getElementById('docCountBadge');
-            if(countBadge) { countBadge.innerHTML = `<i data-lucide="database"></i> <span>${curriculumDocs.length}</span> Docs`; lucide.createIcons({root: countBadge}); }
+            if(countBadge) { countBadge.innerHTML = `<i data-lucide="database"></i> <span>${curriculumDocs.length}</span> Docs`; renderIcons(countBadge); }
             if (!listDiv) return;
             if (curriculumDocs.length === 0) { listDiv.innerHTML = '<div style="color: var(--text-dim); text-align: center; padding: 20px;">No documents uploaded yet.</div>'; return; }
             listDiv.innerHTML = curriculumDocs.map((item, i) => `
@@ -521,7 +532,7 @@ HTML_CODE = """<!DOCTYPE html>
                     <div class="doc-body">${item.concepts}</div>
                 </div>
             `).join('');
-            lucide.createIcons({root: listDiv});
+            renderIcons(listDiv);
         }
 
         async function handleQuestionImageSelect(e) {
@@ -538,7 +549,7 @@ HTML_CODE = """<!DOCTYPE html>
             const files = e.target.files; if (!files || files.length === 0) return;
             const statusDiv = document.getElementById('uploadStatus');
             for (let i = 0; i < files.length; i++) {
-                if(statusDiv) { statusDiv.innerHTML = `<i data-lucide="loader" class="spin-icon"></i> Uploading doc ${i + 1}/${files.length}...`; statusDiv.style.color = 'var(--text-main)'; lucide.createIcons({root: statusDiv}); }
+                if(statusDiv) { statusDiv.innerHTML = `<i data-lucide="loader" class="spin-icon"></i> Uploading doc ${i + 1}/${files.length}...`; statusDiv.style.color = 'var(--text-main)'; renderIcons(statusDiv); }
                 try {
                     const compressedBase64 = await compressImage(files[i]);
                     const res = await fetch('/api/docs/upload', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ image: compressedBase64 }) });
@@ -546,12 +557,12 @@ HTML_CODE = """<!DOCTYPE html>
                     if (data.error) throw new Error(data.error);
                     if (data.docs) curriculumDocs = data.docs;
                 } catch (err) {
-                    if(statusDiv) { statusDiv.innerHTML = `<i data-lucide="alert-circle"></i> Upload failed: ${err.message}`; statusDiv.style.color = 'var(--danger)'; lucide.createIcons({root: statusDiv}); }
+                    if(statusDiv) { statusDiv.innerHTML = `<i data-lucide="alert-circle"></i> Upload failed: ${err.message}`; statusDiv.style.color = 'var(--danger)'; renderIcons(statusDiv); }
                     return;
                 }
             }
             renderDocs();
-            if(statusDiv) { statusDiv.innerHTML = '<i data-lucide="check-circle-2"></i> Documents saved successfully.'; statusDiv.style.color = 'var(--accent-green)'; lucide.createIcons({root: statusDiv}); }
+            if(statusDiv) { statusDiv.innerHTML = '<i data-lucide="check-circle-2"></i> Documents saved successfully.'; statusDiv.style.color = 'var(--accent-green)'; renderIcons(statusDiv); }
         }
         document.getElementById('docFileInputCamera').addEventListener('change', handleDocImageSelect);
         document.getElementById('docFileInputGallery').addEventListener('change', handleDocImageSelect);
@@ -572,16 +583,16 @@ HTML_CODE = """<!DOCTYPE html>
             
             const welcome = document.getElementById('welcomeMsg'); if(welcome) welcome.remove();
 
-            let userTextDisplay = query.replace(/\n/g, '<br>'); // FIXED Line break handling
+            let userTextDisplay = query.replace(/\n/g, '<br>'); 
             if (attachedQuestionBase64) { userTextDisplay = (query ? userTextDisplay + '<br><br>' : '') + '<span style="color:var(--text-dim); font-size:0.85em"><i data-lucide="image" style="width:14px;height:14px; vertical-align:middle;"></i> Image Attached</span>'; }
 
             const userBubble = document.createElement('div'); userBubble.className = 'chat-bubble user-bubble';
             userBubble.innerHTML = `<div class="bubble-content" dir="auto">${userTextDisplay}</div>`;
-            chatFeed.appendChild(userBubble); lucide.createIcons({root: userBubble});
+            chatFeed.appendChild(userBubble); renderIcons(userBubble);
 
             const loadingBubble = document.createElement('div'); loadingBubble.className = 'chat-bubble ai-bubble loading-bubble-temp';
             loadingBubble.innerHTML = `<div class="bubble-icon"><i data-lucide="bot"></i></div> <div class="bubble-content"><i data-lucide="loader-circle" class="spin-icon" style="width:16px;height:16px;"></i> <span class="thinking-text" style="color:var(--text-dim);">Thinking...</span></div>`;
-            chatFeed.appendChild(loadingBubble); lucide.createIcons({root: loadingBubble});
+            chatFeed.appendChild(loadingBubble); renderIcons(loadingBubble);
             
             saveCurrentChatHtml(query);
 
@@ -595,11 +606,11 @@ HTML_CODE = """<!DOCTYPE html>
                 const aiBubble = document.createElement('div');
                 if (data.status === 'out_of_scope') {
                     aiBubble.className = 'chat-bubble ai-bubble'; aiBubble.innerHTML = `<div class="bubble-icon" style="background:var(--danger);"><i data-lucide="alert-triangle"></i></div> <div class="bubble-content">I'm sorry, this is outside your curriculum scope. Please switch to General mode for unrestricted chat.</div>`;
-                    chatFeed.appendChild(aiBubble); lucide.createIcons({root: aiBubble}); chatFeed.scrollTop = chatFeed.scrollHeight; saveCurrentChatHtml();
+                    chatFeed.appendChild(aiBubble); renderIcons(aiBubble); chatFeed.scrollTop = chatFeed.scrollHeight; saveCurrentChatHtml();
                 } else if (data.status === 'success') {
                     aiBubble.className = 'chat-bubble ai-bubble';
                     aiBubble.innerHTML = `<div class="bubble-icon"><i data-lucide="bot"></i></div> <div class="bubble-content" dir="auto"><div class="ai-content"></div></div>`;
-                    chatFeed.appendChild(aiBubble); lucide.createIcons({root: aiBubble});
+                    chatFeed.appendChild(aiBubble); renderIcons(aiBubble);
                     
                     const contentDiv = aiBubble.querySelector('.ai-content'); const fullText = data.answer;
                     let charIndex = 0; let currentText = '';
@@ -613,7 +624,7 @@ HTML_CODE = """<!DOCTYPE html>
                             contentDiv.innerHTML = marked.parse(fullText);
                             const encodedAnswer = encodeURIComponent(fullText);
                             aiBubble.querySelector('.bubble-content').insertAdjacentHTML('beforeend', `<button class="copy-btn" onclick="copyText(this, '${encodedAnswer}')"><i data-lucide="copy" style="width:14px;height:14px;"></i> Copy</button>`);
-                            lucide.createIcons({root: aiBubble});
+                            renderIcons(aiBubble);
                             if (window.MathJax) window.MathJax.typesetPromise([aiBubble]).catch(e => console.log(e));
                             saveCurrentChatHtml();
                         }
@@ -621,12 +632,12 @@ HTML_CODE = """<!DOCTYPE html>
                     typeWriter();
                 } else {
                     aiBubble.className = 'chat-bubble ai-bubble'; aiBubble.innerHTML = `<div class="bubble-icon" style="background:var(--danger);"><i data-lucide="alert-circle"></i></div> <div class="bubble-content">API Error: ${data.error}</div>`;
-                    chatFeed.appendChild(aiBubble); lucide.createIcons({root: aiBubble}); chatFeed.scrollTop = chatFeed.scrollHeight; saveCurrentChatHtml();
+                    chatFeed.appendChild(aiBubble); renderIcons(aiBubble); chatFeed.scrollTop = chatFeed.scrollHeight; saveCurrentChatHtml();
                 }
             }).catch(err => {
                 chatFeed.removeChild(loadingBubble);
                 const errBubble = document.createElement('div'); errBubble.className = 'chat-bubble ai-bubble'; errBubble.innerHTML = `<div class="bubble-icon" style="background:var(--danger);"><i data-lucide="wifi-off"></i></div> <div class="bubble-content">Connection Failed. Check your internet or API key.</div>`;
-                chatFeed.appendChild(errBubble); lucide.createIcons({root: errBubble}); chatFeed.scrollTop = chatFeed.scrollHeight; saveCurrentChatHtml();
+                chatFeed.appendChild(errBubble); renderIcons(errBubble); chatFeed.scrollTop = chatFeed.scrollHeight; saveCurrentChatHtml();
             });
         }
     </script>
@@ -635,7 +646,7 @@ HTML_CODE = """<!DOCTYPE html>
 """
 
 # ==============================================================================
-# Python Backend Server (Fixes General Text Payload)
+# Python Backend Server (Fixed Image & Text Payload Array)
 # ==============================================================================
 class StudyAppRequestHandler(BaseHTTPRequestHandler):
 
@@ -703,7 +714,6 @@ class StudyAppRequestHandler(BaseHTTPRequestHandler):
             try:
                 prompt = "Read this lesson document image and extract all text, concepts, formulas, and rules clearly in English."
                 
-                # FIXED Image Payload Format
                 content_payload = [
                     {"type": "text", "text": prompt},
                     {"type": "image_url", "image_url": {"url": image_base64}}
@@ -739,7 +749,7 @@ class StudyAppRequestHandler(BaseHTTPRequestHandler):
                 full_prompt = (
                     f"You are a highly intelligent and helpful assistant named ge_nius.\n"
                     f"User prompt/image request: \"{user_query}\"\n\n"
-                    f"Respond to the question in a professional, accurate, and friendly manner in Arabic/English depending on the user's language.\n"
+                    f"Respond to the question in a professional, accurate, and friendly manner.\n"
                     f"You can answer anything (general knowledge, coding, science, history, etc.).\n\n"
                     f"--- Formatting Instructions ---\n"
                     f"- Use Markdown for structuring your response.\n"
@@ -757,21 +767,23 @@ class StudyAppRequestHandler(BaseHTTPRequestHandler):
                     f"Follow these instructions exactly:\n"
                     f"1. Analyze carefully: Does the question relate to the provided curriculum documents in any way?\n"
                     f"2. If the question is completely off-topic or out of scope of the uploaded documents, reply with EXACTLY this word and nothing else: OUT_OF_SCOPE\n"
-                    f"3. If it is within scope, provide a comprehensive, step-by-step explanation in Arabic/English.\n\n"
+                    f"3. If it is within scope, provide a comprehensive, step-by-step explanation.\n\n"
                     f"--- Math Formatting ---\n"
                     f"- For inline variables/math, use single dollar signs strictly, e.g., $x=2$ or $v$.\n"
                     f"- For block equations, use double dollar signs strictly, e.g.,\n$$ \\vec{{u}} = \\sqrt{{x^2 + y^2}} $$\n"
                     f"- Use Markdown for headings (###) and lists (-)."
                 )
 
-            # FIXED: Robust Payload structure. Prevent API crashes for text-only messages!
+            # FIX 4: Ensured strict API payload structure for both text and image formats
             if question_image_base64:
                 content_payload = [
                     {"type": "text", "text": full_prompt},
                     {"type": "image_url", "image_url": {"url": question_image_base64}}
                 ]
             else:
-                content_payload = full_prompt # Pure String format when no image is attached
+                content_payload = [
+                    {"type": "text", "text": full_prompt}
+                ]
 
             payload = {
                 "model": MODEL_NAME,
