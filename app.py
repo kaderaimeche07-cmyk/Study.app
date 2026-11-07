@@ -91,7 +91,7 @@ def delete_document_from_db(session_id, doc_id):
         MOCK_DB[session_id] = [d for d in MOCK_DB[session_id] if str(d["id"]) != str(doc_id)]
 
 # ==============================================================================
-# HTML Frontend (ge_nius Royal World-Class UI Final Polish)
+# HTML Frontend (ge_nius Royal World-Class UI)
 # ==============================================================================
 HTML_CODE = """<!DOCTYPE html>
 <html lang="en" dir="auto">
@@ -114,6 +114,7 @@ HTML_CODE = """<!DOCTYPE html>
 
     <style>
         :root {
+            /* نظام ألوان OLED و Royal Blue */
             --bg-main: #030304; 
             --surface: #0f1014; 
             --card: #18191f;
@@ -123,7 +124,7 @@ HTML_CODE = """<!DOCTYPE html>
             --text-main: #f8fafc; 
             --text-dim: #94a3b8;
             --border: rgba(255, 255, 255, 0.06); 
-            --glass: rgba(15, 16, 20, 0.75);
+            --glass: rgba(15, 16, 20, 0.7);
         }
 
         body.light-mode {
@@ -146,54 +147,39 @@ HTML_CODE = """<!DOCTYPE html>
         }
 
         .main-wrapper { 
-            padding: 10px; display: flex; flex-direction: column; gap: 0; 
+            padding: 12px 10px; display: flex; flex-direction: column; gap: 0; 
             width: 100%; height: 100%; height: 100dvh; max-width: 900px; margin: 0 auto; 
         }
 
-        /* شريط التنقل العلوي مع الاسم المستقل وأيقونة الغواصة */
+        /* شريط التنقل العلوي النظيف */
         .top-nav-bar {
             display: flex; justify-content: space-between; align-items: center;
-            padding: 8px 14px; flex-shrink: 0; gap: 12px; background: var(--glass);
+            padding: 6px; flex-shrink: 0; gap: 10px; background: var(--glass);
             backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
             border: 1px solid var(--border); border-radius: 24px; box-shadow: 0 4px 30px rgba(0,0,0,0.3);
-            margin-bottom: 10px;
+            margin-bottom: 12px;
         }
-
-        .nav-left-group { display: flex; align-items: center; gap: 10px; }
-
-        .app-brand {
-            font-family: 'Outfit', sans-serif;
-            font-weight: 900;
-            font-size: 1.2rem;
-            color: var(--text-main);
-            letter-spacing: -0.5px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .app-brand span { color: var(--primary); }
-        .brand-icon { width: 22px; height: 22px; color: var(--primary); }
 
         .icon-btn {
             background: transparent; border: none; color: var(--text-main);
-            border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
+            border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
             cursor: pointer; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); flex-shrink: 0;
         }
         .icon-btn:hover { background: var(--card); color: var(--primary); transform: scale(1.05); }
 
         .mode-switcher-bar {
-            display: flex; gap: 4px; background: rgba(0,0,0,0.2); padding: 3px; border-radius: 18px;
+            display: flex; gap: 4px; flex: 1; background: rgba(0,0,0,0.2); padding: 4px; border-radius: 20px;
         }
         .mode-tab {
-            padding: 6px 12px; background: transparent; border: none; color: var(--text-dim);
-            font-family: 'Inter', sans-serif; font-weight: 600; font-size: 0.8rem; cursor: pointer;
-            border-radius: 14px; white-space: nowrap; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.3s;
+            flex: 1; padding: 8px 10px; background: transparent; border: none; color: var(--text-dim);
+            font-family: 'Inter', sans-serif; font-weight: 600; font-size: 0.85rem; cursor: pointer;
+            border-radius: 16px; white-space: nowrap; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
         .mode-tab.active { background: var(--surface); color: var(--text-main); box-shadow: 0 2px 15px rgba(0,0,0,0.2); border: 1px solid var(--border); }
 
         .lucide { width: 18px; height: 18px; stroke-width: 2.2; display: inline-block; vertical-align: middle; }
 
-        /* القائمة الجانبية (Sidebar) */
+        /* القائمة الجانبية (Sidebar) مع الإعدادات */
         .sidebar-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); z-index: 999; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
         .sidebar-overlay.active { opacity: 1; pointer-events: auto; }
         
@@ -211,6 +197,7 @@ HTML_CODE = """<!DOCTYPE html>
         
         .sidebar-section-title { font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; margin: 15px 0 8px 0; display: flex; align-items: center; gap: 6px;}
         
+        /* شخصيات الذكاء الاصطناعي تم نقلها هنا */
         .persona-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
         .persona-chip {
             background: var(--bg-main); border: 1px solid var(--border); border-radius: 12px;
@@ -257,7 +244,7 @@ HTML_CODE = """<!DOCTYPE html>
         
         .message-text-ai { font-size: 1.05rem; line-height: 1.75; color: var(--text-main); font-weight: 500; word-break: break-word; align-self: flex-start; max-width: 95%;}
 
-        .submarine-logo { width: 72px; height: 72px; filter: drop-shadow(0 0 20px rgba(65, 105, 225, 0.5)); color: var(--primary); }
+        .submarine-logo { width: 56px; height: 56px; margin-bottom: 8px; filter: drop-shadow(0 0 16px rgba(65, 105, 225, 0.5)); color: var(--primary); }
 
         .complex-card-box {
             background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 16px;
@@ -278,7 +265,7 @@ HTML_CODE = """<!DOCTYPE html>
         .pulse-dot { width: 8px; height: 8px; background: var(--primary); border-radius: 50%; animation: pulse-anim 1s infinite ease-in-out; }
         @keyframes pulse-anim { 0%, 100% { transform: scale(0.8); opacity: 0.3; } 50% { transform: scale(1.4); opacity: 1; box-shadow: 0 0 10px var(--primary); } }
 
-        /* إطار الكتابة */
+        /* إطار الكتابة فائق النظافة (Minimalist Prompt Bar) */
         .chat-input-container { flex-shrink: 0; padding-bottom: 6px; position: relative; }
         .input-glass-panel {
             background: rgba(15, 16, 20, 0.85); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
@@ -287,7 +274,7 @@ HTML_CODE = """<!DOCTYPE html>
             transition: all 0.3s ease; position: relative; z-index: 10;
         }
         .input-glass-panel:focus-within { border-color: rgba(65, 105, 225, 0.5); box-shadow: 0 12px 40px rgba(65, 105, 225, 0.15); }
-        .input-glass-panel.locked { opacity: 0.6; pointer-events: none; }
+        .input-glass-panel.locked { opacity: 0.6; pointer-events: none; } /* حالة قفل الإرسال */
 
         textarea {
             background: transparent; color: var(--text-main); border: none; outline: none;
@@ -296,6 +283,7 @@ HTML_CODE = """<!DOCTYPE html>
         }
         textarea::placeholder { color: #64748b; }
 
+        /* القائمة المنبثقة للزر السحري (+) */
         .magic-menu {
             position: absolute; bottom: 70px; left: 10px; background: var(--surface); border: 1px solid var(--border);
             border-radius: 18px; padding: 8px; display: flex; flex-direction: column; gap: 4px;
@@ -316,9 +304,6 @@ HTML_CODE = """<!DOCTYPE html>
         }
         .tool-btn:hover { background: var(--card); color: var(--text-main); }
         .tool-btn.active-magic { background: var(--card); color: var(--primary); transform: rotate(45deg); }
-        .tool-btn.recording { color: var(--danger) !important; animation: pulse 1.2s infinite; }
-
-        @keyframes pulse { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(1.1); } 100% { opacity: 1; transform: scale(1); } }
 
         .send-btn-royal {
             background: var(--primary); color: white; border: none; border-radius: 50%; width: 42px; height: 42px;
@@ -340,6 +325,7 @@ HTML_CODE = """<!DOCTYPE html>
 </head>
 <body>
 
+    <!-- القائمة الجانبية (تم نقل الإعدادات والشخصيات إليها) -->
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
@@ -355,6 +341,7 @@ HTML_CODE = """<!DOCTYPE html>
             <i data-lucide="scan-line"></i> Curriculum Documents
         </button>
 
+        <!-- إعدادات الذكاء الاصطناعي المخفية بأناقة -->
         <div class="sidebar-section-title"><i data-lucide="brain"></i> AI Persona</div>
         <div class="persona-grid" id="personaContainer">
             <button class="persona-chip active" data-val="human" onclick="selectPersona('human', this)"><i data-lucide="heart"></i> Human</button>
@@ -370,32 +357,29 @@ HTML_CODE = """<!DOCTYPE html>
             <button class="btn" style="flex:1; justify-content: center; padding: 10px;" onclick="toggleTheme()" title="Toggle Theme">
                 <i data-lucide="moon" id="themeIcon"></i>
             </button>
+            <button class="btn" style="flex:1; justify-content: center; padding: 10px;" onclick="toggleAudioMute()" id="sidebarAudioBtn" title="Mute AI">
+                <i data-lucide="volume-2" id="muteIcon"></i>
+            </button>
         </div>
     </aside>
 
     <div class="main-wrapper">
-        <!-- شريط التنقل العلوي مع الاسم المستقل وأيقونة الغواصة -->
+        <!-- شريط التنقل العلوي النظيف -->
         <div class="top-nav-bar">
-            <div class="nav-left-group">
-                <button class="icon-btn" onclick="toggleSidebar()" title="Menu">
-                    <i data-lucide="align-left"></i>
-                </button>
-                <div class="app-brand">
-                    <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M16 13v-2a2 2 0 0 0-2-2h-1v-2a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v2H7a2 2 0 0 0-2 2v2"/>
-                        <path d="M4 11h16a2 2 0 0 1 2 2v2a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5v-2a2 2 0 0 1 2-2z"/>
-                    </svg>
-                    ge<span>_</span>nius
-                </div>
-            </div>
+            <button class="icon-btn" onclick="toggleSidebar()" title="Menu">
+                <i data-lucide="align-left"></i>
+            </button>
 
             <div class="mode-switcher-bar">
                 <button class="mode-tab active" id="modeStudy" onclick="switchMode('study')">Study</button>
                 <button class="mode-tab" id="modeGeneral" onclick="switchMode('general')">General</button>
                 <button class="mode-tab" id="modeGames" onclick="switchMode('games')">Games</button>
             </div>
+            
+            <div style="width: 40px;"></div> <!-- مساحة وهمية للتوازن -->
         </div>
 
+        <!-- واجهة المحادثة الرئيسية -->
         <div class="tab-section active" id="askTab">
             <div class="chat-container-wrapper">
                 <div class="chat-feed" id="chatFeed">
@@ -405,17 +389,20 @@ HTML_CODE = """<!DOCTYPE html>
                             <path d="M4 11h16a2 2 0 0 1 2 2v2a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5v-2a2 2 0 0 1 2-2z"/>
                             <circle cx="12" cy="15" r="2"/><path d="M20 15h2"/><path d="M2 15h2"/>
                         </svg>
-                        <p style="margin: 0; font-size: 1rem; max-width: 250px; line-height: 1.5; color: var(--text-dim);">How can I help you today?</p>
+                        <h2 style="margin: 0; color: var(--text-main); font-weight: 800; font-size: 1.8rem; letter-spacing: -0.5px;">ge_nius</h2>
+                        <p style="margin: 0; font-size: 1rem; max-width: 250px; line-height: 1.5;">How can I help you today?</p>
                     </div>
                 </div>
             </div>
 
+            <!-- إطار الإدخال الفاخر الخالي من الازدحام -->
             <div class="chat-input-container">
                 <div class="image-preview-bar" id="questionImgPreview">
                     <span style="display: flex; align-items: center; gap: 6px;"><i data-lucide="image" style="width: 14px; height: 14px;"></i> Document attached</span>
                     <span style="cursor: pointer; color: #fca5a5; font-weight: bold; display: flex; align-items: center;" onclick="removeQuestionImage()"><i data-lucide="x" style="width: 16px; height: 16px;"></i></span>
                 </div>
 
+                <!-- القائمة السحرية المنسدلة للأعلى -->
                 <div class="magic-menu" id="magicMenu">
                     <label for="qFileInputCamera" class="magic-item">
                         <i data-lucide="camera" style="color:var(--primary)"></i> Take Photo
@@ -438,6 +425,7 @@ HTML_CODE = """<!DOCTYPE html>
                         <i data-lucide="mic"></i>
                     </button>
 
+                    <!-- الزر الذي يحتوي على حالة التحميل / قفل الإرسال -->
                     <button class="send-btn-royal" id="sendBtn" onclick="submitQuestion()" title="Send">
                         <i data-lucide="arrow-up" id="sendIcon"></i>
                     </button>
@@ -445,6 +433,7 @@ HTML_CODE = """<!DOCTYPE html>
             </div>
         </div>
 
+        <!-- واجهة المستندات -->
         <div class="tab-section" id="docsTab">
             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
                 <h3 style="margin:0; font-size: 1.15rem; color: var(--text-main); font-weight: 700;">Curriculum</h3>
@@ -471,8 +460,10 @@ HTML_CODE = """<!DOCTYPE html>
     <script>
         document.addEventListener("DOMContentLoaded", () => { lucide.createIcons(); });
 
+        // متغير التحكم بحالة الذكاء الاصطناعي (ميزة قفل الإرسال)
         let isAiThinking = false;
 
+        // إدارة القائمة السحرية (+)
         function toggleMagicMenu() {
             if(isAiThinking) return;
             const menu = document.getElementById('magicMenu');
@@ -480,7 +471,7 @@ HTML_CODE = """<!DOCTYPE html>
             menu.classList.toggle('show');
             btn.classList.toggle('active-magic');
         }
-
+        // إغلاق القائمة عند النقر خارجها
         document.addEventListener('click', (e) => {
             const menu = document.getElementById('magicMenu');
             const btn = document.getElementById('magicBtn');
@@ -490,12 +481,13 @@ HTML_CODE = """<!DOCTYPE html>
             }
         });
 
+        // إدارة الـ Persona
         let currentPersonaValue = 'human';
         window.selectPersona = function(val, btnElement) {
             currentPersonaValue = val;
             document.querySelectorAll('.persona-chip').forEach(btn => btn.classList.remove('active'));
             btnElement.classList.add('active');
-            if(window.innerWidth < 768) toggleSidebar();
+            if(window.innerWidth < 768) toggleSidebar(); // إغلاق القائمة الجانبية بعد الاختيار في الجوال
         };
 
         function toggleTheme() {
@@ -528,43 +520,27 @@ HTML_CODE = """<!DOCTYPE html>
 
         let modeContents = { study: "", general: "", games: "" };
         let currentMode = 'study';
+        let isAudioMuted = false;
 
         const chatFeed = document.getElementById('chatFeed');
 
-        let recognition = null;
-        function toggleVoiceRecording() {
-            const btn = document.getElementById('voiceRecordBtn');
-            const queryInput = document.getElementById('userQuery');
-            
-            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-                alert('Speech recognition is not supported in your browser.');
-                return;
+        function toggleAudioMute() {
+            isAudioMuted = !isAudioMuted;
+            const icon = document.getElementById('muteIcon');
+            const btn = document.getElementById('sidebarAudioBtn');
+            if (isAudioMuted) {
+                icon.setAttribute('data-lucide', 'volume-x');
+                btn.style.color = 'var(--danger)';
+                if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+            } else {
+                icon.setAttribute('data-lucide', 'volume-2');
+                btn.style.color = 'var(--text-main)';
             }
-
-            if (btn.classList.contains('recording')) {
-                if(recognition) recognition.stop();
-                btn.classList.remove('recording');
-                return;
-            }
-
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            recognition = new SpeechRecognition();
-            recognition.lang = 'en-US';
-            recognition.interimResults = false;
-
-            recognition.onstart = () => { btn.classList.add('recording'); };
-            recognition.onresult = (event) => {
-                queryInput.value = event.results[0][0].transcript;
-                autoResizeTextarea(queryInput);
-                btn.classList.remove('recording');
-            };
-            recognition.onerror = () => { btn.classList.remove('recording'); };
-            recognition.onend = () => { btn.classList.remove('recording'); };
-            recognition.start();
+            lucide.createIcons();
         }
 
-        let chatSessions = JSON.parse(localStorage.getItem('ge_nius_sessions_v5')) || {};
-        let currentSessionId = localStorage.getItem('ge_nius_current_session_v5');
+        let chatSessions = JSON.parse(localStorage.getItem('ge_nius_sessions_v3')) || {};
+        let currentSessionId = localStorage.getItem('ge_nius_current_session_v3');
 
         function initSessions() {
             if (!currentSessionId || !chatSessions[currentSessionId]) { createNewSessionQuiet(); } 
@@ -580,14 +556,14 @@ HTML_CODE = """<!DOCTYPE html>
         }
 
         function createNewChatSession() {
-            if(isAiThinking) return;
+            if(isAiThinking) return; // منع إنشاء جلسة أثناء التفكير
             createNewSessionQuiet();
             loadChatSession(currentSessionId);
             if(document.getElementById('sidebar').classList.contains('open')) toggleSidebar();
         }
 
         function switchMode(mode) {
-            if(isAiThinking) return;
+            if(isAiThinking) return; // منع التبديل أثناء التفكير
             modeContents[currentMode] = chatFeed.innerHTML;
             currentMode = mode;
             document.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
@@ -598,7 +574,7 @@ HTML_CODE = """<!DOCTYPE html>
             if (modeContents[mode] && modeContents[mode].trim() !== '') {
                 chatFeed.innerHTML = modeContents[mode];
             } else {
-                chatFeed.innerHTML = `<div id="welcomeMsg" style="color: var(--text-dim); text-align: center; padding: 80px 20px; display: flex; flex-direction: column; align-items: center; gap: 16px;"><svg class="submarine-logo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 13v-2a2 2 0 0 0-2-2h-1v-2a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v2H7a2 2 0 0 0-2 2v2"/><path d="M4 11h16a2 2 0 0 1 2 2v2a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5v-2a2 2 0 0 1 2-2z"/><circle cx="12" cy="15" r="2"/><path d="M20 15h2"/><path d="M2 15h2"/></svg><p style="margin: 0; font-size: 1rem; max-width: 250px; line-height: 1.5; color: var(--text-dim);">${mode.toUpperCase()} Workspace is ready.</p></div>`;
+                chatFeed.innerHTML = `<div id="welcomeMsg" style="color: var(--text-dim); text-align: center; padding: 80px 20px; display: flex; flex-direction: column; align-items: center; gap: 16px;"><svg class="submarine-logo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 13v-2a2 2 0 0 0-2-2h-1v-2a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v2H7a2 2 0 0 0-2 2v2"/><path d="M4 11h16a2 2 0 0 1 2 2v2a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5v-2a2 2 0 0 1 2-2z"/><circle cx="12" cy="15" r="2"/><path d="M20 15h2"/><path d="M2 15h2"/></svg><h2 style="margin: 0; color: var(--text-main); font-weight: 800; font-size: 1.8rem; letter-spacing: -0.5px;">${mode.toUpperCase()}</h2><p style="margin: 0; font-size: 1rem; max-width: 250px; line-height: 1.5;">Workspace is ready.</p></div>`;
             }
 
             if(chatSessions[currentSessionId]) {
@@ -642,8 +618,8 @@ HTML_CODE = """<!DOCTYPE html>
         }
 
         function saveSessionsData() {
-            localStorage.setItem('ge_nius_sessions_v5', JSON.stringify(chatSessions));
-            localStorage.setItem('ge_nius_current_session_v5', currentSessionId);
+            localStorage.setItem('ge_nius_sessions_v3', JSON.stringify(chatSessions));
+            localStorage.setItem('ge_nius_current_session_v3', currentSessionId);
             renderChatHistoryList();
         }
 
@@ -664,6 +640,7 @@ HTML_CODE = """<!DOCTYPE html>
         initSessions();
 
         window.speakText = function(text) {
+            if (isAudioMuted) return;
             if ('speechSynthesis' in window) {
                 window.speechSynthesis.cancel();
                 const utterance = new SpeechSynthesisUtterance(decodeURIComponent(text));
@@ -741,8 +718,9 @@ HTML_CODE = """<!DOCTYPE html>
 
         function deleteDoc(id) { fetch('/api/docs/delete', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id }) }).then(res => res.json()).then(data => { curriculumDocs = data; renderDocs(); }); }
 
+        // الدالة المعدلة مع قفل الإرسال (Concurrency Lock)
         function submitQuestion() {
-            if (isAiThinking) return;
+            if (isAiThinking) return; // قفل الإرسال لمنع التداخل
 
             const queryInput = document.getElementById('userQuery');
             const query = queryInput.value.trim();
@@ -751,6 +729,7 @@ HTML_CODE = """<!DOCTYPE html>
             if (!query && !attachedQuestionBase64) return;
             if (currentMode === 'study' && curriculumDocs.length === 0) { alert('Study mode requires uploaded curriculum documents. Switch to General or Games!'); return; }
             
+            // تفعيل حالة التحميل والقفل
             isAiThinking = true;
             document.getElementById('inputPanel').classList.add('locked');
             const sendBtn = document.getElementById('sendBtn');
@@ -770,9 +749,7 @@ HTML_CODE = """<!DOCTYPE html>
 
             const loadingRow = document.createElement('div'); loadingRow.className = 'message-row loading-bubble-temp';
             loadingRow.innerHTML = `
-                <div class="message-sender" style="color:var(--primary); display:flex; align-items:center; gap:5px;">
-                    <svg style="width:14px;height:14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 13v-2a2 2 0 0 0-2-2h-1v-2a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v2H7a2 2 0 0 0-2 2v2"/><path d="M4 11h16a2 2 0 0 1 2 2v2a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5v-2a2 2 0 0 1 2-2z"/></svg> ge_nius
-                </div>
+                <div class="message-sender" style="color:var(--primary)"><i data-lucide="cpu" style="width:12px;height:12px;"></i> ge_nius</div>
                 <div class="hologram-thinking">
                     <div class="pulse-dot"></div>
                     <span>Processing logic...</span>
@@ -791,22 +768,15 @@ HTML_CODE = """<!DOCTYPE html>
                 chatFeed.removeChild(loadingRow);
                 const aiRow = document.createElement('div'); aiRow.className = 'message-row';
 
-                # رأس الرسالة (مع أيقونة الغواصة المصغرة بجانب اسم التطبيق)
-                const aiHeaderHtml = `
-                    <div class="message-sender" style="color:var(--primary); display:flex; align-items:center; gap:5px;">
-                        <svg style="width:14px;height:14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 13v-2a2 2 0 0 0-2-2h-1v-2a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v2H7a2 2 0 0 0-2 2v2"/><path d="M4 11h16a2 2 0 0 1 2 2v2a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5v-2a2 2 0 0 1 2-2z"/></svg> ge_nius
-                    </div>
-                `;
-
                 if (data.status === 'out_of_scope') {
-                    aiRow.innerHTML = `${aiHeaderHtml}<div class="message-text-ai" style="color:#fca5a5;">Out of curriculum scope. Switch to General mode.</div>`;
+                    aiRow.innerHTML = `<div class="message-sender" style="color:var(--danger)">ge_nius</div><div class="message-text-ai" style="color:#fca5a5;">Out of curriculum scope. Switch to General mode.</div>`;
                 } else if (data.status === 'success') {
                     const fullText = data.answer;
                     const encoded = encodeURIComponent(fullText);
                     
                     if (fullText.includes("```") || fullText.length > 500) {
                         aiRow.innerHTML = `
-                            ${aiHeaderHtml}
+                            <div class="message-sender"><i data-lucide="bot" style="width:12px;height:12px;color:var(--primary)"></i> ge_nius</div>
                             <div class="complex-card-box">
                                 <div class="complex-card-header">
                                     <span>Detailed Output</span>
@@ -818,13 +788,14 @@ HTML_CODE = """<!DOCTYPE html>
                         `;
                     } else {
                         aiRow.innerHTML = `
-                            ${aiHeaderHtml}
+                            <div class="message-sender"><i data-lucide="bot" style="width:12px;height:12px;color:var(--primary)"></i> ge_nius</div>
                             <div class="message-text-ai ai-content" style="padding-top:4px;">${marked.parse(fullText)}</div>
                             <div><button class="audio-speech-btn" onclick="speakText('${encoded}')"><i data-lucide="volume-2" style="width:14px;height:14px;"></i> Listen</button></div>
                         `;
                     }
+                    speakText(encoded);
                 } else {
-                    aiRow.innerHTML = `${aiHeaderHtml}<div class="message-text-ai">Error: ${data.error || 'Failed.'}</div>`;
+                    aiRow.innerHTML = `<div class="message-sender" style="color:var(--danger)">ge_nius</div><div class="message-text-ai">Error: ${data.error || 'Failed.'}</div>`;
                 }
                 
                 chatFeed.appendChild(aiRow); lucide.createIcons({root: aiRow});
@@ -837,6 +808,7 @@ HTML_CODE = """<!DOCTYPE html>
                 errRow.innerHTML = `<div class="message-sender" style="color:var(--danger)">ge_nius</div><div class="message-text-ai">Connection error.</div>`;
                 chatFeed.appendChild(errRow); lucide.createIcons({root: errRow});
             }).finally(() => {
+                // إلغاء القفل بعد انتهاء الرد
                 isAiThinking = false;
                 document.getElementById('inputPanel').classList.remove('locked');
                 sendBtn.classList.remove('loading');
