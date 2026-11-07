@@ -68,9 +68,6 @@ def delete_document_from_db(session_id, doc_id):
     except Exception as e:
         pass
 
-# ==============================================================================
-# الواجهة الرسومية (تطبيق احترافي متكامل بميزات القائمة الجانبية المتعددة)
-# ==============================================================================
 HTML_CODE = """<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -113,7 +110,6 @@ HTML_CODE = """<!DOCTYPE html>
             font-family: 'Tajawal', sans-serif; 
             background-color: var(--bg-main); color: var(--text-main);
             margin: 0; padding: 0; min-height: 100vh;
-            /* خلفية عصرية متدرجة */
             background-image: radial-gradient(circle at 15% 50%, var(--gradient-1), transparent 25%),
                               radial-gradient(circle at 85% 30%, var(--gradient-2), transparent 25%);
             background-attachment: fixed;
@@ -122,7 +118,6 @@ HTML_CODE = """<!DOCTYPE html>
 
         .main-wrapper { padding: 12px; display: flex; flex-direction: column; gap: 12px; flex: 1; }
 
-        /* شريط التطبيق العلوي */
         .app-header {
             background: rgba(var(--surface), 0.8); backdrop-filter: blur(10px);
             padding: 12px 16px; border-radius: 16px; border: 1px solid var(--border);
@@ -139,7 +134,6 @@ HTML_CODE = """<!DOCTYPE html>
         }
         .icon-btn:hover { background: var(--primary); color: white; }
 
-        /* لوقو الغواصة */
         .submarine-logo {
             position: relative; background: linear-gradient(180deg, #f59e0b, #d97706);
             padding: 4px 16px; border-radius: 40px; border: 2px solid #b45309;
@@ -188,7 +182,6 @@ HTML_CODE = """<!DOCTYPE html>
         .history-item:hover { background: var(--card); }
         .history-item.active { background: var(--gradient-1); border: 1px solid var(--primary); color: var(--primary); font-weight: bold; }
         
-        /* التبويبات و المحتوى */
         .tab-bar { display: flex; background: var(--surface); border-radius: 12px; padding: 4px; border: 1px solid var(--border); }
         .tab-btn { flex: 1; padding: 12px; background: none; border: none; color: var(--text-dim); font-family: 'Tajawal', sans-serif; font-weight: 700; font-size: 0.95rem; cursor: pointer; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .tab-btn.active { background: var(--primary); color: white; box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3); }
@@ -197,7 +190,6 @@ HTML_CODE = """<!DOCTYPE html>
         .tab-section.active { display: flex; }
         .card { background: rgba(var(--surface), 0.7); backdrop-filter: blur(10px); border-radius: 16px; border: 1px solid var(--border); padding: 16px; display: flex; flex-direction: column; gap: 12px; }
 
-        /* الشات */
         .chat-feed {
             display: flex; flex-direction: column; gap: 14px; height: 50vh; overflow-y: auto; padding: 10px 10px 30px;
             background: transparent; scroll-behavior: smooth;
@@ -219,6 +211,8 @@ HTML_CODE = """<!DOCTYPE html>
 
         .bubble-icon { flex-shrink: 0; margin-top: 2px; }
 
+        .out-of-scope-bubble { background: rgba(239, 68, 68, 0.15); border: 1px solid var(--danger); color: #fca5a5; font-weight: 800; align-self: center; width: 100%; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+
         .input-group { display: flex; flex-direction: column; gap: 6px; }
         textarea { background: var(--card); color: var(--text-main); border: 1px solid var(--border); padding: 14px; border-radius: 12px; font-family: 'Tajawal', sans-serif; font-size: 0.95rem; outline: none; resize: vertical; min-height: 60px; box-shadow: inset 0 2px 5px rgba(0,0,0,0.05); }
 
@@ -238,7 +232,6 @@ HTML_CODE = """<!DOCTYPE html>
         .spin-icon { animation: spin 1.2s linear infinite; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
         
-        /* التمرير المخصص */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.3); border-radius: 10px; }
@@ -405,7 +398,7 @@ HTML_CODE = """<!DOCTYPE html>
             } catch(e) {}
         }
 
-        // إدارة الجلسات (المحادثات المتعددة)
+        // إدارة الجلسات
         let chatSessions = JSON.parse(localStorage.getItem('ge_nius_sessions')) || {};
         let currentSessionId = localStorage.getItem('ge_nius_current_session');
         const chatFeed = document.getElementById('chatFeed');
@@ -456,12 +449,21 @@ HTML_CODE = """<!DOCTYPE html>
             saveSessionsData();
         }
 
+        // إصلاح زر مسح المحادثة بشكل نهائي وصحيح
+        window.clearChat = function() {
+            playSound('tap');
+            if(confirm('هل أنت متأكد من مسح المحادثة الحالية؟')) {
+                chatFeed.innerHTML = `<div id="welcomeMsg" style="color: var(--text-dim); font-style: italic; text-align: center; padding: 20px; display: flex; flex-direction: column; align-items: center; gap: 8px;"><i data-lucide="sparkles" style="width: 32px; height: 32px; color: var(--accent-purple);"></i> تم مسح المحادثة بنجاح!</div>`;
+                lucide.createIcons({root: chatFeed});
+                saveCurrentChatHtml(); // هذا السطر سيحفظ المحادثة فارغة ولن تعود عند التحديث
+            }
+        };
+
         function saveCurrentChatHtml(userQueryText = null) {
             const clones = chatFeed.cloneNode(true);
             clones.querySelectorAll('.loading-bubble-temp').forEach(l => l.remove());
             chatSessions[currentSessionId].html = clones.innerHTML;
             
-            // تحديث اسم المحادثة تلقائياً بناءً على أول سؤال
             if (userQueryText && chatSessions[currentSessionId].title === "محادثة جديدة") {
                 chatSessions[currentSessionId].title = userQueryText.substring(0, 20) + "...";
             }
@@ -477,7 +479,6 @@ HTML_CODE = """<!DOCTYPE html>
         function renderChatList() {
             const listDiv = document.getElementById('chatHistoryList');
             listDiv.innerHTML = '';
-            // ترتيب عكسي (الأحدث أولاً)
             const sortedIds = Object.keys(chatSessions).sort((a, b) => b - a);
             
             sortedIds.forEach(id => {
@@ -495,7 +496,7 @@ HTML_CODE = """<!DOCTYPE html>
             lucide.createIcons({root: listDiv});
         }
 
-        initSessions(); // تشغيل عند البداية
+        initSessions();
 
         window.copyText = function(btn, text) {
             navigator.clipboard.writeText(decodeURIComponent(text)).then(() => {
@@ -580,8 +581,18 @@ HTML_CODE = """<!DOCTYPE html>
             const query = queryInput.value.trim();
             const currentMode = chatSessions[currentSessionId].mode;
 
-            if (!query && !attachedQuestionBase64) { alert('اكتب سؤالاً أو ارفق صورة!'); return; }
-            if (currentMode === 'study' && curriculumDocs.length === 0) { alert('أنت في وضع المنهج. يرجى رفع دروسك أولاً أو التبديل للوضع العام من القائمة الجانبية!'); return; }
+            if (!query && !attachedQuestionBase64) { return; } // لا تفعل شيء إذا كان حقل النص فارغاً تماماً
+            
+            // حل مشكلة التنبيه الصامت باستخدام فقاعة ملونة داخل الشات
+            if (currentMode === 'study' && curriculumDocs.length === 0) { 
+                const errorBubble = document.createElement('div'); 
+                errorBubble.className = 'chat-bubble out-of-scope-bubble';
+                errorBubble.innerHTML = `<i data-lucide="alert-triangle"></i> أنت في وضع المنهج 🎓 ولم ترفع أي درس! ارفع دروسك أولاً، أو افتح القائمة الجانبية (≡) للتبديل للوضع العام 🌍.`;
+                chatFeed.appendChild(errorBubble); 
+                lucide.createIcons({root: errorBubble}); 
+                chatFeed.scrollTop = chatFeed.scrollHeight;
+                return; 
+            }
             
             playSound('send');
             const welcome = document.getElementById('welcomeMsg'); if(welcome) welcome.remove();
@@ -601,7 +612,7 @@ HTML_CODE = """<!DOCTYPE html>
             let phraseIdx = 0;
             const thinkInterval = setInterval(() => { phraseIdx = (phraseIdx + 1) % thinkPhrases.length; const txt = loadingBubble.querySelector('.thinking-text'); if(txt) txt.textContent = thinkPhrases[phraseIdx]; }, 2000);
 
-            saveCurrentChatHtml(query); // حفظ سؤال المستخدم فوراً
+            saveCurrentChatHtml(query);
 
             const payload = { query: query, image: attachedQuestionBase64, mode: currentMode };
             queryInput.value = ''; removeQuestionImage(); chatFeed.scrollTop = chatFeed.scrollHeight;
@@ -654,9 +665,6 @@ HTML_CODE = """<!DOCTYPE html>
 </html>
 """
 
-# ==============================================================================
-# سيرفر بايثون الموحد
-# ==============================================================================
 class StudyAppRequestHandler(BaseHTTPRequestHandler):
 
     def get_session_id(self):
@@ -738,7 +746,7 @@ class StudyAppRequestHandler(BaseHTTPRequestHandler):
         elif self.path == "/api/ask":
             user_query = req_json.get("query", "")
             question_image_base64 = req_json.get("image")
-            mode = req_json.get("mode", "study") # استقبال نوع المحادثة من الواجهة
+            mode = req_json.get("mode", "study") 
             
             docs = load_curriculum(session_id)
             messages_content = []
@@ -746,7 +754,6 @@ class StudyAppRequestHandler(BaseHTTPRequestHandler):
             if question_image_base64:
                 messages_content.append({"type": "image_url", "image_url": {"url": question_image_base64}})
 
-            # بناء الـ Prompt حسب النمط المختار من القائمة الجانبية
             if mode == "general":
                 full_prompt = (
                     f"أنت مساعد ذكي ومثقف واسع المعرفة اسمك ge_nius.\n"
@@ -758,7 +765,6 @@ class StudyAppRequestHandler(BaseHTTPRequestHandler):
                     f"- استخدم رموز الدولار المفردة ($...$) للمتغيرات والمزدوجة ($$...$$) للمعادلات المستقلة."
                 )
             else:
-                # نمط مساعد المنهج (الوضع الافتراضي)
                 all_concepts_summary = "\n\n".join([f"الوثيقة {i+1}:\n{doc['concepts']}" for i, doc in enumerate(docs)])
                 full_prompt = (
                     f"أنت معلم ومساعد دراسي متخصص.\n"
