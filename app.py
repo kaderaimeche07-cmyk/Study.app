@@ -91,7 +91,7 @@ def delete_document_from_db(session_id, doc_id):
         MOCK_DB[session_id] = [d for d in MOCK_DB[session_id] if str(d["id"]) != str(doc_id)]
 
 # ==============================================================================
-# HTML Frontend (ge_nius Royal World-Class UI Refined)
+# HTML Frontend (ge_nius Royal World-Class UI Final Polish)
 # ==============================================================================
 HTML_CODE = """<!DOCTYPE html>
 <html lang="en" dir="auto">
@@ -123,7 +123,7 @@ HTML_CODE = """<!DOCTYPE html>
             --text-main: #f8fafc; 
             --text-dim: #94a3b8;
             --border: rgba(255, 255, 255, 0.06); 
-            --glass: rgba(15, 16, 20, 0.7);
+            --glass: rgba(15, 16, 20, 0.75);
         }
 
         body.light-mode {
@@ -146,23 +146,25 @@ HTML_CODE = """<!DOCTYPE html>
         }
 
         .main-wrapper { 
-            padding: 12px 10px; display: flex; flex-direction: column; gap: 0; 
+            padding: 10px; display: flex; flex-direction: column; gap: 0; 
             width: 100%; height: 100%; height: 100dvh; max-width: 900px; margin: 0 auto; 
         }
 
-        /* شريط التنقل العلوي مع اسم التطبيق العصري */
+        /* شريط التنقل العلوي المحدث (الهوية مستقلة والأنماط مستقلة) */
         .top-nav-bar {
             display: flex; justify-content: space-between; align-items: center;
-            padding: 6px 12px; flex-shrink: 0; gap: 10px; background: var(--glass);
+            padding: 8px 14px; flex-shrink: 0; gap: 12px; background: var(--glass);
             backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
             border: 1px solid var(--border); border-radius: 24px; box-shadow: 0 4px 30px rgba(0,0,0,0.3);
-            margin-bottom: 12px;
+            margin-bottom: 10px;
         }
+
+        .nav-left-group { display: flex; align-items: center; gap: 10px; }
 
         .app-brand {
             font-family: 'Outfit', sans-serif;
             font-weight: 900;
-            font-size: 1.25rem;
+            font-size: 1.2rem;
             color: var(--text-main);
             letter-spacing: -0.5px;
             display: flex;
@@ -170,21 +172,22 @@ HTML_CODE = """<!DOCTYPE html>
             gap: 6px;
         }
         .app-brand span { color: var(--primary); }
+        .brand-icon { width: 22px; height: 22px; color: var(--primary); }
 
         .icon-btn {
             background: transparent; border: none; color: var(--text-main);
-            border-radius: 50%; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center;
+            border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
             cursor: pointer; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); flex-shrink: 0;
         }
         .icon-btn:hover { background: var(--card); color: var(--primary); transform: scale(1.05); }
 
         .mode-switcher-bar {
-            display: flex; gap: 4px; background: rgba(0,0,0,0.2); padding: 4px; border-radius: 20px;
+            display: flex; gap: 4px; background: rgba(0,0,0,0.2); padding: 3px; border-radius: 18px;
         }
         .mode-tab {
             padding: 6px 12px; background: transparent; border: none; color: var(--text-dim);
-            font-family: 'Inter', sans-serif; font-weight: 600; font-size: 0.82rem; cursor: pointer;
-            border-radius: 16px; white-space: nowrap; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.3s;
+            font-family: 'Inter', sans-serif; font-weight: 600; font-size: 0.8rem; cursor: pointer;
+            border-radius: 14px; white-space: nowrap; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.3s;
         }
         .mode-tab.active { background: var(--surface); color: var(--text-main); box-shadow: 0 2px 15px rgba(0,0,0,0.2); border: 1px solid var(--border); }
 
@@ -254,7 +257,6 @@ HTML_CODE = """<!DOCTYPE html>
         
         .message-text-ai { font-size: 1.05rem; line-height: 1.75; color: var(--text-main); font-weight: 500; word-break: break-word; align-self: flex-start; max-width: 95%;}
 
-        /* شعار الغواصة بدون نصوص مزعجة */
         .submarine-logo { width: 72px; height: 72px; filter: drop-shadow(0 0 20px rgba(65, 105, 225, 0.5)); color: var(--primary); }
 
         .complex-card-box {
@@ -276,7 +278,7 @@ HTML_CODE = """<!DOCTYPE html>
         .pulse-dot { width: 8px; height: 8px; background: var(--primary); border-radius: 50%; animation: pulse-anim 1s infinite ease-in-out; }
         @keyframes pulse-anim { 0%, 100% { transform: scale(0.8); opacity: 0.3; } 50% { transform: scale(1.4); opacity: 1; box-shadow: 0 0 10px var(--primary); } }
 
-        /* إطار الكتابة فائق النظافة */
+        /* إطار الكتابة */
         .chat-input-container { flex-shrink: 0; padding-bottom: 6px; position: relative; }
         .input-glass-panel {
             background: rgba(15, 16, 20, 0.85); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
@@ -372,13 +374,20 @@ HTML_CODE = """<!DOCTYPE html>
     </aside>
 
     <div class="main-wrapper">
-        <!-- شريط التنقل العلوي مع اسم التطبيق العصري -->
+        <!-- شريط التنقل العلوي المعدل: الهوية مستقلة والأنماط مستقلة -->
         <div class="top-nav-bar">
-            <button class="icon-btn" onclick="toggleSidebar()" title="Menu">
-                <i data-lucide="align-left"></i>
-            </button>
-
-            <div class="app-brand">ge<span>_</span>nius</div>
+            <div class="nav-left-group">
+                <button class="icon-btn" onclick="toggleSidebar()" title="Menu">
+                    <i data-lucide="align-left"></i>
+                </button>
+                <div class="app-brand">
+                    <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M16 13v-2a2 2 0 0 0-2-2h-1v-2a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v2H7a2 2 0 0 0-2 2v2"/>
+                        <path d="M4 11h16a2 2 0 0 1 2 2v2a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5v-2a2 2 0 0 1 2-2z"/>
+                    </svg>
+                    ge<span>_</span>nius
+                </div>
+            </div>
 
             <div class="mode-switcher-bar">
                 <button class="mode-tab active" id="modeStudy" onclick="switchMode('study')">Study</button>
@@ -391,7 +400,6 @@ HTML_CODE = """<!DOCTYPE html>
             <div class="chat-container-wrapper">
                 <div class="chat-feed" id="chatFeed">
                     <div id="welcomeMsg" style="color: var(--text-dim); text-align: center; padding: 80px 20px; display: flex; flex-direction: column; align-items: center; gap: 16px;">
-                        <!-- شعار الغواصة فقط بدون أي نصوص مزعجة تحته -->
                         <svg class="submarine-logo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M16 13v-2a2 2 0 0 0-2-2h-1v-2a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v2H7a2 2 0 0 0-2 2v2"/>
                             <path d="M4 11h16a2 2 0 0 1 2 2v2a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5v-2a2 2 0 0 1 2-2z"/>
@@ -426,7 +434,6 @@ HTML_CODE = """<!DOCTYPE html>
 
                     <textarea id="userQuery" placeholder="Ask ge_nius..." rows="1" oninput="autoResizeTextarea(this)"></textarea>
                     
-                    <!-- إصلاح وتفعيل زر المايك للتسجيل الصوتي -->
                     <button class="tool-btn" id="voiceRecordBtn" onclick="toggleVoiceRecording()" title="Voice Input">
                         <i data-lucide="mic"></i>
                     </button>
@@ -524,7 +531,6 @@ HTML_CODE = """<!DOCTYPE html>
 
         const chatFeed = document.getElementById('chatFeed');
 
-        // إصلاح تسجيل الصوت (Speech Recognition يعمل الآن بكفاءة عالية)
         let recognition = null;
         function toggleVoiceRecording() {
             const btn = document.getElementById('voiceRecordBtn');
@@ -557,8 +563,8 @@ HTML_CODE = """<!DOCTYPE html>
             recognition.start();
         }
 
-        let chatSessions = JSON.parse(localStorage.getItem('ge_nius_sessions_v4')) || {};
-        let currentSessionId = localStorage.getItem('ge_nius_current_session_v4');
+        let chatSessions = JSON.parse(localStorage.getItem('ge_nius_sessions_v5')) || {};
+        let currentSessionId = localStorage.getItem('ge_nius_current_session_v5');
 
         function initSessions() {
             if (!currentSessionId || !chatSessions[currentSessionId]) { createNewSessionQuiet(); } 
@@ -636,8 +642,8 @@ HTML_CODE = """<!DOCTYPE html>
         }
 
         function saveSessionsData() {
-            localStorage.setItem('ge_nius_sessions_v4', JSON.stringify(chatSessions));
-            localStorage.setItem('ge_nius_current_session_v4', currentSessionId);
+            localStorage.setItem('ge_nius_sessions_v5', JSON.stringify(chatSessions));
+            localStorage.setItem('ge_nius_current_session_v5', currentSessionId);
             renderChatHistoryList();
         }
 
@@ -657,7 +663,6 @@ HTML_CODE = """<!DOCTYPE html>
 
         initSessions();
 
-        // قراءة الصوت أصبحت يدوية تماماً بناءً على رغبة المستخدم (لا توجد قراءة تلقائية مزعجة)
         window.speakText = function(text) {
             if ('speechSynthesis' in window) {
                 window.speechSynthesis.cancel();
@@ -765,7 +770,9 @@ HTML_CODE = """<!DOCTYPE html>
 
             const loadingRow = document.createElement('div'); loadingRow.className = 'message-row loading-bubble-temp';
             loadingRow.innerHTML = `
-                <div class="message-sender" style="color:var(--primary)"><i data-lucide="cpu" style="width:12px;height:12px;"></i> ge_nius</div>
+                <div class="message-sender" style="color:var(--primary)">
+                    <svg style="width:14px;height:14px;display:inline-block;vertical-align:middle;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 13v-2a2 2 0 0 0-2-2h-1v-2a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v2H7a2 2 0 0 0-2 2v2"/><path d="M4 11h16a2 2 0 0 1 2 2v2a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5v-2a2 2 0 0 1 2-2z"/></svg> ge_nius
+                </div>
                 <div class="hologram-thinking">
                     <div class="pulse-dot"></div>
                     <span>Processing logic...</span>
@@ -784,15 +791,22 @@ HTML_CODE = """<!DOCTYPE html>
                 chatFeed.removeChild(loadingRow);
                 const aiRow = document.createElement('div'); aiRow.className = 'message-row';
 
+                # أداة التعريف بالرد (مع أيقونة الغواصة المصغرة بجانب الاسم)
+                const aiHeaderHtml = `
+                    <div class="message-sender" style="color:var(--primary); display:flex; align-items:center; gap:5px;">
+                        <svg style="width:14px;height:14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 13v-2a2 2 0 0 0-2-2h-1v-2a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v2H7a2 2 0 0 0-2 2v2"/><path d="M4 11h16a2 2 0 0 1 2 2v2a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5v-2a2 2 0 0 1 2-2z"/></svg> ge_nius
+                    </div>
+                `;
+
                 if (data.status === 'out_of_scope') {
-                    aiRow.innerHTML = `<div class="message-sender" style="color:var(--danger)">ge_nius</div><div class="message-text-ai" style="color:#fca5a5;">Out of curriculum scope. Switch to General mode.</div>`;
+                    aiRow.innerHTML = `${aiHeaderHtml}<div class="message-text-ai" style="color:#fca5a5;">Out of curriculum scope. Switch to General mode.</div>`;
                 } else if (data.status === 'success') {
                     const fullText = data.answer;
                     const encoded = encodeURIComponent(fullText);
                     
                     if (fullText.includes("```") || fullText.length > 500) {
                         aiRow.innerHTML = `
-                            <div class="message-sender"><i data-lucide="bot" style="width:12px;height:12px;color:var(--primary)"></i> ge_nius</div>
+                            ${aiHeaderHtml}
                             <div class="complex-card-box">
                                 <div class="complex-card-header">
                                     <span>Detailed Output</span>
@@ -804,14 +818,13 @@ HTML_CODE = """<!DOCTYPE html>
                         `;
                     } else {
                         aiRow.innerHTML = `
-                            <div class="message-sender"><i data-lucide="bot" style="width:12px;height:12px;color:var(--primary)"></i> ge_nius</div>
+                            ${aiHeaderHtml}
                             <div class="message-text-ai ai-content" style="padding-top:4px;">${marked.parse(fullText)}</div>
                             <div><button class="audio-speech-btn" onclick="speakText('${encoded}')"><i data-lucide="volume-2" style="width:14px;height:14px;"></i> Listen</button></div>
                         `;
                     }
-                    // ملاحظة: تم إزالة التشغيل التلقائي تماماً، ولن ينطق الصوت إلا إذا ضغط المستخدم زر (Listen).
                 } else {
-                    aiRow.innerHTML = `<div class="message-sender" style="color:var(--danger)">ge_nius</div><div class="message-text-ai">Error: ${data.error || 'Failed.'}</div>`;
+                    aiRow.innerHTML = `${aiHeaderHtml}<div class="message-text-ai">Error: ${data.error || 'Failed.'}</div>`;
                 }
                 
                 chatFeed.appendChild(aiRow); lucide.createIcons({root: aiRow});
