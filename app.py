@@ -44,6 +44,11 @@ def load_curriculum(session_id):
             return [{"id": r[0], "title": r[1], "concepts": r[2]} for r in rows]
         except Exception as e:
             pass
+        finally:
+            try:
+                conn.close()
+            except:
+                pass
     return MOCK_DB.get(session_id, [])
 
 def add_document_to_db(session_id, title, content):
@@ -60,6 +65,11 @@ def add_document_to_db(session_id, title, content):
             return
         except Exception as e:
             pass
+        finally:
+            try:
+                conn.close()
+            except:
+                pass
     if session_id not in MOCK_DB:
         MOCK_DB[session_id] = []
     MOCK_DB[session_id].append({"id": MOCK_DB_DOC_ID, "title": title, "concepts": content})
@@ -78,6 +88,11 @@ def delete_document_from_db(session_id, doc_id):
             return
         except Exception as e:
             pass
+        finally:
+            try:
+                conn.close()
+            except:
+                pass
     if session_id in MOCK_DB:
         MOCK_DB[session_id] = [d for d in MOCK_DB[session_id] if str(d["id"]) != str(doc_id)]
 
@@ -140,7 +155,6 @@ HTML_CODE = """<!DOCTYPE html>
             width: 100%; height: 100%; height: 100dvh; max-width: 900px; margin: 0 auto; 
         }
 
-        /* شريط سفلي خفيف للأزرار الجانبية دون إطار علوي مزدحم */
         .top-nav-bar {
             display: flex; justify-content: space-between; align-items: center;
             padding: 4px 8px; flex-shrink: 0;
@@ -153,7 +167,6 @@ HTML_CODE = """<!DOCTYPE html>
         }
         .icon-btn:hover { background: var(--primary); color: white; }
 
-        /* شريط اختيار الأنماط المتقدم */
         .mode-switcher-bar {
             display: flex; gap: 6px; background: var(--surface); padding: 4px; border-radius: 14px;
             border: 1px solid var(--border); flex-shrink: 0; overflow-x: auto;
@@ -167,7 +180,6 @@ HTML_CODE = """<!DOCTYPE html>
 
         .lucide { width: 18px; height: 18px; stroke-width: 2.2; display: inline-block; vertical-align: middle; }
 
-        /* Sidebar & Overlay */
         .sidebar-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 999; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
         .sidebar-overlay.active { opacity: 1; pointer-events: auto; }
         
@@ -199,7 +211,6 @@ HTML_CODE = """<!DOCTYPE html>
         
         .card { background: rgba(28, 25, 23, 0.85); backdrop-filter: blur(12px); border-radius: 18px; border: 1px solid var(--border); padding: 16px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 8px 30px rgba(0,0,0,0.1); }
 
-        /* نظام تدفق المحادثة النظيف (بدون فقاعات تقليدية للنصوص العادية) */
         .chat-feed {
             display: flex; flex-direction: column; gap: 16px; flex: 1; overflow-y: auto; padding: 12px 6px;
             background: transparent; scroll-behavior: smooth;
@@ -211,7 +222,6 @@ HTML_CODE = """<!DOCTYPE html>
         .message-sender { font-size: 0.75rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px; }
         .message-text { font-size: 0.98rem; line-height: 1.7; color: var(--text-main); word-break: break-word; }
 
-        /* كارد مخصص فقط للتمارين والأكواد المعقدة */
         .complex-card-box {
             background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 14px;
             margin: 6px 0; box-shadow: 0 4px 15px rgba(0,0,0,0.2); position: relative; overflow-x: auto;
@@ -227,7 +237,6 @@ HTML_CODE = """<!DOCTYPE html>
         .cursor-blink { animation: blink 1s step-start infinite; color: var(--primary); font-weight: bold; }
         @keyframes blink { 50% { opacity: 0; } }
 
-        /* إطار الكتابة الأنيق على غرار ChatGPT */
         .chat-input-container { flex-shrink: 0; }
         .chat-input-box {
             background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 10px 14px;
@@ -280,7 +289,6 @@ HTML_CODE = """<!DOCTYPE html>
 </head>
 <body>
 
-    <!-- القائمة الجانبية لإدارة السجلات والوثائق -->
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
@@ -307,16 +315,14 @@ HTML_CODE = """<!DOCTYPE html>
     </aside>
 
     <div class="main-wrapper">
-        <!-- شريط علوي مرن ونظيف جداً -->
         <div class="top-nav-bar">
             <button class="icon-btn" onclick="toggleSidebar()" title="Menu">
                 <i data-lucide="align-right"></i>
             </button>
 
-            <!-- شريط تغيير الأنماط الذكي -->
             <div class="mode-switcher-bar">
                 <button class="mode-tab active" id="modeStudy" onclick="setMode('study')">
-                    <i data-lucide="graduation-cap">|</i> Study
+                    <i data-lucide="graduation-cap"></i> Study
                 </button>
                 <button class="mode-tab" id="modeGeneral" onclick="setMode('general')">
                     <i data-lucide="globe"></i> General
@@ -331,7 +337,6 @@ HTML_CODE = """<!DOCTYPE html>
             </button>
         </div>
 
-        <!-- TAB 1: Chat Feed -->
         <div class="tab-section active" id="askTab">
             <div class="chat-feed" id="chatFeed">
                 <div id="welcomeMsg" style="color: var(--text-dim); text-align: center; padding: 40px 20px; display: flex; flex-direction: column; align-items: center; gap: 10px;">
@@ -341,7 +346,6 @@ HTML_CODE = """<!DOCTYPE html>
                 </div>
             </div>
 
-            <!-- إطار الكتابة الراقي -->
             <div class="chat-input-container">
                 <div class="chat-input-box">
                     <div class="image-preview-bar" id="questionImgPreview">
@@ -365,7 +369,6 @@ HTML_CODE = """<!DOCTYPE html>
                             </label>
                             <input type="file" id="qFileInputGallery" accept="image/*">
 
-                            <!-- زر التسجيل الصوتي المباشر -->
                             <button class="tool-btn" id="voiceRecordBtn" onclick="toggleVoiceRecording()" title="Voice Input">
                                 <i data-lucide="mic"></i>
                             </button>
@@ -379,7 +382,6 @@ HTML_CODE = """<!DOCTYPE html>
             </div>
         </div>
 
-        <!-- TAB 2: Curriculum Documents Section -->
         <div class="tab-section" id="docsTab">
             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px;">
                 <h3 style="margin:0; font-size: 1.1rem; color: var(--text-main);">Curriculum Documents</h3>
@@ -447,7 +449,6 @@ HTML_CODE = """<!DOCTYPE html>
             el.style.height = (el.scrollHeight) + 'px';
         }
 
-        // الأنماط (Study, General, Games)
         let currentMode = 'study';
         function setMode(mode) {
             currentMode = mode;
@@ -462,7 +463,6 @@ HTML_CODE = """<!DOCTYPE html>
             }
         }
 
-        // نظام السجلات والجلسات الفردية
         let chatSessions = JSON.parse(localStorage.getItem('ge_nius_sessions_v3')) || {};
         let currentSessionId = localStorage.getItem('ge_nius_current_session_v3');
         const chatFeed = document.getElementById('chatFeed');
@@ -508,7 +508,6 @@ HTML_CODE = """<!DOCTYPE html>
             if(document.getElementById('sidebar').classList.contains('open')) toggleSidebar();
         }
 
-        // حذف سجل فردي بعينه
         function deleteSessionItem(e, id) {
             e.stopPropagation();
             if(confirm('Delete this chat history?')) {
@@ -574,7 +573,6 @@ HTML_CODE = """<!DOCTYPE html>
 
         initSessions();
 
-        // خاصية قراءة النص بصوت (Text-to-Speech)
         window.speakText = function(text) {
             if ('speechSynthesis' in window) {
                 window.speechSynthesis.cancel();
@@ -585,7 +583,6 @@ HTML_CODE = """<!DOCTYPE html>
             }
         };
 
-        // خاصية التسجيل الصوتي عبر الميكروفون
         let recognition = null;
         function toggleVoiceRecording() {
             const btn = document.getElementById('voiceRecordBtn');
@@ -604,7 +601,7 @@ HTML_CODE = """<!DOCTYPE html>
 
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             recognition = new SpeechRecognition();
-            recognition.lang = 'en-US'; // يمكن التحدث بأي لغة وسيتعرف عليها المتصفح
+            recognition.lang = 'en-US';
             recognition.interimResults = false;
 
             recognition.onstart = () => { btn.classList.add('recording'); };
@@ -702,7 +699,6 @@ HTML_CODE = """<!DOCTYPE html>
             let userTextDisplay = query.replace(/\\n/g, '<br>');
             if (attachedQuestionBase64) { userTextDisplay = (query ? userTextDisplay + '<br>' : '') + '<span style="color:#60a5fa; font-size:0.85em"><i data-lucide="image" style="width:14px;height:14px;"></i> Image attached</span>'; }
 
-            // تدرج المحادثة النظيف بدون فقاعات دردشة جانبية تقليدية
             const userRow = document.createElement('div'); userRow.className = 'message-row';
             userRow.innerHTML = `<div class="message-sender"><i data-lucide="user" style="width:14px;height:14px;"></i> You</div><div class="message-text">${userTextDisplay}</div>`;
             chatFeed.appendChild(userRow); lucide.createIcons({root: userRow});
@@ -727,7 +723,6 @@ HTML_CODE = """<!DOCTYPE html>
                 } else if (data.status === 'success') {
                     const fullText = data.answer;
                     
-                    // تحليل ما إذا كان الرد يحتوي على كود برمجي أو تمرين معقد لفصله في كارد خاص
                     if (fullText.includes("```") || fullText.length > 500) {
                         const encoded = encodeURIComponent(fullText);
                         aiRow.innerHTML = `
@@ -770,7 +765,7 @@ HTML_CODE = """<!DOCTYPE html>
 """
 
 # ==============================================================================
-# Python Backend Server
+# Python Backend Server (Fixed and Optimized)
 # ==============================================================================
 class StudyAppRequestHandler(BaseHTTPRequestHandler):
 
@@ -787,125 +782,132 @@ class StudyAppRequestHandler(BaseHTTPRequestHandler):
         headers = { "Content-Type": "application/json", "Authorization": f"Bearer {API_KEY}" }
         ssl_ctx = ssl._create_unverified_context()
         req = urllib.request.Request(API_URL, data=req_data, headers=headers, method="POST")
-        with urllib.request.urlopen(req, context=ssl_ctx) as response:
+        # تم إضافة timeout بحجم 50 ثانية لمنع تجمد السيرفر نهائياً
+        with urllib.request.urlopen(req, context=ssl_ctx, timeout=50) as response:
             res_json = json.loads(response.read().decode("utf-8"))
             return res_json["choices"][0]["message"]["content"].strip()
 
     def do_GET(self):
-        if self.path == "/":
-            session_id = self.get_session_id()
-            is_new_session = False
-            if not session_id:
-                session_id = str(uuid.uuid4())
-                is_new_session = True
+        try:
+            if self.path == "/":
+                session_id = self.get_session_id()
+                is_new_session = False
+                if not session_id:
+                    session_id = str(uuid.uuid4())
+                    is_new_session = True
 
-            self.send_response(200)
-            self.send_header("Content-type", "text/html; charset=utf-8")
-            if is_new_session:
-                self.send_header("Set-Cookie", f"session_id={session_id}; Path=/; Max-Age=31536000; HttpOnly; SameSite=Lax")
-            self.end_headers()
-            self.wfile.write(HTML_CODE.encode("utf-8"))
-            
-        elif self.path == "/api/docs":
-            session_id = self.get_session_id()
-            if not session_id:
-                self.send_json_response([])
-                return
-            docs = load_curriculum(session_id)
-            self.send_json_response(docs)
+                self.send_response(200)
+                self.send_header("Content-type", "text/html; charset=utf-8")
+                if is_new_session:
+                    self.send_header("Set-Cookie", f"session_id={session_id}; Path=/; Max-Age=31536000; HttpOnly; SameSite=Lax")
+                self.end_headers()
+                self.wfile.write(HTML_CODE.encode("utf-8"))
+                
+            elif self.path == "/api/docs":
+                session_id = self.get_session_id()
+                if not session_id:
+                    self.send_json_response([])
+                    return
+                docs = load_curriculum(session_id)
+                self.send_json_response(docs)
+        except Exception as e:
+            self.send_json_response({"error": str(e)})
 
     def do_POST(self):
-        session_id = self.get_session_id()
-        if not session_id:
-            self.send_json_response({"error": "Invalid session."})
-            return
-
-        content_length = int(self.headers.get('Content-Length', 0))
-        post_data = self.rfile.read(content_length)
-        req_json = json.loads(post_data.decode('utf-8')) if post_data else {}
-
-        if self.path == "/api/docs/upload":
-            image_base64 = req_json.get("image")
-            if not image_base64:
-                self.send_json_response({"error": "No image"})
+        try:
+            session_id = self.get_session_id()
+            if not session_id:
+                self.send_json_response({"error": "Invalid session."})
                 return
-            try:
-                prompt = "Read this document image and extract all concepts, text, and rules clearly."
+
+            content_length = int(self.headers.get('Content-Length', 0))
+            post_data = self.rfile.read(content_length)
+            req_json = json.loads(post_data.decode('utf-8')) if post_data else {}
+
+            if self.path == "/api/docs/upload":
+                image_base64 = req_json.get("image")
+                if not image_base64:
+                    self.send_json_response({"error": "No image"})
+                    return
+                try:
+                    prompt = "Read this document image and extract all concepts, text, and rules clearly."
+                    payload = {
+                        "model": MODEL_NAME,
+                        "messages": [{"role": "user", "content": [{"type": "text", "text": prompt}, {"type": "image_url", "image_url": {"url": image_base64}}]}],
+                        "max_tokens": 4096
+                    }
+                    extracted_concepts = self.send_api_request(payload)
+                    add_document_to_db(session_id, "Document Lesson", extracted_concepts)
+                    docs = load_curriculum(session_id)
+                    self.send_json_response({"status": "success", "docs": docs})
+                except Exception as e:
+                    self.send_json_response({"error": str(e)})
+
+            elif self.path == "/api/docs/delete":
+                doc_id = req_json.get("id")
+                if doc_id is not None:
+                    delete_document_from_db(session_id, doc_id)
+                docs = load_curriculum(session_id)
+                self.send_json_response(docs)
+
+            elif self.path == "/api/ask":
+                user_query = req_json.get("query", "")
+                question_image_base64 = req_json.get("image")
+                mode = req_json.get("mode", "study") 
+                docs = load_curriculum(session_id)
+
+                messages_content = []
+                if question_image_base64:
+                    messages_content.append({"type": "image_url", "image_url": {"url": question_image_base64}})
+
+                if mode == "general":
+                    full_prompt = (
+                        f"You are a global AI assistant named ge_nius.\n"
+                        f"User prompt/request: \"{user_query}\"\n\n"
+                        f"IMPORTANT: Respond in the exact same language the user is using.\n"
+                        f"Provide a professional, accurate, and structured response using Markdown."
+                    )
+                elif mode == "games":
+                    full_prompt = (
+                        f"You are an interactive Brain Games and Puzzle master named ge_nius.\n"
+                        f"The user wants to play a thinking game, crossword, guess the animal/place, or solve a puzzle.\n"
+                        f"User input: \"{user_query}\"\n\n"
+                        f"IMPORTANT: Respond in the exact same language the user is using.\n"
+                        f"Engage the user interactively, propose fun puzzles, riddle questions, or guessing games, and make it exciting!"
+                    )
+                else:
+                    all_concepts_summary = "\n\n".join([f"Document {i+1}:\n{doc['concepts']}" for i, doc in enumerate(docs)])
+                    full_prompt = (
+                        f"You are an expert tutor.\n"
+                        f"Here is the student's curriculum study material:\n"
+                        f"--- START CURRICULUM ---\n"
+                        f"{all_concepts_summary}\n"
+                        f"--- END CURRICULUM ---\n\n"
+                        f"User question/request: \"{user_query}\"\n\n"
+                        f"IMPORTANT: Respond in the exact same language the user is asking in.\n"
+                        f"1. Does this relate to the curriculum?\n"
+                        f"2. If completely unrelated, reply with EXACTLY: OUT_OF_SCOPE\n"
+                        f"3. If in scope, provide a clear, step-by-step explanation using Markdown and equations if needed."
+                    )
+                    
+                messages_content.append({"type": "text", "text": full_prompt})
+
                 payload = {
                     "model": MODEL_NAME,
-                    "messages": [{"role": "user", "content": [{"type": "text", "text": prompt}, {"type": "image_url", "image_url": {"url": image_base64}}]}],
+                    "messages": [{"role": "user", "content": messages_content}],
                     "max_tokens": 4096
                 }
-                extracted_concepts = self.send_api_request(payload)
-                add_document_to_db(session_id, "Document Lesson", extracted_concepts)
-                docs = load_curriculum(session_id)
-                self.send_json_response({"status": "success", "docs": docs})
-            except Exception as e:
-                self.send_json_response({"error": str(e)})
 
-        elif self.path == "/api/docs/delete":
-            doc_id = req_json.get("id")
-            if doc_id is not None:
-                delete_document_from_db(session_id, doc_id)
-            docs = load_curriculum(session_id)
-            self.send_json_response(docs)
-
-        elif self.path == "/api/ask":
-            user_query = req_json.get("query", "")
-            question_image_base64 = req_json.get("image")
-            mode = req_json.get("mode", "study") 
-            docs = load_curriculum(session_id)
-
-            messages_content = []
-            if question_image_base64:
-                messages_content.append({"type": "image_url", "image_url": {"url": question_image_base64}})
-
-            if mode == "general":
-                full_prompt = (
-                    f"You are a global AI assistant named ge_nius.\n"
-                    f"User prompt/request: \"{user_query}\"\n\n"
-                    f"IMPORTANT: Respond in the exact same language the user is using.\n"
-                    f"Provide a professional, accurate, and structured response using Markdown."
-                )
-            elif mode == "games":
-                full_prompt = (
-                    f"You are an interactive Brain Games and Puzzle master named ge_nius.\n"
-                    f"The user wants to play a thinking game, crossword, guess the animal/place, or solve a puzzle.\n"
-                    f"User input: \"{user_query}\"\n\n"
-                    f"IMPORTANT: Respond in the exact same language the user is using.\n"
-                    f"Engage the user interactively, propose fun puzzles, riddle questions, or guessing games, and make it exciting!"
-                )
-            else:
-                all_concepts_summary = "\n\n".join([f"Document {i+1}:\n{doc['concepts']}" for i, doc in enumerate(docs)])
-                full_prompt = (
-                    f"You are an expert tutor.\n"
-                    f"Here is the student's curriculum study material:\n"
-                    f"--- START CURRICULUM ---\n"
-                    f"{all_concepts_summary}\n"
-                    f"--- END CURRICULUM ---\n\n"
-                    f"User question/request: \"{user_query}\"\n\n"
-                    f"IMPORTANT: Respond in the exact same language the user is asking in.\n"
-                    f"1. Does this relate to the curriculum?\n"
-                    f"2. If completely unrelated, reply with EXACTLY: OUT_OF_SCOPE\n"
-                    f"3. If in scope, provide a clear, step-by-step explanation using Markdown and equations if needed."
-                )
-                
-            messages_content.append({"type": "text", "text": full_prompt})
-
-            payload = {
-                "model": MODEL_NAME,
-                "messages": [{"role": "user", "content": messages_content}],
-                "max_tokens": 4096
-            }
-
-            try:
-                ai_reply = self.send_api_request(payload)
-                if mode == "study" and ("OUT_OF_SCOPE" in ai_reply or ai_reply.startswith("OUT_OF_SCOPE")):
-                    self.send_json_response({"status": "out_of_scope"})
-                else:
-                    self.send_json_response({"status": "success", "answer": ai_reply})
-            except Exception as e:
-                self.send_json_response({"status": "error", "error": str(e)})
+                try:
+                    ai_reply = self.send_api_request(payload)
+                    if mode == "study" and ("OUT_OF_SCOPE" in ai_reply or ai_reply.startswith("OUT_OF_SCOPE")):
+                        self.send_json_response({"status": "out_of_scope"})
+                    else:
+                        self.send_json_response({"status": "success", "answer": ai_reply})
+                except Exception as e:
+                    self.send_json_response({"status": "error", "error": str(e)})
+        except Exception as e:
+            self.send_json_response({"error": str(e)})
 
     def send_json_response(self, data):
         self.send_response(200)
