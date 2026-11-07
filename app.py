@@ -69,7 +69,7 @@ def delete_document_from_db(session_id, doc_id):
         pass
 
 # ==============================================================================
-# الواجهة الرسومية (النسخة الخرافية الكاملة: Markdown + Sounds + Theme + History)
+# الواجهة الرسومية (تطبيق احترافي متكامل بميزات القائمة الجانبية المتعددة)
 # ==============================================================================
 HTML_CODE = """<!DOCTYPE html>
 <html lang="ar" dir="rtl">
@@ -79,20 +79,12 @@ HTML_CODE = """<!DOCTYPE html>
     <title>ge_nius Assistant</title>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Outfit:wght@700;900&display=swap" rel="stylesheet">
     
-    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
-    
-    <!-- Marked.js لتحويل النصوص إلى تنسيق جميل -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
-    <!-- MathJax للمعادلات الرياضية -->
     <script>
       window.MathJax = {
-        tex: {
-          inlineMath: [['$', '$']],
-          displayMath: [['$$', '$$']],
-          processEscapes: true
-        },
+        tex: { inlineMath: [['$', '$']], displayMath: [['$$', '$$']], processEscapes: true },
         options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'] }
       };
     </script>
@@ -100,267 +92,311 @@ HTML_CODE = """<!DOCTYPE html>
 
     <style>
         :root {
-            /* الألوان الافتراضية (الوضع الليلي) */
-            --bg-main: #0f172a; --surface: #1e293b; --card: #334155;
+            /* الألوان الافتراضية (الليلي العصري) */
+            --bg-main: #020617; --surface: #0f172a; --card: #1e293b;
             --primary: #6366f1; --accent-purple: #8b5cf6; --accent-green: #10b981;
             --danger: #ef4444; --text-main: #f8fafc; --text-dim: #94a3b8;
-            --border: rgba(255, 255, 255, 0.08); --ai-bubble-bg: #17223b;
+            --border: rgba(255, 255, 255, 0.08); --ai-bubble-bg: rgba(30, 41, 59, 0.7);
+            --gradient-1: rgba(99, 102, 241, 0.15); --gradient-2: rgba(139, 92, 246, 0.15);
         }
 
-        /* الوضع النهاري */
         body.light-mode {
-            --bg-main: #f1f5f9; --surface: #ffffff; --card: #e2e8f0;
+            --bg-main: #f8fafc; --surface: #ffffff; --card: #f1f5f9;
             --primary: #4f46e5; --text-main: #0f172a; --text-dim: #475569;
-            --border: rgba(0, 0, 0, 0.1); --ai-bubble-bg: #e0e7ff;
+            --border: rgba(0, 0, 0, 0.08); --ai-bubble-bg: #ffffff;
+            --gradient-1: rgba(99, 102, 241, 0.08); --gradient-2: rgba(139, 92, 246, 0.08);
         }
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; transition: background-color 0.3s ease; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
         body {
-            font-family: 'Tajawal', sans-serif; background-color: var(--bg-main);
-            color: var(--text-main); margin: 0; padding: 12px;
-            min-height: 100vh; display: flex; flex-direction: column; gap: 12px;
+            font-family: 'Tajawal', sans-serif; 
+            background-color: var(--bg-main); color: var(--text-main);
+            margin: 0; padding: 0; min-height: 100vh;
+            /* خلفية عصرية متدرجة */
+            background-image: radial-gradient(circle at 15% 50%, var(--gradient-1), transparent 25%),
+                              radial-gradient(circle at 85% 30%, var(--gradient-2), transparent 25%);
+            background-attachment: fixed;
+            display: flex; flex-direction: column; overflow-x: hidden;
         }
 
+        .main-wrapper { padding: 12px; display: flex; flex-direction: column; gap: 12px; flex: 1; }
+
+        /* شريط التطبيق العلوي */
         .app-header {
-            background: var(--surface); padding: 18px 18px 12px; border-radius: 16px;
-            border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;
+            background: rgba(var(--surface), 0.8); backdrop-filter: blur(10px);
+            padding: 12px 16px; border-radius: 16px; border: 1px solid var(--border);
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
         }
         
         .header-actions { display: flex; gap: 10px; align-items: center; }
         
-        .theme-btn {
+        .icon-btn {
             background: var(--card); border: 1px solid var(--border); color: var(--text-main);
-            border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
-            cursor: pointer;
+            border-radius: 10px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.2s;
         }
+        .icon-btn:hover { background: var(--primary); color: white; }
 
+        /* لوقو الغواصة */
         .submarine-logo {
             position: relative; background: linear-gradient(180deg, #f59e0b, #d97706);
-            padding: 4px 18px; border-radius: 40px; border: 2px solid #b45309;
+            padding: 4px 16px; border-radius: 40px; border: 2px solid #b45309;
             display: inline-flex; align-items: center; justify-content: center;
             box-shadow: 0 4px 10px rgba(245, 158, 11, 0.25), inset 0 -3px 5px rgba(0,0,0,0.2);
-            color: #451a03; font-weight: 900; font-size: 1.15rem; letter-spacing: 1px;
-            font-family: 'Outfit', sans-serif; margin-right: 8px; margin-top: 5px;
+            color: #451a03; font-weight: 900; font-size: 1.1rem; letter-spacing: 1px; font-family: 'Outfit', sans-serif;
+            margin-top: 5px;
         }
-        .submarine-logo::before {
-            content: ''; position: absolute; top: -12px; left: 60%; width: 8px; height: 12px;
-            background: #f59e0b; border-left: 2px solid #b45309; border-right: 2px solid #b45309; z-index: 1;
-        }
-        .submarine-logo::after {
-            content: ''; position: absolute; top: -12px; left: calc(60% + 4px); width: 12px; height: 5px;
-            background: #f59e0b; border: 2px solid #b45309; border-radius: 2px; z-index: 2;
-        }
-        .submarine-propeller {
-            position: absolute; right: -10px; top: 50%; transform: translateY(-50%); width: 8px; height: 18px;
-            background: #94a3b8; border: 2px solid #475569; border-radius: 4px;
-        }
-        .submarine-propeller::after {
-            content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 4px; height: 22px;
-            background: #cbd5e1; border-radius: 2px; animation: spin-propeller 0.15s linear infinite;
-        }
+        .submarine-logo::before { content: ''; position: absolute; top: -12px; left: 60%; width: 8px; height: 12px; background: #f59e0b; border-left: 2px solid #b45309; border-right: 2px solid #b45309; z-index: 1; }
+        .submarine-logo::after { content: ''; position: absolute; top: -12px; left: calc(60% + 4px); width: 12px; height: 5px; background: #f59e0b; border: 2px solid #b45309; border-radius: 2px; z-index: 2; }
+        .submarine-propeller { position: absolute; right: -10px; top: 50%; transform: translateY(-50%); width: 8px; height: 18px; background: #94a3b8; border: 2px solid #475569; border-radius: 4px; }
+        .submarine-propeller::after { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 4px; height: 22px; background: #cbd5e1; border-radius: 2px; animation: spin-propeller 0.15s linear infinite; }
         @keyframes spin-propeller { 0% { transform: translate(-50%, -50%) scaleY(1); } 50% { transform: translate(-50%, -50%) scaleY(0.2); } 100% { transform: translate(-50%, -50%) scaleY(1); } }
 
         .lucide { width: 18px; height: 18px; stroke-width: 2.2; }
 
-        .tab-bar { display: flex; background: var(--surface); border-radius: 12px; padding: 4px; border: 1px solid var(--border); }
-        .tab-btn {
-            flex: 1; padding: 12px; background: none; border: none; color: var(--text-dim);
-            font-family: 'Tajawal', sans-serif; font-weight: 700; font-size: 0.95rem; cursor: pointer;
-            border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 8px;
+        /* القائمة الجانبية (Sidebar) */
+        .sidebar-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(2px); z-index: 99; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+        .sidebar-overlay.active { opacity: 1; pointer-events: auto; }
+        
+        .sidebar {
+            position: fixed; top: 0; left: -300px; width: 280px; height: 100vh;
+            background: var(--surface); border-right: 1px solid var(--border);
+            z-index: 100; transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex; flex-direction: column; padding: 20px;
+            box-shadow: 5px 0 20px rgba(0,0,0,0.2);
         }
-        .tab-btn.active { background: var(--primary); color: white; }
+        .sidebar.open { left: 0; }
+        
+        .sidebar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 15px;}
+        .sidebar h3 { margin: 0; font-size: 1.1rem; color: var(--text-main); display: flex; align-items: center; gap: 8px;}
+        
+        .mode-selector { margin: 15px 0; background: var(--card); padding: 10px; border-radius: 12px; border: 1px solid var(--border); }
+        .mode-selector label { font-size: 0.85rem; color: var(--text-dim); margin-bottom: 5px; display: block; }
+        .mode-selector select {
+            width: 100%; background: var(--surface); color: var(--text-main); border: 1px solid var(--border);
+            padding: 8px; border-radius: 8px; font-family: 'Tajawal', sans-serif; outline: none; cursor: pointer;
+        }
+
+        .chat-history-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+        .history-item {
+            background: transparent; border: 1px solid transparent; color: var(--text-main);
+            padding: 12px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; gap: 10px;
+            font-family: 'Tajawal', sans-serif; font-size: 0.9rem; transition: all 0.2s; text-align: right;
+        }
+        .history-item:hover { background: var(--card); }
+        .history-item.active { background: var(--gradient-1); border: 1px solid var(--primary); color: var(--primary); font-weight: bold; }
+        
+        /* التبويبات و المحتوى */
+        .tab-bar { display: flex; background: var(--surface); border-radius: 12px; padding: 4px; border: 1px solid var(--border); }
+        .tab-btn { flex: 1; padding: 12px; background: none; border: none; color: var(--text-dim); font-family: 'Tajawal', sans-serif; font-weight: 700; font-size: 0.95rem; cursor: pointer; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .tab-btn.active { background: var(--primary); color: white; box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3); }
 
         .tab-section { display: none; flex-direction: column; gap: 12px; flex: 1; }
         .tab-section.active { display: flex; }
+        .card { background: rgba(var(--surface), 0.7); backdrop-filter: blur(10px); border-radius: 16px; border: 1px solid var(--border); padding: 16px; display: flex; flex-direction: column; gap: 12px; }
 
-        .card { background: var(--surface); border-radius: 16px; border: 1px solid var(--border); padding: 16px; display: flex; flex-direction: column; gap: 12px; }
-
+        /* الشات */
         .chat-feed {
-            display: flex; flex-direction: column; gap: 14px; max-height: 55vh; overflow-y: auto; padding: 10px;
-            background: var(--card); border-radius: 12px; border: 1px solid var(--border); scroll-behavior: smooth;
+            display: flex; flex-direction: column; gap: 14px; height: 50vh; overflow-y: auto; padding: 10px 10px 30px;
+            background: transparent; scroll-behavior: smooth;
         }
-
-        .chat-bubble {
-            padding: 14px 16px; border-radius: 16px; font-size: 0.95rem; line-height: 1.8; max-width: 92%;
-            display: flex; gap: 10px; align-items: flex-start; position: relative;
-            animation: slideUp 0.3s ease-out forwards;
-        }
+        .chat-bubble { padding: 14px 18px; border-radius: 18px; font-size: 0.95rem; line-height: 1.8; max-width: 90%; display: flex; gap: 10px; align-items: flex-start; position: relative; animation: slideUp 0.3s ease-out forwards; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
         @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
-
-        .user-bubble { background: var(--primary); color: white; align-self: flex-start; border-bottom-right-radius: 4px; }
-        .ai-bubble { background: var(--ai-bubble-bg); color: var(--text-main); align-self: flex-end; border-bottom-left-radius: 4px; border: 1px solid var(--border); flex-direction: row-reverse; }
+        .user-bubble { background: linear-gradient(135deg, var(--primary), var(--accent-purple)); color: white; align-self: flex-start; border-bottom-right-radius: 4px; }
+        .ai-bubble { background: var(--ai-bubble-bg); color: var(--text-main); align-self: flex-end; border-bottom-left-radius: 4px; border: 1px solid var(--border); flex-direction: row-reverse; backdrop-filter: blur(5px); }
         
-        /* تحسينات الـ Markdown */
         .ai-content { width: 100%; overflow-x: auto; }
         .ai-content h1, .ai-content h2, .ai-content h3 { margin-top: 5px; margin-bottom: 10px; color: var(--accent-purple); }
         .ai-content p { margin: 5px 0; }
         .ai-content strong { color: var(--accent-green); }
+        .cursor-blink { animation: blink 1s step-start infinite; color: var(--primary); font-weight: bold; }
+        @keyframes blink { 50% { opacity: 0; } }
         
-        .copy-btn {
-            position: absolute; bottom: -10px; left: 10px; background: var(--surface); color: var(--text-dim);
-            border: 1px solid var(--border); border-radius: 8px; padding: 4px 8px; font-size: 0.75rem;
-            cursor: pointer; display: flex; align-items: center; gap: 4px; opacity: 0.8;
-        }
-        .copy-btn:hover { opacity: 1; color: var(--primary); }
+        .copy-btn { position: absolute; bottom: -14px; left: 14px; background: var(--card); color: var(--text-dim); border: 1px solid var(--border); border-radius: 8px; padding: 4px 10px; font-size: 0.75rem; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: all 0.2s; }
+        .copy-btn:hover { background: var(--primary); color: white; }
 
         .bubble-icon { flex-shrink: 0; margin-top: 2px; }
 
         .input-group { display: flex; flex-direction: column; gap: 6px; }
-        textarea {
-            background: var(--card); color: var(--text-main); border: 1px solid var(--border);
-            padding: 12px; border-radius: 10px; font-family: 'Tajawal', sans-serif; font-size: 0.95rem;
-            outline: none; resize: vertical; min-height: 60px;
-        }
+        textarea { background: var(--card); color: var(--text-main); border: 1px solid var(--border); padding: 14px; border-radius: 12px; font-family: 'Tajawal', sans-serif; font-size: 0.95rem; outline: none; resize: vertical; min-height: 60px; box-shadow: inset 0 2px 5px rgba(0,0,0,0.05); }
 
-        .image-preview-bar {
-            display: none; align-items: center; justify-content: space-between; background: rgba(139, 92, 246, 0.15);
-            border: 1px solid var(--accent-purple); padding: 8px 12px; border-radius: 10px; font-size: 0.85rem; color: var(--accent-purple);
-        }
-
-        .btn-controls { display: grid; grid-template-columns: 1fr auto auto auto; gap: 8px; }
-
-        .btn {
-            background: var(--primary); color: white; border: none; padding: 12px; border-radius: 10px;
-            font-family: 'Tajawal', sans-serif; font-weight: 700; font-size: 0.95rem; cursor: pointer;
-            display: flex; align-items: center; justify-content: center; gap: 8px; transition: transform 0.1s;
-        }
+        .btn-controls { display: grid; grid-template-columns: 1fr auto auto; gap: 8px; }
+        .btn { background: var(--primary); color: white; border: none; padding: 12px; border-radius: 12px; font-family: 'Tajawal', sans-serif; font-weight: 700; font-size: 0.95rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: transform 0.1s, box-shadow 0.2s; }
         .btn:active { transform: scale(0.96); }
         .btn-purple { background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%); }
         .btn-green { background: var(--accent-green); color: #042f2e; }
-        .btn-clear { background: var(--danger); }
+        .btn-danger { background: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.3); padding: 6px 12px; border-radius: 8px; font-size: 0.85rem;}
         input[type="file"] { display: none; }
 
-        .doc-item { background: var(--card); border-radius: 12px; padding: 12px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 8px; }
+        .doc-item { background: var(--card); border-radius: 12px; padding: 14px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 10px; }
         .doc-header { display: flex; justify-content: space-between; align-items: center; }
         .doc-title { font-weight: 700; font-size: 0.95rem; color: var(--accent-purple); display: flex; align-items: center; gap: 8px;}
-        .doc-body { font-size: 0.85rem; color: var(--text-dim); line-height: 1.5; max-height: 100px; overflow-y: auto; background: var(--surface); padding: 8px; border-radius: 6px; white-space: pre-wrap; }
+        .doc-body { font-size: 0.85rem; color: var(--text-dim); line-height: 1.6; max-height: 120px; overflow-y: auto; background: var(--surface); padding: 10px; border-radius: 8px; white-space: pre-wrap; }
 
         .spin-icon { animation: spin 1.2s linear infinite; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
         
-        .status-msg { display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.9rem; margin-top: 10px; font-weight: bold;}
+        /* التمرير المخصص */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.3); border-radius: 10px; }
     </style>
 </head>
 <body>
 
-    <header class="app-header">
-        <div class="submarine-logo">
-            ge_nius
-            <div class="submarine-propeller"></div>
+    <!-- القائمة الجانبية المظلمة -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h3><i data-lucide="menu"></i> القائمة</h3>
+            <button class="icon-btn" style="width:30px; height:30px; border:none; background:transparent;" onclick="toggleSidebar()"><i data-lucide="x"></i></button>
         </div>
-        <div class="header-actions">
-            <span style="font-size: 0.85rem; color: var(--accent-green); display: flex; align-items: center; gap: 5px;" id="docCountBadge">
-                <i data-lucide="database"></i> 0 وثائق
-            </span>
-            <button class="theme-btn" id="themeToggleBtn" onclick="toggleTheme()">
-                <i data-lucide="sun" id="themeIcon"></i>
+        
+        <button class="btn btn-purple" onclick="createNewChat()" style="margin-bottom: 15px;">
+            <i data-lucide="plus-circle"></i> فتح محادثة جديدة
+        </button>
+
+        <div class="mode-selector">
+            <label><i data-lucide="settings-2" style="width:14px; height:14px;"></i> نمط المساعد الحالي:</label>
+            <select id="chatModeSelect" onchange="updateChatMode()">
+                <option value="study">🎓 مساعد المنهج (شرح الدروس)</option>
+                <option value="general">🌍 محادثة عامة (أسئلة حرة)</option>
+            </select>
+        </div>
+
+        <h4 style="font-size: 0.85rem; color: var(--text-dim); margin-bottom: 5px;"><i data-lucide="history" style="width:14px; height:14px;"></i> سجل المحادثات:</h4>
+        <div class="chat-history-list" id="chatHistoryList">
+            <!-- سيتم إضافة المحادثات هنا برمجياً -->
+        </div>
+
+        <div style="margin-top: auto; padding-top: 15px; border-top: 1px solid var(--border);">
+            <button class="btn" style="width: 100%; background: var(--card); color: var(--text-main); border: 1px solid var(--border);" onclick="toggleTheme()">
+                <i data-lucide="sun" id="themeIcon"></i> تغيير المظهر
             </button>
         </div>
-    </header>
+    </aside>
 
-    <div class="tab-bar">
-        <button class="tab-btn active" id="btnAskTab" onclick="switchTab('askTab', this)">
-            <i data-lucide="message-circle-code"></i> المحادثة
-        </button>
-        <button class="tab-btn" id="btnDocsTab" onclick="switchTab('docsTab', this)">
-            <i data-lucide="files"></i> وثائق الدروس
-        </button>
-    </div>
-
-    <!-- TAB 1: Chat Feed -->
-    <div class="tab-section active" id="askTab">
-        <div class="chat-feed" id="chatFeed">
-            <div id="welcomeMsg" style="color: var(--text-dim); font-style: italic; text-align: center; padding: 15px; display: flex; flex-direction: column; align-items: center; gap: 8px;">
-                <i data-lucide="sparkles" style="width: 28px; height: 28px; color: var(--accent-purple);"></i>
-                مرحباً بك! ارفع وثائق دروسك، ثم صور أو اكتب سؤالك هنا ليجيبك النظام بدقة.
+    <div class="main-wrapper">
+        <header class="app-header">
+            <div class="header-actions">
+                <button class="icon-btn" onclick="toggleSidebar()">
+                    <i data-lucide="align-left"></i>
+                </button>
+                <div class="submarine-logo">
+                    ge_nius
+                    <div class="submarine-propeller"></div>
+                </div>
             </div>
+            <span style="font-size: 0.85rem; color: var(--accent-green); display: flex; align-items: center; gap: 5px;" id="docCountBadge">
+                <i data-lucide="database"></i> <span>0</span>
+            </span>
+        </header>
+
+        <div class="tab-bar">
+            <button class="tab-btn active" id="btnAskTab" onclick="switchTab('askTab', this)">
+                <i data-lucide="message-square"></i> الدردشة
+            </button>
+            <button class="tab-btn" id="btnDocsTab" onclick="switchTab('docsTab', this)">
+                <i data-lucide="folder-open"></i> وثائقي
+            </button>
         </div>
 
-        <div class="card">
-            <div class="image-preview-bar" id="questionImgPreview">
-                <span style="display: flex; align-items: center; gap: 6px;"><i data-lucide="image-check" style="width: 16px; height: 16px;"></i> تم إرفاق الصورة</span>
-                <span style="cursor: pointer; color: var(--danger); font-weight: bold; display: flex; align-items: center; gap: 4px;" onclick="removeQuestionImage()">
-                    <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i> إلغاء
-                </span>
+        <!-- TAB 1: Chat Feed -->
+        <div class="tab-section active" id="askTab">
+            <div class="chat-feed" id="chatFeed">
+                <!-- المحادثة تظهر هنا -->
             </div>
 
-            <div class="input-group">
-                <textarea id="userQuery" placeholder="اكتب سؤالك هنا أو ارفق صورة التمرين..."></textarea>
-            </div>
-            
-            <div class="btn-controls">
-                <button class="btn btn-green" onclick="submitQuestion()">
-                    <i data-lucide="send"></i> إرسال
-                </button>
-                <label for="qFileInputCamera" class="btn btn-purple" title="كاميرا">
-                    <i data-lucide="camera"></i>
-                </label>
-                <input type="file" id="qFileInputCamera" accept="image/*" capture="environment">
+            <div class="card" style="margin-top: auto;">
+                <div id="questionImgPreview" style="display: none; align-items: center; justify-content: space-between; background: rgba(139, 92, 246, 0.15); border: 1px solid var(--accent-purple); padding: 8px 12px; border-radius: 10px; font-size: 0.85rem; color: var(--accent-purple); margin-bottom: 8px;">
+                    <span style="display: flex; align-items: center; gap: 6px;"><i data-lucide="image-check" style="width: 16px; height: 16px;"></i> تم الإرفاق</span>
+                    <span style="cursor: pointer; color: var(--danger); font-weight: bold; display: flex; align-items: center; gap: 4px;" onclick="removeQuestionImage()">
+                        <i data-lucide="x-circle" style="width: 16px; height: 16px;"></i> حذف
+                    </span>
+                </div>
 
-                <label for="qFileInputGallery" class="btn btn-purple" title="معرض الصور">
-                    <i data-lucide="image"></i>
-                </label>
-                <input type="file" id="qFileInputGallery" accept="image/*">
+                <div class="input-group">
+                    <textarea id="userQuery" placeholder="اكتب سؤالك هنا..."></textarea>
+                </div>
                 
-                <button class="btn btn-clear" onclick="clearChat()" title="مسح المحادثة">
-                    <i data-lucide="trash"></i>
-                </button>
+                <div class="btn-controls">
+                    <button class="btn btn-green" onclick="submitQuestion()">
+                        <i data-lucide="send"></i> إرسال
+                    </button>
+                    <label for="qFileInputCamera" class="btn btn-purple" title="كاميرا">
+                        <i data-lucide="camera"></i>
+                    </label>
+                    <input type="file" id="qFileInputCamera" accept="image/*" capture="environment">
+
+                    <label for="qFileInputGallery" class="btn btn-purple" title="معرض الصور">
+                        <i data-lucide="image"></i>
+                    </label>
+                    <input type="file" id="qFileInputGallery" accept="image/*">
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- TAB 2: Curriculum Documents Section -->
-    <div class="tab-section" id="docsTab">
-        <div class="card">
-            <span style="font-weight: 700; font-size: 1rem; color: var(--accent-purple); display: flex; align-items: center; gap: 8px;">
-                <i data-lucide="file-plus-2"></i> إضافة وثائق دراسية
-            </span>
-            <p style="font-size: 0.8rem; color: var(--text-dim); margin: 0;">اختر التصوير المباشر لصفحة الدرس أو ارفع عدة صور معاً:</p>
-            
-            <div style="display: flex; gap: 8px;">
-                <label for="docFileInputCamera" class="btn btn-purple" style="flex: 1; text-align: center; margin:0;">
-                    <i data-lucide="camera"></i> تصوير مباشر
-                </label>
-                <input type="file" id="docFileInputCamera" accept="image/*" capture="environment">
+        <!-- TAB 2: Curriculum Documents -->
+        <div class="tab-section" id="docsTab">
+            <div class="card">
+                <span style="font-weight: 700; font-size: 1rem; color: var(--accent-purple); display: flex; align-items: center; gap: 8px;">
+                    <i data-lucide="file-up"></i> رفع درس جديد للمنهج
+                </span>
+                <p style="font-size: 0.85rem; color: var(--text-dim); margin: 0;">اختر التصوير المباشر لصفحة الدرس أو ارفع عدة صور معاً:</p>
+                
+                <div style="display: flex; gap: 8px; margin-top: 5px;">
+                    <label for="docFileInputCamera" class="btn btn-purple" style="flex: 1; text-align: center; margin:0;">
+                        <i data-lucide="camera"></i> كاميرا
+                    </label>
+                    <input type="file" id="docFileInputCamera" accept="image/*" capture="environment">
 
-                <label for="docFileInputGallery" class="btn btn-purple" style="flex: 1; text-align: center; margin:0;">
-                    <i data-lucide="images"></i> معرض الصور
-                </label>
-                <input type="file" id="docFileInputGallery" accept="image/*" multiple>
+                    <label for="docFileInputGallery" class="btn btn-purple" style="flex: 1; text-align: center; margin:0;">
+                        <i data-lucide="images"></i> معرض (متعدد)
+                    </label>
+                    <input type="file" id="docFileInputGallery" accept="image/*" multiple>
+                </div>
+                
+                <div id="uploadStatus" style="display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.9rem; margin-top: 10px; font-weight: bold;"></div>
             </div>
-            
-            <div id="uploadStatus" class="status-msg"></div>
-        </div>
 
-        <div class="card">
-            <span style="font-weight: 700; font-size: 0.9rem; color: var(--text-dim); display: flex; align-items: center; gap: 8px;">
-                <i data-lucide="folder-open"></i> الوثائق والأفكار المستخرجة الخاصة بك:
-            </span>
-            <div id="docsList" style="display: flex; flex-direction: column; gap: 10px;"></div>
+            <div class="card">
+                <span style="font-weight: 700; font-size: 0.9rem; color: var(--text-dim); display: flex; align-items: center; gap: 8px;">
+                    <i data-lucide="archive"></i> الأرشيف و الدروس المحللة:
+                </span>
+                <div id="docsList" style="display: flex; flex-direction: column; gap: 10px;"></div>
+            </div>
         </div>
     </div>
 
     <script>
-        // إعدادات الوضع الليلي / النهاري
+        // التهيئة والأيقونات
+        lucide.createIcons();
+
         function toggleTheme() {
             const isLight = document.body.classList.toggle('light-mode');
             localStorage.setItem('theme', isLight ? 'light' : 'dark');
             const themeIcon = document.getElementById('themeIcon');
             themeIcon.setAttribute('data-lucide', isLight ? 'moon' : 'sun');
-            lucide.createIcons();
+            lucide.createIcons(); playSound('tap');
+        }
+        if (localStorage.getItem('theme') === 'light') { document.body.classList.add('light-mode'); document.getElementById('themeIcon').setAttribute('data-lucide', 'moon'); lucide.createIcons(); }
+
+        // القائمة الجانبية
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('active');
             playSound('tap');
         }
-        if (localStorage.getItem('theme') === 'light') { document.body.classList.add('light-mode'); }
-        lucide.createIcons(); // تفعيل الأيقونات في البداية
-        if(document.body.classList.contains('light-mode')) { document.getElementById('themeIcon').setAttribute('data-lucide', 'moon'); lucide.createIcons(); }
 
-        // نظام الصوت الذكي 
+        // نظام الصوت الذكي
         function playSound(type) {
             try {
                 const ctx = new (window.AudioContext || window.webkitAudioContext)();
-                const osc = ctx.createOscillator();
-                const gain = ctx.createGain();
+                const osc = ctx.createOscillator(); const gain = ctx.createGain();
                 osc.connect(gain); gain.connect(ctx.destination);
                 if (type === 'send') { osc.frequency.setValueAtTime(400, ctx.currentTime); osc.type = 'sine'; gain.gain.setValueAtTime(0.05, ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1); osc.start(); osc.stop(ctx.currentTime + 0.1); }
                 else if (type === 'receive') { osc.frequency.setValueAtTime(800, ctx.currentTime); osc.type = 'triangle'; gain.gain.setValueAtTime(0.05, ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2); osc.start(); osc.stop(ctx.currentTime + 0.2); }
@@ -369,42 +405,108 @@ HTML_CODE = """<!DOCTYPE html>
             } catch(e) {}
         }
 
-        // استرجاع المحادثة المحفوظة
+        // إدارة الجلسات (المحادثات المتعددة)
+        let chatSessions = JSON.parse(localStorage.getItem('ge_nius_sessions')) || {};
+        let currentSessionId = localStorage.getItem('ge_nius_current_session');
         const chatFeed = document.getElementById('chatFeed');
-        const savedChat = localStorage.getItem('genius_chat_history');
-        if (savedChat && savedChat.trim() !== '') {
-            chatFeed.innerHTML = savedChat;
+        const modeSelect = document.getElementById('chatModeSelect');
+
+        function initSessions() {
+            if (!currentSessionId || !chatSessions[currentSessionId]) {
+                createNewChat(false);
+            } else {
+                loadChat(currentSessionId, false);
+            }
+            renderChatList();
+        }
+
+        function createNewChat(playSnd = true) {
+            if(playSnd) playSound('tap');
+            const id = Date.now().toString();
+            chatSessions[id] = { id: id, title: "محادثة جديدة", html: "", mode: "study" };
+            currentSessionId = id;
+            saveSessionsData();
+            loadChat(id, false);
+            if(document.getElementById('sidebar').classList.contains('open')) toggleSidebar();
+        }
+
+        function loadChat(id, playSnd = true) {
+            if(playSnd) playSound('tap');
+            currentSessionId = id;
+            const session = chatSessions[id];
+            modeSelect.value = session.mode || 'study';
+            
+            if (session.html && session.html.trim() !== '') {
+                chatFeed.innerHTML = session.html;
+            } else {
+                chatFeed.innerHTML = `<div id="welcomeMsg" style="color: var(--text-dim); font-style: italic; text-align: center; padding: 20px; display: flex; flex-direction: column; align-items: center; gap: 8px;"><i data-lucide="sparkles" style="width: 32px; height: 32px; color: var(--accent-purple);"></i> ابدأ محادثة جديدة الآن!</div>`;
+            }
+            
             lucide.createIcons({root: chatFeed});
             if (window.MathJax) MathJax.typesetPromise([chatFeed]);
             chatFeed.scrollTop = chatFeed.scrollHeight;
-        }
-        function saveChatHistory() {
-            // مسح رسالة التحميل قبل الحفظ
-            const clones = chatFeed.cloneNode(true);
-            const loaders = clones.querySelectorAll('.loading-bubble-temp');
-            loaders.forEach(l => l.remove());
-            localStorage.setItem('genius_chat_history', clones.innerHTML);
-        }
-        function clearChat() {
-            playSound('tap');
-            if(confirm('هل أنت متأكد من مسح محادثة اليوم؟')) {
-                localStorage.removeItem('genius_chat_history');
-                chatFeed.innerHTML = `<div id="welcomeMsg" style="color: var(--text-dim); font-style: italic; text-align: center; padding: 15px; display: flex; flex-direction: column; align-items: center; gap: 8px;"><i data-lucide="sparkles" style="width: 28px; height: 28px; color: var(--accent-purple);"></i>تم مسح المحادثة بنجاح.</div>`;
-                lucide.createIcons();
-            }
+            
+            saveSessionsData();
+            renderChatList();
+            if(playSnd && document.getElementById('sidebar').classList.contains('open')) toggleSidebar();
         }
 
-        // نسخ النص
+        function updateChatMode() {
+            chatSessions[currentSessionId].mode = modeSelect.value;
+            saveSessionsData();
+        }
+
+        function saveCurrentChatHtml(userQueryText = null) {
+            const clones = chatFeed.cloneNode(true);
+            clones.querySelectorAll('.loading-bubble-temp').forEach(l => l.remove());
+            chatSessions[currentSessionId].html = clones.innerHTML;
+            
+            // تحديث اسم المحادثة تلقائياً بناءً على أول سؤال
+            if (userQueryText && chatSessions[currentSessionId].title === "محادثة جديدة") {
+                chatSessions[currentSessionId].title = userQueryText.substring(0, 20) + "...";
+            }
+            saveSessionsData();
+        }
+
+        function saveSessionsData() {
+            localStorage.setItem('ge_nius_sessions', JSON.stringify(chatSessions));
+            localStorage.setItem('ge_nius_current_session', currentSessionId);
+            renderChatList();
+        }
+
+        function renderChatList() {
+            const listDiv = document.getElementById('chatHistoryList');
+            listDiv.innerHTML = '';
+            // ترتيب عكسي (الأحدث أولاً)
+            const sortedIds = Object.keys(chatSessions).sort((a, b) => b - a);
+            
+            sortedIds.forEach(id => {
+                const session = chatSessions[id];
+                const icon = session.mode === 'general' ? 'globe' : 'graduation-cap';
+                const isActive = id === currentSessionId ? 'active' : '';
+                
+                listDiv.innerHTML += `
+                    <div class="history-item ${isActive}" onclick="loadChat('${id}')">
+                        <i data-lucide="${icon}" style="width: 16px; height: 16px;"></i>
+                        <span style="flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${session.title}</span>
+                    </div>
+                `;
+            });
+            lucide.createIcons({root: listDiv});
+        }
+
+        initSessions(); // تشغيل عند البداية
+
         window.copyText = function(btn, text) {
             navigator.clipboard.writeText(decodeURIComponent(text)).then(() => {
                 const originalHtml = btn.innerHTML;
-                btn.innerHTML = `<i data-lucide="check"></i> تم النسخ`;
-                lucide.createIcons({root: btn});
-                playSound('tap');
+                btn.innerHTML = `<i data-lucide="check"></i> تم`;
+                lucide.createIcons({root: btn}); playSound('tap');
                 setTimeout(() => { btn.innerHTML = originalHtml; lucide.createIcons({root: btn}); }, 2000);
             });
         };
 
+        // نظام الوثائق
         let curriculumDocs = [];
         let attachedQuestionBase64 = null;
         fetchDocs();
@@ -414,30 +516,24 @@ HTML_CODE = """<!DOCTYPE html>
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.querySelectorAll('.tab-section').forEach(s => s.classList.remove('active'));
             if(btnElement) btnElement.classList.add('active');
-            const targetSection = document.getElementById(tabId);
-            if(targetSection) targetSection.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
         }
 
         function fetchDocs() {
-            fetch('/api/docs').then(res => res.json()).then(data => {
-                curriculumDocs = data; renderDocs();
-            }).catch(err => console.log(err));
+            fetch('/api/docs').then(res => res.json()).then(data => { curriculumDocs = data; renderDocs(); }).catch(err => console.log(err));
         }
 
         function renderDocs() {
             const listDiv = document.getElementById('docsList');
             const countBadge = document.getElementById('docCountBadge');
-            if(countBadge) { countBadge.innerHTML = `<i data-lucide="database" style="width: 14px; height: 14px;"></i> ${curriculumDocs.length} وثائق`; lucide.createIcons({root: countBadge}); }
+            if(countBadge) { countBadge.innerHTML = `<i data-lucide="database" style="width:14px; height:14px;"></i> <span>${curriculumDocs.length}</span>`; lucide.createIcons({root: countBadge}); }
             if (!listDiv) return;
-            if (curriculumDocs.length === 0) {
-                listDiv.innerHTML = '<div style="color: var(--text-dim); font-style: italic; text-align: center; padding: 10px;">لم تضف أي وثائق دروس بعد.</div>';
-                return;
-            }
-            listDiv.innerHTML = curriculumDocs.map((item, index) => `
+            if (curriculumDocs.length === 0) { listDiv.innerHTML = '<div style="color: var(--text-dim); text-align: center; padding: 10px;">لا توجد وثائق.</div>'; return; }
+            listDiv.innerHTML = curriculumDocs.map((item, i) => `
                 <div class="doc-item">
                     <div class="doc-header">
-                        <span class="doc-title"><i data-lucide="file-text"></i> وثيقة ${index + 1}</span>
-                        <button class="btn btn-clear" style="padding: 4px 10px;" onclick="deleteDoc(${item.id})"><i data-lucide="trash-2" style="width: 14px; height: 14px;"></i> حذف</button>
+                        <span class="doc-title"><i data-lucide="file-text"></i> صفحة ${i + 1}</span>
+                        <button class="btn btn-danger" onclick="deleteDoc(${item.id})"><i data-lucide="trash-2" style="width:14px; height:14px;"></i> حذف</button>
                     </div>
                     <div class="doc-body">${item.concepts}</div>
                 </div>
@@ -446,57 +542,46 @@ HTML_CODE = """<!DOCTYPE html>
         }
 
         function handleQuestionImageSelect(e) {
-            playSound('tap');
-            const file = e.target.files[0];
-            if (!file) return;
+            playSound('tap'); const file = e.target.files[0]; if (!file) return;
             const reader = new FileReader();
-            reader.onload = function(evt) {
-                attachedQuestionBase64 = evt.target.result;
-                const preview = document.getElementById('questionImgPreview');
-                if(preview) preview.style.display = 'flex';
-            };
-            reader.readAsDataURL(file);
-            e.target.value = '';
+            reader.onload = function(evt) { attachedQuestionBase64 = evt.target.result; document.getElementById('questionImgPreview').style.display = 'flex'; };
+            reader.readAsDataURL(file); e.target.value = '';
         }
         document.getElementById('qFileInputCamera').addEventListener('change', handleQuestionImageSelect);
         document.getElementById('qFileInputGallery').addEventListener('change', handleQuestionImageSelect);
-
         function removeQuestionImage() { playSound('tap'); attachedQuestionBase64 = null; document.getElementById('questionImgPreview').style.display = 'none'; }
 
         async function handleDocImageSelect(e) {
-            playSound('tap');
-            const files = e.target.files;
-            if (!files || files.length === 0) return;
+            playSound('tap'); const files = e.target.files; if (!files || files.length === 0) return;
             const statusDiv = document.getElementById('uploadStatus');
             for (let i = 0; i < files.length; i++) {
-                if(statusDiv) { statusDiv.innerHTML = `<i data-lucide="loader" class="spin-icon"></i> جاري قراءة وتفريغ الوثيقة ${i + 1} من ${files.length}...`; statusDiv.style.color = 'var(--primary)'; lucide.createIcons({root: statusDiv}); }
+                if(statusDiv) { statusDiv.innerHTML = `<i data-lucide="loader" class="spin-icon"></i> جاري رفع ${i + 1}/${files.length}...`; statusDiv.style.color = 'var(--primary)'; lucide.createIcons({root: statusDiv}); }
                 await new Promise((resolve) => {
                     const reader = new FileReader();
                     reader.onload = async function(evt) {
                         try {
                             const res = await fetch('/api/docs/upload', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ image: evt.target.result }) });
-                            const data = await res.json();
-                            if (data.docs) curriculumDocs = data.docs;
-                        } catch (err) {}
-                        resolve();
-                    };
-                    reader.readAsDataURL(files[i]);
+                            const data = await res.json(); if (data.docs) curriculumDocs = data.docs;
+                        } catch (err) {} resolve();
+                    }; reader.readAsDataURL(files[i]);
                 });
             }
             renderDocs();
-            if(statusDiv) { statusDiv.innerHTML = '<i data-lucide="check-circle-2"></i> تم الحفظ بنجاح!'; statusDiv.style.color = 'var(--accent-green)'; lucide.createIcons({root: statusDiv}); playSound('success'); }
-            e.target.value = '';
+            if(statusDiv) { statusDiv.innerHTML = '<i data-lucide="check-circle-2"></i> اكتمل الرفع!'; statusDiv.style.color = 'var(--accent-green)'; lucide.createIcons({root: statusDiv}); playSound('success'); }
         }
         document.getElementById('docFileInputCamera').addEventListener('change', handleDocImageSelect);
         document.getElementById('docFileInputGallery').addEventListener('change', handleDocImageSelect);
 
         function deleteDoc(id) { fetch('/api/docs/delete', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id }) }).then(res => res.json()).then(data => { curriculumDocs = data; renderDocs(); }); }
 
+        // إرسال السؤال والمحادثة
         function submitQuestion() {
             const queryInput = document.getElementById('userQuery');
             const query = queryInput.value.trim();
-            if (!query && !attachedQuestionBase64) { alert('يرجى كتابة سؤالك أو إرفاق صورة أولاً!'); return; }
-            if (curriculumDocs.length === 0) { alert('يرجى رفع وثائق دروسك أولاً!'); return; }
+            const currentMode = chatSessions[currentSessionId].mode;
+
+            if (!query && !attachedQuestionBase64) { alert('اكتب سؤالاً أو ارفق صورة!'); return; }
+            if (currentMode === 'study' && curriculumDocs.length === 0) { alert('أنت في وضع المنهج. يرجى رفع دروسك أولاً أو التبديل للوضع العام من القائمة الجانبية!'); return; }
             
             playSound('send');
             const welcome = document.getElementById('welcomeMsg'); if(welcome) welcome.remove();
@@ -504,73 +589,64 @@ HTML_CODE = """<!DOCTYPE html>
             let userTextDisplay = query;
             if (attachedQuestionBase64) { userTextDisplay = (query ? query + '<br>' : '') + '<span style="color:#fbbf24; font-size:0.85em"><i data-lucide="image" style="width:14px;height:14px;"></i> تم إرفاق صورة</span>'; }
 
-            const userBubble = document.createElement('div');
-            userBubble.className = 'chat-bubble user-bubble';
+            const userBubble = document.createElement('div'); userBubble.className = 'chat-bubble user-bubble';
             userBubble.innerHTML = `<i data-lucide="user" class="bubble-icon"></i> <div>${userTextDisplay}</div>`;
-            chatFeed.appendChild(userBubble);
-            lucide.createIcons({root: userBubble});
+            chatFeed.appendChild(userBubble); lucide.createIcons({root: userBubble});
 
-            const loadingBubble = document.createElement('div');
-            loadingBubble.className = 'chat-bubble ai-bubble loading-bubble-temp';
-            loadingBubble.innerHTML = `<i data-lucide="loader-circle" class="bubble-icon spin-icon"></i> <div class="thinking-text" style="color: var(--accent-purple); font-weight: bold;">أقرأ الوثائق... ⏳</div>`;
-            chatFeed.appendChild(loadingBubble);
-            lucide.createIcons({root: loadingBubble});
+            const loadingBubble = document.createElement('div'); loadingBubble.className = 'chat-bubble ai-bubble loading-bubble-temp';
+            loadingBubble.innerHTML = `<i data-lucide="loader-circle" class="bubble-icon spin-icon"></i> <div class="thinking-text" style="color: var(--accent-purple); font-weight: bold;">أفكر... ⏳</div>`;
+            chatFeed.appendChild(loadingBubble); lucide.createIcons({root: loadingBubble});
             
-            // تأثير التفكير الحي
-            const thinkPhrases = ["أقرأ الوثائق... ⏳", "أحلل سؤالك بدقة... 🧠", "أستخرج المفاهيم... 🔍", "أجهز لك الشرح السحري! ✨"];
+            const thinkPhrases = currentMode === 'study' ? ["أقرأ الوثائق... ⏳", "أحلل سؤالك... 🧠", "أجهز الشرح! ✨"] : ["أبحث في قاعدة معلوماتي... 🌍", "أرتب الأفكار... 🧠", "أجهز الإجابة! ✨"];
             let phraseIdx = 0;
-            const thinkInterval = setInterval(() => {
-                phraseIdx = (phraseIdx + 1) % thinkPhrases.length;
-                const txt = loadingBubble.querySelector('.thinking-text');
-                if(txt) txt.textContent = thinkPhrases[phraseIdx];
-            }, 2000);
+            const thinkInterval = setInterval(() => { phraseIdx = (phraseIdx + 1) % thinkPhrases.length; const txt = loadingBubble.querySelector('.thinking-text'); if(txt) txt.textContent = thinkPhrases[phraseIdx]; }, 2000);
 
-            const payload = { query: query, image: attachedQuestionBase64 };
+            saveCurrentChatHtml(query); // حفظ سؤال المستخدم فوراً
+
+            const payload = { query: query, image: attachedQuestionBase64, mode: currentMode };
             queryInput.value = ''; removeQuestionImage(); chatFeed.scrollTop = chatFeed.scrollHeight;
 
             fetch('/api/ask', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
             .then(res => res.json())
             .then(data => {
-                clearInterval(thinkInterval);
-                chatFeed.removeChild(loadingBubble);
-                playSound('receive');
+                clearInterval(thinkInterval); chatFeed.removeChild(loadingBubble); playSound('receive');
                 const aiBubble = document.createElement('div');
 
                 if (data.status === 'out_of_scope') {
-                    aiBubble.className = 'chat-bubble out-of-scope-bubble';
-                    aiBubble.innerHTML = `<i data-lucide="alert-triangle"></i> عذراً، هذا غير مدرج في برنامجك الدراسي`;
+                    aiBubble.className = 'chat-bubble out-of-scope-bubble'; aiBubble.innerHTML = `<i data-lucide="alert-triangle"></i> عذراً، هذا خارج برنامجك الدراسي. بدل للوضع العام من القائمة الجانبية.`;
+                    chatFeed.appendChild(aiBubble); lucide.createIcons({root: aiBubble}); chatFeed.scrollTop = chatFeed.scrollHeight; saveCurrentChatHtml();
                 } else if (data.status === 'success') {
                     aiBubble.className = 'chat-bubble ai-bubble';
-                    // تحويل الـ Markdown إلى HTML منسق وجميل
-                    const formattedHtml = marked.parse(data.answer);
-                    const encodedAnswer = encodeURIComponent(data.answer);
-                    aiBubble.innerHTML = `
-                        <i data-lucide="bot" class="bubble-icon" style="color: var(--accent-purple)"></i> 
-                        <div class="ai-content">${formattedHtml}</div>
-                        <button class="copy-btn" onclick="copyText(this, '${encodedAnswer}')"><i data-lucide="copy" style="width:14px;height:14px;"></i> نسخ</button>
-                    `;
+                    aiBubble.innerHTML = `<i data-lucide="bot" class="bubble-icon" style="color: var(--accent-purple)"></i> <div class="ai-content"></div>`;
+                    chatFeed.appendChild(aiBubble); lucide.createIcons({root: aiBubble});
                     
-                    if (window.MathJax && window.MathJax.typesetPromise) {
-                        window.MathJax.typesetPromise([aiBubble]).catch(err => console.log(err));
+                    const contentDiv = aiBubble.querySelector('.ai-content'); const fullText = data.answer;
+                    let charIndex = 0; let currentText = '';
+                    
+                    function typeWriter() {
+                        if (charIndex < fullText.length) {
+                            currentText += fullText.substring(charIndex, charIndex + 3); charIndex += 3;
+                            contentDiv.innerHTML = marked.parse(currentText) + '<span class="cursor-blink"> ▌</span>';
+                            chatFeed.scrollTop = chatFeed.scrollHeight;
+                            setTimeout(typeWriter, 20);
+                        } else {
+                            contentDiv.innerHTML = marked.parse(fullText);
+                            const encodedAnswer = encodeURIComponent(fullText);
+                            aiBubble.insertAdjacentHTML('beforeend', `<button class="copy-btn" onclick="copyText(this, '${encodedAnswer}')"><i data-lucide="copy" style="width:14px;height:14px;"></i> نسخ</button>`);
+                            lucide.createIcons({root: aiBubble});
+                            if (window.MathJax) window.MathJax.typesetPromise([aiBubble]).catch(e => console.log(e));
+                            saveCurrentChatHtml();
+                        }
                     }
+                    typeWriter();
                 } else {
-                    aiBubble.className = 'chat-bubble ai-bubble';
-                    aiBubble.innerHTML = `<i data-lucide="alert-circle" class="bubble-icon" style="color: var(--danger)"></i> <div>حدث خطأ: ${data.error || 'تعذر الإجابة.'}</div>`;
+                    aiBubble.className = 'chat-bubble ai-bubble'; aiBubble.innerHTML = `<i data-lucide="alert-circle" class="bubble-icon" style="color: var(--danger)"></i> <div>خطأ: ${data.error}</div>`;
+                    chatFeed.appendChild(aiBubble); lucide.createIcons({root: aiBubble}); chatFeed.scrollTop = chatFeed.scrollHeight; saveCurrentChatHtml();
                 }
-                
-                chatFeed.appendChild(aiBubble); 
-                lucide.createIcons({root: aiBubble});
-                chatFeed.scrollTop = chatFeed.scrollHeight;
-                saveChatHistory();
             }).catch(err => {
-                clearInterval(thinkInterval);
-                chatFeed.removeChild(loadingBubble);
-                const errBubble = document.createElement('div');
-                errBubble.className = 'chat-bubble ai-bubble';
-                errBubble.innerHTML = `<i data-lucide="wifi-off" class="bubble-icon" style="color: var(--danger)"></i> <div>تعذر الاتصال بالسيرفر.</div>`;
-                chatFeed.appendChild(errBubble); 
-                lucide.createIcons({root: errBubble});
-                chatFeed.scrollTop = chatFeed.scrollHeight;
+                clearInterval(thinkInterval); chatFeed.removeChild(loadingBubble);
+                const errBubble = document.createElement('div'); errBubble.className = 'chat-bubble ai-bubble'; errBubble.innerHTML = `<i data-lucide="wifi-off" class="bubble-icon" style="color: var(--danger)"></i> <div>تعذر الاتصال بالسيرفر.</div>`;
+                chatFeed.appendChild(errBubble); lucide.createIcons({root: errBubble}); chatFeed.scrollTop = chatFeed.scrollHeight; saveCurrentChatHtml();
             });
         }
     </script>
@@ -662,32 +738,45 @@ class StudyAppRequestHandler(BaseHTTPRequestHandler):
         elif self.path == "/api/ask":
             user_query = req_json.get("query", "")
             question_image_base64 = req_json.get("image")
+            mode = req_json.get("mode", "study") # استقبال نوع المحادثة من الواجهة
+            
             docs = load_curriculum(session_id)
-
             messages_content = []
+            
             if question_image_base64:
                 messages_content.append({"type": "image_url", "image_url": {"url": question_image_base64}})
 
-            all_concepts_summary = "\n\n".join([f"الوثيقة {i+1}:\n{doc['concepts']}" for i, doc in enumerate(docs)])
-
-            full_prompt = (
-                f"أنت معلم ومساعد دراسي متخصص.\n"
-                f"إليك المحتوى والمفاهيم التي استخرجت من وثائق دروس الطالب:\n"
-                f"--- بداية المحتوى الدراسي ---\n"
-                f"{all_concepts_summary}\n"
-                f"--- نهاية المحتوى الدراسي ---\n\n"
-                f"سؤال الطالب النصي أو المرفق في الصورة هو: \"{user_query}\"\n\n"
-                f"قم بالتحليل باتباع الخطوات التالية:\n"
-                f"1. فكّر بدقة: هل يرتبط سؤال التمرين بالمحتوى الدراسي المرفوع أعلى بأي شكل؟\n"
-                f"2. إذا كان السؤال عن موضوع مختلف تماماً ولا علاقة له بالدروس المضافة، أجب بالكلمة الحرفية التالية فقط بدون زيادة: OUT_OF_SCOPE\n"
-                f"3. إذا كان ضمن الدروس والمحتوى المرفوع، قدم إجابة شاملة وشارحة خطوة بخطوة باللغة العربية.\n"
-                f"\n--- تعليمات التنسيق والمعادلات (تطبيق إلزامي) ---\n"
-                f"- لا تستخدم أبداً الأقواس المربعة \\[ أو \\] أو الأقواس الدائرية \\( أو \\) لتمثيل المعادلات.\n"
-                f"- لكتابة المتغيرات الرياضية والرموز داخل النص: يجب استخدام رمز الدولار المفرد حصراً، مثال: $x=2$ أو $v$.\n"
-                f"- لكتابة المعادلات الطويلة والمصفوفات والكسور: يجب كتابتها في سطر جديد ومستقل واستخدام رمز الدولار المزدوج حصراً، مثال:\n"
-                f"$$ \\vec{{u}} = \\sqrt{{x^2 + y^2}} $$\n"
-                f"- يمكنك استخدام Markdown لتنظيم العناوين الفرعية (بواسطة ###) والقوائم المقطعية (-)."
-            )
+            # بناء الـ Prompt حسب النمط المختار من القائمة الجانبية
+            if mode == "general":
+                full_prompt = (
+                    f"أنت مساعد ذكي ومثقف واسع المعرفة اسمك ge_nius.\n"
+                    f"سؤال المستخدم أو طلب الصورة هو: \"{user_query}\"\n\n"
+                    f"أجب عن السؤال بأسلوب احترافي، دقيق، وودي باللغة العربية.\n"
+                    f"يمكنك الإجابة عن أي سؤال في الثقافة، البرمجة، العلوم، التاريخ، أو مجرد الدردشة.\n\n"
+                    f"--- تعليمات التنسيق ---\n"
+                    f"- استخدم Markdown لتنظيم الإجابة.\n"
+                    f"- استخدم رموز الدولار المفردة ($...$) للمتغيرات والمزدوجة ($$...$$) للمعادلات المستقلة."
+                )
+            else:
+                # نمط مساعد المنهج (الوضع الافتراضي)
+                all_concepts_summary = "\n\n".join([f"الوثيقة {i+1}:\n{doc['concepts']}" for i, doc in enumerate(docs)])
+                full_prompt = (
+                    f"أنت معلم ومساعد دراسي متخصص.\n"
+                    f"إليك المحتوى والمفاهيم التي استخرجت من وثائق دروس الطالب:\n"
+                    f"--- بداية المحتوى الدراسي ---\n"
+                    f"{all_concepts_summary}\n"
+                    f"--- نهاية المحتوى الدراسي ---\n\n"
+                    f"سؤال الطالب النصي أو المرفق في الصورة هو: \"{user_query}\"\n\n"
+                    f"قم بالتحليل باتباع الخطوات التالية:\n"
+                    f"1. فكّر بدقة: هل يرتبط سؤال التمرين بالمحتوى الدراسي المرفوع أعلى بأي شكل؟\n"
+                    f"2. إذا كان السؤال عن موضوع مختلف تماماً ولا علاقة له بالدروس المضافة، أجب بالكلمة الحرفية التالية فقط بدون زيادة: OUT_OF_SCOPE\n"
+                    f"3. إذا كان ضمن الدروس والمحتوى المرفوع، قدم إجابة شاملة وشارحة خطوة بخطوة باللغة العربية.\n\n"
+                    f"--- تعليمات التنسيق للمعادلات ---\n"
+                    f"- لكتابة المتغيرات الرياضية داخل النص: يجب استخدام رمز الدولار المفرد حصراً، مثال: $x=2$ أو $v$.\n"
+                    f"- لكتابة المعادلات الطويلة: استخدم رمز الدولار المزدوج حصراً، مثال:\n$$ \\vec{{u}} = \\sqrt{{x^2 + y^2}} $$\n"
+                    f"- يمكنك استخدام Markdown لتنظيم العناوين الفرعية (بواسطة ###) والقوائم المقطعية (-)."
+                )
+                
             messages_content.append({"type": "text", "text": full_prompt})
 
             payload = {
@@ -698,7 +787,7 @@ class StudyAppRequestHandler(BaseHTTPRequestHandler):
 
             try:
                 ai_reply = self.send_api_request(payload)
-                if "OUT_OF_SCOPE" in ai_reply or ai_reply.startswith("OUT_OF_SCOPE"):
+                if mode == "study" and ("OUT_OF_SCOPE" in ai_reply or ai_reply.startswith("OUT_OF_SCOPE")):
                     self.send_json_response({"status": "out_of_scope"})
                 else:
                     self.send_json_response({"status": "success", "answer": ai_reply})
