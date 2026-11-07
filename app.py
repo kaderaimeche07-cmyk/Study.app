@@ -20,56 +20,75 @@ PORT = 8080
 
 MODEL_NAME = "Qwen3-30B-A3B-Thinking"
 
+# ==============================================================================
+# Database & Fallback System
+# ==============================================================================
+MOCK_DB = {}
+MOCK_DB_DOC_ID = 1
+
 def get_db_connection():
     database_url = os.environ.get("DATABASE_URL")
     if not database_url:
         return None
-    return psycopg2.connect(database_url, sslmode='require')
+    try:
+        return psycopg2.connect(database_url, sslmode='require', connect_timeout=3)
+    except Exception:
+        return None
 
 def load_curriculum(session_id):
-    try:
-        conn = get_db_connection()
-        if not conn:
-            return []
-        cur = conn.cursor()
-        cur.execute("CREATE TABLE IF NOT EXISTS user_documents (id SERIAL PRIMARY KEY, session_id VARCHAR(255), title TEXT, content TEXT);")
-        cur.execute("SELECT id, title, content FROM user_documents WHERE session_id = %s ORDER BY id ASC;", (session_id,))
-        rows = cur.fetchall()
-        cur.close()
-        conn.close()
-        return [{"id": r[0], "title": r[1], "concepts": r[2]} for r in rows]
-    except Exception as e:
-        return []
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+            cur.execute("CREATE TABLE IF NOT EXISTS user_documents (id SERIAL PRIMARY KEY, session_id VARCHAR(255), title TEXT, content TEXT);")
+            cur.execute("SELECT id, title, content FROM user_documents WHERE session_id = %s ORDER BY id ASC;", (session_id,))
+            rows = cur.fetchall()
+            cur.close()
+            conn.close()
+            return [{"id": r[0], "title": r[1], "concepts": r[2]} for r in rows]
+        except Exception:
+            pass
+    return MOCK_DB.get(session_id, [])
 
 def add_document_to_db(session_id, title, content):
-    try:
-        conn = get_db_connection()
-        if not conn:
+    global MOCK_DB, MOCK_DB_DOC_ID
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+            cur.execute("CREATE TABLE IF NOT EXISTS user_documents (id SERIAL PRIMARY KEY, session_id VARCHAR(255), title TEXT, content TEXT);")
+            cur.execute("INSERT INTO user_documents (session_id, title, content) VALUES (%s, %s, %s);", (session_id, title, content))
+            conn.commit()
+            cur.close()
+            conn.close()
             return
-        cur = conn.cursor()
-        cur.execute("CREATE TABLE IF NOT EXISTS user_documents (id SERIAL PRIMARY KEY, session_id VARCHAR(255), title TEXT, content TEXT);")
-        cur.execute("INSERT INTO user_documents (session_id, title, content) VALUES (%s, %s, %s);", (session_id, title, content))
-        conn.commit()
-        cur.close()
-        conn.close()
-    except Exception as e:
-        pass
+        except Exception:
+            pass
+    
+    if session_id not in MOCK_DB:
+        MOCK_DB[session_id] = []
+    MOCK_DB[session_id].append({"id": MOCK_DB_DOC_ID, "title": title, "concepts": content})
+    MOCK_DB_DOC_ID += 1
 
 def delete_document_from_db(session_id, doc_id):
-    try:
-        conn = get_db_connection()
-        if not conn:
+    global MOCK_DB
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+            cur.execute("DELETE FROM user_documents WHERE id = %s AND session_id = %s;", (doc_id, session_id))
+            conn.commit()
+            cur.close()
+            conn.close()
             return
-        cur = conn.cursor()
-        cur.execute("DELETE FROM user_documents WHERE id = %s AND session_id = %s;", (doc_id, session_id))
-        conn.commit()
-        cur.close()
-        conn.close()
-    except Exception as e:
-        pass
+        except Exception:
+            pass
+    
+    if session_id in MOCK_DB:
+        MOCK_DB[session_id] = [d for d in MOCK_DB[session_id] if str(d["id"]) != str(doc_id)]
 
 # ==============================================================================
-# HTML Frontend (English, Professional Inter Font, ChatGPT-style UI)
+# HTML Frontend (Onion Gradient Theme & Royal Blue Submarine)
 # ==============================================================================
 HTML_CODE = """<!DOCTYPE html>
 <html lang="en" dir="ltr">
@@ -78,9 +97,7 @@ HTML_CODE = """<!DOCTYPE html>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ge_nius</title>
     
-    <!-- Professional Fonts: Inter for UI, Outfit for Logo -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@700;900&display=swap" rel="stylesheet">
-    
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
@@ -94,19 +111,34 @@ HTML_CODE = """<!DOCTYPE html>
 
     <style>
         :root {
-            /* Modern Dark Theme */
-            --bg-main: #020617; --surface: #0f172a; --card: #1e293b;
-            --primary: #6366f1; --accent-purple: #8b5cf6; --accent-green: #10b981;
-            --danger: #ef4444; --text-main: #f8fafc; --text-dim: #94a3b8;
-            --border: rgba(255, 255, 255, 0.08); --ai-bubble-bg: transparent;
-            --gradient-1: rgba(99, 102, 241, 0.15); --gradient-2: rgba(139, 92, 246, 0.15);
+            /* Onion Dark Theme (Deep Eggplant, Magenta, Purple) */
+            --bg-main: #1f1025; 
+            --surface: #2d1836; 
+            --card: #3a1f44;
+            --primary: #c9184a; /* Vibrant Onion Pink/Red */
+            --accent-purple: #9d4edd; /* Onion Purple */
+            --accent-green: #10b981;
+            --danger: #ef4444; 
+            --text-main: #f8fafc; 
+            --text-dim: #d8b4e2; /* Soft tinted text */
+            --border: rgba(255, 255, 255, 0.08); 
+            --ai-bubble-bg: transparent;
+            --gradient-1: rgba(201, 24, 74, 0.15); 
+            --gradient-2: rgba(157, 78, 221, 0.15); 
         }
 
         body.light-mode {
-            --bg-main: #f8fafc; --surface: #ffffff; --card: #f1f5f9;
-            --primary: #4f46e5; --text-main: #0f172a; --text-dim: #475569;
-            --border: rgba(0, 0, 0, 0.08); --ai-bubble-bg: transparent;
-            --gradient-1: rgba(99, 102, 241, 0.08); --gradient-2: rgba(139, 92, 246, 0.08);
+            /* Onion Light Theme (Outer skin soft pink/white) */
+            --bg-main: #fff0f3; 
+            --surface: #ffffff; 
+            --card: #ffe5ec;
+            --primary: #c9184a; 
+            --text-main: #3a0ca3; 
+            --text-dim: #7209b7;
+            --border: rgba(201, 24, 74, 0.15); 
+            --ai-bubble-bg: transparent;
+            --gradient-1: rgba(201, 24, 74, 0.08); 
+            --gradient-2: rgba(157, 78, 221, 0.08);
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -121,13 +153,13 @@ HTML_CODE = """<!DOCTYPE html>
             display: flex; flex-direction: column; overflow-x: hidden;
         }
 
-        .main-wrapper { padding: 12px; display: flex; flex-direction: column; gap: 12px; flex: 1; max-width: 900px; margin: 0 auto; width: 100%; }
+        .main-wrapper { padding: 12px; display: flex; flex-direction: column; gap: 12px; flex: 1; max-width: 900px; margin: 0 auto; width: 100%; height: 100vh; }
 
         .app-header {
             background: rgba(var(--surface), 0.8); backdrop-filter: blur(10px);
             padding: 12px 16px; border-radius: 16px; border: 1px solid var(--border);
             display: flex; justify-content: space-between; align-items: center;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05); flex-shrink: 0;
         }
         
         .header-actions { display: flex; gap: 10px; align-items: center; }
@@ -139,22 +171,23 @@ HTML_CODE = """<!DOCTYPE html>
         }
         .icon-btn:hover { background: var(--primary); color: white; }
 
+        /* Royal Blue Submarine Logo */
         .submarine-logo {
-            position: relative; background: linear-gradient(180deg, #f59e0b, #d97706);
-            padding: 4px 16px; border-radius: 40px; border: 2px solid #b45309;
+            position: relative; 
+            background: linear-gradient(180deg, #3b82f6, #1d4ed8); /* Royal Blue Gradient */
+            padding: 4px 16px; border-radius: 40px; border: 2px solid #1e3a8a; /* Dark Royal Blue Border */
             display: inline-flex; align-items: center; justify-content: center;
-            box-shadow: 0 4px 10px rgba(245, 158, 11, 0.25), inset 0 -3px 5px rgba(0,0,0,0.2);
-            color: #451a03; font-weight: 900; font-size: 1.1rem; letter-spacing: 1px; font-family: 'Outfit', sans-serif;
+            box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25), inset 0 -3px 5px rgba(0,0,0,0.2);
+            color: #ffffff; font-weight: 900; font-size: 1.1rem; letter-spacing: 1px; font-family: 'Outfit', sans-serif;
         }
-        .submarine-logo::before { content: ''; position: absolute; top: -12px; left: 60%; width: 8px; height: 12px; background: #f59e0b; border-left: 2px solid #b45309; border-right: 2px solid #b45309; z-index: 1; }
-        .submarine-logo::after { content: ''; position: absolute; top: -12px; left: calc(60% + 4px); width: 12px; height: 5px; background: #f59e0b; border: 2px solid #b45309; border-radius: 2px; z-index: 2; }
+        .submarine-logo::before { content: ''; position: absolute; top: -12px; left: 60%; width: 8px; height: 12px; background: #3b82f6; border-left: 2px solid #1e3a8a; border-right: 2px solid #1e3a8a; z-index: 1; }
+        .submarine-logo::after { content: ''; position: absolute; top: -12px; left: calc(60% + 4px); width: 12px; height: 5px; background: #3b82f6; border: 2px solid #1e3a8a; border-radius: 2px; z-index: 2; }
         .submarine-propeller { position: absolute; right: -10px; top: 50%; transform: translateY(-50%); width: 8px; height: 18px; background: #94a3b8; border: 2px solid #475569; border-radius: 4px; }
         .submarine-propeller::after { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 4px; height: 22px; background: #cbd5e1; border-radius: 2px; animation: spin-propeller 0.15s linear infinite; }
         @keyframes spin-propeller { 0% { transform: translate(-50%, -50%) scaleY(1); } 50% { transform: translate(-50%, -50%) scaleY(0.2); } 100% { transform: translate(-50%, -50%) scaleY(1); } }
 
         .lucide { width: 18px; height: 18px; stroke-width: 2.2; }
 
-        /* Sidebar (Left side for LTR) */
         .sidebar-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(2px); z-index: 99; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
         .sidebar-overlay.active { opacity: 1; pointer-events: auto; }
         
@@ -170,7 +203,6 @@ HTML_CODE = """<!DOCTYPE html>
         .sidebar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 15px;}
         .sidebar h3 { margin: 0; font-size: 1.1rem; color: var(--text-main); display: flex; align-items: center; gap: 8px;}
         
-        /* Modern Mode Toggle Pill */
         .mode-toggle {
             display: flex; background: var(--card); border-radius: 12px; padding: 4px;
             position: relative; margin: 15px 0; border: 1px solid var(--border);
@@ -193,19 +225,18 @@ HTML_CODE = """<!DOCTYPE html>
             font-size: 0.9rem; transition: all 0.2s; text-align: left;
         }
         .history-item:hover { background: var(--card); }
-        .history-item.active { background: var(--gradient-1); border: 1px solid var(--primary); color: var(--primary); font-weight: 600; }
+        .history-item.active { background: var(--gradient-1); border: 1px solid var(--primary); color: var(--text-main); font-weight: 600; }
         
-        .tab-bar { display: flex; background: var(--surface); border-radius: 12px; padding: 4px; border: 1px solid var(--border); }
+        .tab-bar { display: flex; background: var(--surface); border-radius: 12px; padding: 4px; border: 1px solid var(--border); flex-shrink: 0; }
         .tab-btn { flex: 1; padding: 10px; background: none; border: none; color: var(--text-dim); font-family: 'Inter', sans-serif; font-weight: 600; font-size: 0.95rem; cursor: pointer; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 8px; }
-        .tab-btn.active { background: var(--primary); color: white; box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3); }
+        .tab-btn.active { background: var(--primary); color: white; box-shadow: 0 4px 10px rgba(201, 24, 74, 0.3); }
 
-        .tab-section { display: none; flex-direction: column; gap: 12px; flex: 1; }
+        .tab-section { display: none; flex-direction: column; gap: 12px; flex: 1; overflow: hidden; }
         .tab-section.active { display: flex; }
-        .card { background: rgba(var(--surface), 0.7); backdrop-filter: blur(10px); border-radius: 16px; border: 1px solid var(--border); padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+        .card { background: rgba(var(--surface), 0.7); backdrop-filter: blur(10px); border-radius: 16px; border: 1px solid var(--border); padding: 16px; display: flex; flex-direction: column; gap: 12px; overflow-y: auto;}
 
-        /* Chat UI - ChatGPT style */
         .chat-feed {
-            display: flex; flex-direction: column; gap: 20px; height: 50vh; overflow-y: auto; padding: 10px 10px 30px;
+            display: flex; flex-direction: column; gap: 20px; flex: 1; overflow-y: auto; padding: 10px 10px 30px;
             background: transparent; scroll-behavior: smooth;
         }
         .chat-bubble { 
@@ -229,18 +260,18 @@ HTML_CODE = """<!DOCTYPE html>
         .copy-btn { margin-top: 8px; background: transparent; color: var(--text-dim); border: none; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: color 0.2s; padding: 0; }
         .copy-btn:hover { color: var(--primary); }
 
-        .bubble-icon { 
-            flex-shrink: 0; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; 
-        }
+        .bubble-icon { flex-shrink: 0; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
         .user-bubble .bubble-icon { background: var(--primary); color: white; }
-        .ai-bubble .bubble-icon { background: linear-gradient(180deg, #f59e0b, #d97706); color: #451a03; }
+        
+        /* Royal Blue AI Icon */
+        .ai-bubble .bubble-icon { background: linear-gradient(180deg, #3b82f6, #1d4ed8); color: #ffffff; box-shadow: 0 2px 5px rgba(37, 99, 235, 0.3); }
         .ai-bubble .bubble-icon svg { width: 18px; height: 18px; }
 
-        /* ChatGPT Style Input Box */
+        .chat-input-container { flex-shrink: 0; padding-bottom: 10px; }
         .chat-input-wrapper {
             background: var(--surface); border: 1px solid var(--border); border-radius: 24px;
             padding: 8px 12px; display: flex; align-items: flex-end; gap: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-top: auto;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05); 
         }
         .chat-input-wrapper textarea {
             flex: 1; background: transparent; border: none; color: var(--text-main);
@@ -263,14 +294,14 @@ HTML_CODE = """<!DOCTYPE html>
         .send-btn svg { width: 16px; height: 16px; }
 
         .image-preview-bar {
-            display: none; align-items: center; justify-content: space-between; background: rgba(99, 102, 241, 0.1);
+            display: none; align-items: center; justify-content: space-between; background: rgba(201, 24, 74, 0.1);
             border: 1px solid var(--primary); padding: 8px 12px; border-radius: 12px; font-size: 0.85rem; color: var(--primary); margin-bottom: 10px;
         }
 
         .btn { background: var(--card); color: var(--text-main); border: 1px solid var(--border); padding: 10px 16px; border-radius: 8px; font-family: 'Inter', sans-serif; font-weight: 600; font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s; }
         .btn:hover { background: var(--border); }
         .btn-primary { background: var(--primary); color: white; border: none; }
-        .btn-primary:hover { background: #4f46e5; }
+        .btn-primary:hover { background: #9d1239; }
         .btn-danger { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.2); }
         .btn-danger:hover { background: rgba(239, 68, 68, 0.2); }
 
@@ -302,7 +333,6 @@ HTML_CODE = """<!DOCTYPE html>
             <i data-lucide="plus"></i> New Chat
         </button>
 
-        <!-- Modern Pill Toggle for Chat Mode -->
         <div style="font-size: 0.8rem; color: var(--text-dim); margin-bottom: 5px; font-weight: 600;">Assistant Mode</div>
         <div class="mode-toggle" id="modeToggle">
             <div class="mode-slider" id="modeSlider" style="left: 4px;"></div>
@@ -348,7 +378,7 @@ HTML_CODE = """<!DOCTYPE html>
         <div class="tab-section active" id="askTab">
             <div class="chat-feed" id="chatFeed"></div>
 
-            <div style="margin-top: auto;">
+            <div class="chat-input-container">
                 <div id="questionImgPreview" class="image-preview-bar">
                     <span style="display: flex; align-items: center; gap: 6px;"><i data-lucide="image-check" style="width: 16px; height: 16px;"></i> Image attached</span>
                     <span style="cursor: pointer; display: flex; align-items: center; gap: 4px;" onclick="removeQuestionImage()">
@@ -356,7 +386,6 @@ HTML_CODE = """<!DOCTYPE html>
                     </span>
                 </div>
 
-                <!-- ChatGPT Style Input -->
                 <div class="chat-input-wrapper">
                     <div class="chat-input-actions">
                         <label for="qFileInputCamera" class="action-icon" title="Camera">
@@ -370,7 +399,7 @@ HTML_CODE = """<!DOCTYPE html>
                         <input type="file" id="qFileInputGallery" accept="image/*">
                     </div>
                     
-                    <textarea id="userQuery" placeholder="Message ge_nius..." oninput="autoResize(this)" rows="1"></textarea>
+                    <textarea id="userQuery" placeholder="Message ge_nius..." oninput="autoResize(this)" onkeydown="handleEnter(event)" rows="1"></textarea>
                     
                     <div class="chat-input-actions">
                         <button class="send-btn" onclick="submitQuestion()" title="Send">
@@ -418,6 +447,13 @@ HTML_CODE = """<!DOCTYPE html>
         function autoResize(textarea) {
             textarea.style.height = 'auto';
             textarea.style.height = textarea.scrollHeight + 'px';
+        }
+
+        function handleEnter(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                submitQuestion();
+            }
         }
 
         function toggleTheme() {
@@ -500,7 +536,7 @@ HTML_CODE = """<!DOCTYPE html>
             clones.querySelectorAll('.loading-bubble-temp').forEach(l => l.remove());
             chatSessions[currentSessionId].html = clones.innerHTML;
             
-            if (userQueryText && chatSessions[currentSessionId].title === "New Chat") {
+            if (userQueryText && (chatSessions[currentSessionId].title === "New Chat" || chatSessions[currentSessionId].title === "محادثة جديدة")) {
                 chatSessions[currentSessionId].title = userQueryText.substring(0, 25) + "...";
             }
             saveSessionsData();
@@ -525,7 +561,7 @@ HTML_CODE = """<!DOCTYPE html>
                 listDiv.innerHTML += `
                     <div class="history-item ${isActive}" onclick="loadChat('${id}')">
                         <i data-lucide="${icon}"></i>
-                        <span style="flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${session.title}</span>
+                        <span style="flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; direction: ltr;">${session.title}</span>
                     </div>
                 `;
             });
@@ -604,15 +640,24 @@ HTML_CODE = """<!DOCTYPE html>
             const statusDiv = document.getElementById('uploadStatus');
             for (let i = 0; i < files.length; i++) {
                 if(statusDiv) { statusDiv.innerHTML = `<i data-lucide="loader" class="spin-icon"></i> Reading document ${i + 1}/${files.length}...`; statusDiv.style.color = 'var(--text-main)'; lucide.createIcons({root: statusDiv}); }
-                await new Promise((resolve) => {
-                    const reader = new FileReader();
-                    reader.onload = async function(evt) {
-                        try {
-                            const res = await fetch('/api/docs/upload', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ image: evt.target.result }) });
-                            const data = await res.json(); if (data.docs) curriculumDocs = data.docs;
-                        } catch (err) {} resolve();
-                    }; reader.readAsDataURL(files[i]);
-                });
+                try {
+                    await new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.onload = async function(evt) {
+                            try {
+                                const res = await fetch('/api/docs/upload', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ image: evt.target.result }) });
+                                const data = await res.json(); 
+                                if (data.error) throw new Error(data.error);
+                                if (data.docs) curriculumDocs = data.docs;
+                                resolve();
+                            } catch (err) { reject(err); }
+                        }; 
+                        reader.readAsDataURL(files[i]);
+                    });
+                } catch (err) {
+                    if(statusDiv) { statusDiv.innerHTML = `<i data-lucide="alert-circle"></i> Upload failed: ${err.message}`; statusDiv.style.color = 'var(--danger)'; lucide.createIcons({root: statusDiv}); }
+                    return;
+                }
             }
             renderDocs();
             if(statusDiv) { statusDiv.innerHTML = '<i data-lucide="check-circle-2"></i> Documents saved successfully.'; statusDiv.style.color = 'var(--accent-green)'; lucide.createIcons({root: statusDiv}); }
@@ -625,8 +670,12 @@ HTML_CODE = """<!DOCTYPE html>
         function submitQuestion() {
             const queryInput = document.getElementById('userQuery');
             const query = queryInput.value.trim();
-            const currentSession = chatSessions[currentSessionId];
-            if (!currentSession) { initSessions(); return; }
+            
+            let currentSession = chatSessions[currentSessionId];
+            if (!currentSession) { 
+                createNewChat(); 
+                currentSession = chatSessions[currentSessionId];
+            }
             const currentMode = currentSession.mode || 'study';
 
             if (!query && !attachedQuestionBase64) return;
@@ -638,11 +687,11 @@ HTML_CODE = """<!DOCTYPE html>
             
             const welcome = document.getElementById('welcomeMsg'); if(welcome) welcome.remove();
 
-            let userTextDisplay = query;
-            if (attachedQuestionBase64) { userTextDisplay = (query ? query + '<br><br>' : '') + '<span style="color:var(--text-dim); font-size:0.85em"><i data-lucide="image" style="width:14px;height:14px; vertical-align:middle;"></i> Image Attached</span>'; }
+            let userTextDisplay = query.replace(/\\n/g, '<br>');
+            if (attachedQuestionBase64) { userTextDisplay = (query ? userTextDisplay + '<br><br>' : '') + '<span style="color:var(--text-dim); font-size:0.85em"><i data-lucide="image" style="width:14px;height:14px; vertical-align:middle;"></i> Image Attached</span>'; }
 
             const userBubble = document.createElement('div'); userBubble.className = 'chat-bubble user-bubble';
-            userBubble.innerHTML = `<div class="bubble-content">${userTextDisplay}</div>`;
+            userBubble.innerHTML = `<div class="bubble-content" dir="auto">${userTextDisplay}</div>`;
             chatFeed.appendChild(userBubble); lucide.createIcons({root: userBubble});
 
             const loadingBubble = document.createElement('div'); loadingBubble.className = 'chat-bubble ai-bubble loading-bubble-temp';
@@ -665,7 +714,7 @@ HTML_CODE = """<!DOCTYPE html>
                     chatFeed.appendChild(aiBubble); lucide.createIcons({root: aiBubble}); chatFeed.scrollTop = chatFeed.scrollHeight; saveCurrentChatHtml();
                 } else if (data.status === 'success') {
                     aiBubble.className = 'chat-bubble ai-bubble';
-                    aiBubble.innerHTML = `<div class="bubble-icon"><i data-lucide="bot"></i></div> <div class="bubble-content"><div class="ai-content"></div></div>`;
+                    aiBubble.innerHTML = `<div class="bubble-icon"><i data-lucide="bot"></i></div> <div class="bubble-content" dir="auto"><div class="ai-content"></div></div>`;
                     chatFeed.appendChild(aiBubble); lucide.createIcons({root: aiBubble});
                     
                     const contentDiv = aiBubble.querySelector('.ai-content'); const fullText = data.answer;
