@@ -150,7 +150,7 @@ HTML_CODE = """<!DOCTYPE html>
             width: 100%; height: 100%; height: 100dvh; max-width: 900px; margin: 0 auto; 
         }
 
-        /* شريط التنقل العلوي المحدث (الهوية مستقلة والأنماط مستقلة) */
+        /* شريط التنقل العلوي مع الاسم المستقل وأيقونة الغواصة */
         .top-nav-bar {
             display: flex; justify-content: space-between; align-items: center;
             padding: 8px 14px; flex-shrink: 0; gap: 12px; background: var(--glass);
@@ -374,7 +374,7 @@ HTML_CODE = """<!DOCTYPE html>
     </aside>
 
     <div class="main-wrapper">
-        <!-- شريط التنقل العلوي المعدل: الهوية مستقلة والأنماط مستقلة -->
+        <!-- شريط التنقل العلوي مع الاسم المستقل وأيقونة الغواصة -->
         <div class="top-nav-bar">
             <div class="nav-left-group">
                 <button class="icon-btn" onclick="toggleSidebar()" title="Menu">
@@ -770,8 +770,8 @@ HTML_CODE = """<!DOCTYPE html>
 
             const loadingRow = document.createElement('div'); loadingRow.className = 'message-row loading-bubble-temp';
             loadingRow.innerHTML = `
-                <div class="message-sender" style="color:var(--primary)">
-                    <svg style="width:14px;height:14px;display:inline-block;vertical-align:middle;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 13v-2a2 2 0 0 0-2-2h-1v-2a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v2H7a2 2 0 0 0-2 2v2"/><path d="M4 11h16a2 2 0 0 1 2 2v2a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5v-2a2 2 0 0 1 2-2z"/></svg> ge_nius
+                <div class="message-sender" style="color:var(--primary); display:flex; align-items:center; gap:5px;">
+                    <svg style="width:14px;height:14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 13v-2a2 2 0 0 0-2-2h-1v-2a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v2H7a2 2 0 0 0-2 2v2"/><path d="M4 11h16a2 2 0 0 1 2 2v2a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5v-2a2 2 0 0 1 2-2z"/></svg> ge_nius
                 </div>
                 <div class="hologram-thinking">
                     <div class="pulse-dot"></div>
@@ -791,7 +791,7 @@ HTML_CODE = """<!DOCTYPE html>
                 chatFeed.removeChild(loadingRow);
                 const aiRow = document.createElement('div'); aiRow.className = 'message-row';
 
-                # أداة التعريف بالرد (مع أيقونة الغواصة المصغرة بجانب الاسم)
+                # رأس الرسالة (مع أيقونة الغواصة المصغرة بجانب اسم التطبيق)
                 const aiHeaderHtml = `
                     <div class="message-sender" style="color:var(--primary); display:flex; align-items:center; gap:5px;">
                         <svg style="width:14px;height:14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 13v-2a2 2 0 0 0-2-2h-1v-2a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v2H7a2 2 0 0 0-2 2v2"/><path d="M4 11h16a2 2 0 0 1 2 2v2a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5v-2a2 2 0 0 1 2-2z"/></svg> ge_nius
