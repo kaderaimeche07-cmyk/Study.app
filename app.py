@@ -37,7 +37,6 @@ def get_db_connection():
         return None
 
 def compress_file_data(base64_data):
-    """خوارزمية ذكية لضغط الملفات باستخدام zlib"""
     try:
         header, encoded = base64_data.split(",", 1)
         data = base64.b64decode(encoded)
@@ -126,7 +125,7 @@ def delete_document_from_db(session_id, doc_id):
         MOCK_DB[session_id] = [d for d in MOCK_DB[session_id] if str(d["id"]) != str(doc_id)]
 
 # ==============================================================================
-# HTML Frontend (ge_nius Royal World-Class UI Refined with 6 Features)
+# HTML Frontend (ge_nius Royal World-Class UI - Correctly Restored)
 # ==============================================================================
 HTML_CODE = """<!DOCTYPE html>
 <html lang="en" dir="auto">
@@ -153,7 +152,7 @@ HTML_CODE = """<!DOCTYPE html>
             --primary: #4169E1; --primary-glow: rgba(65, 105, 225, 0.4);
             --danger: #ef4444; --accent-gold: #fbbf24; --accent-green: #10b981;
             --text-main: #f8fafc; --text-dim: #94a3b8;
-            --border: rgba(255, 255, 255, 0.06); --glass: rgba(15, 16, 20, 0.7);
+            --border: rgba(255, 255, 255, 0.06); --glass: rgba(15, 16, 20, 0.75);
         }
 
         body.light-mode {
@@ -168,18 +167,19 @@ HTML_CODE = """<!DOCTYPE html>
         html, body {
             font-family: 'Inter', sans-serif; 
             background-color: var(--bg-main); color: var(--text-main);
-            margin: 0; padding: 0; width: 100vw; height: 100vh; overflow: hidden;
-            background-image: radial-gradient(ellipse at 10% 10%, rgba(65, 105, 225, 0.08) 0%, transparent 50%),
-                              radial-gradient(ellipse at 90% 90%, rgba(139, 92, 246, 0.05) 0%, transparent 50%);
+            margin: 0; padding: 0; width: 100vw; height: 100vh; height: 100dvh; overflow: hidden;
+            background-image: 
+                radial-gradient(ellipse at 10% 10%, rgba(65, 105, 225, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 90% 90%, rgba(139, 92, 246, 0.05) 0%, transparent 50%);
             background-attachment: fixed;
         }
 
         .main-wrapper { 
-            padding: 12px 10px; display: flex; flex-direction: column; gap: 0; 
-            width: 100%; height: 100%; max-width: 900px; margin: 0 auto; 
+            padding: 10px; display: flex; flex-direction: column; gap: 0; 
+            width: 100%; height: 100%; height: 100dvh; max-width: 900px; margin: 0 auto; 
         }
 
-        /* --- Auth Overlay CSS --- */
+        /* --- Auth Overlay --- */
         #authOverlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(3, 3, 4, 0.95); backdrop-filter: blur(20px);
@@ -203,88 +203,179 @@ HTML_CODE = """<!DOCTYPE html>
             padding: 12px 16px; border-radius: 12px; font-family: 'Inter', sans-serif; font-size: 0.95rem; outline: none;
         }
         
-        /* Top Navbar */
+        /* --- Top Nav Bar (RESTORED TO GLORY) --- */
         .top-nav-bar {
             display: flex; justify-content: space-between; align-items: center;
-            padding: 6px 12px; flex-shrink: 0; gap: 10px; background: var(--glass);
-            backdrop-filter: blur(20px); border: 1px solid var(--border); border-radius: 24px;
-            box-shadow: 0 4px 30px rgba(0,0,0,0.3); margin-bottom: 8px;
+            padding: 8px 14px; flex-shrink: 0; gap: 12px; background: var(--glass);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border); border-radius: 24px; box-shadow: 0 4px 30px rgba(0,0,0,0.3);
+            margin-bottom: 10px;
         }
-        .app-brand { font-family: 'Outfit', sans-serif; font-weight: 900; font-size: 1.25rem; display: flex; align-items: center; gap: 6px; }
+
+        .nav-left-group { display: flex; align-items: center; gap: 10px; }
+
+        .app-brand {
+            font-family: 'Outfit', sans-serif; font-weight: 900; font-size: 1.2rem;
+            color: var(--text-main); letter-spacing: -0.5px; display: flex; align-items: center; gap: 6px;
+        }
         .app-brand span { color: var(--primary); }
-        .icon-btn { background: transparent; border: none; color: var(--text-main); border-radius: 50%; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.2s; }
+        .brand-icon { width: 22px; height: 22px; color: var(--primary); }
+
+        .icon-btn {
+            background: transparent; border: none; color: var(--text-main);
+            border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.2s; flex-shrink: 0;
+        }
         .icon-btn:hover { background: var(--card); color: var(--primary); transform: scale(1.05); }
 
-        .mode-switcher-bar { display: flex; gap: 4px; background: rgba(0,0,0,0.2); padding: 4px; border-radius: 20px; overflow-x: auto; }
-        .mode-tab { padding: 6px 12px; background: transparent; border: none; color: var(--text-dim); font-weight: 600; font-size: 0.82rem; cursor: pointer; border-radius: 16px; display: flex; align-items: center; gap: 6px; }
-        .mode-tab.active { background: var(--surface); color: var(--text-main); border: 1px solid var(--border); }
+        .mode-switcher-bar {
+            display: flex; gap: 4px; background: rgba(0,0,0,0.2); padding: 3px; border-radius: 18px;
+        }
+        .mode-tab {
+            padding: 6px 12px; background: transparent; border: none; color: var(--text-dim);
+            font-family: 'Inter', sans-serif; font-weight: 600; font-size: 0.8rem; cursor: pointer;
+            border-radius: 14px; white-space: nowrap; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.3s;
+        }
+        .mode-tab.active { background: var(--surface); color: var(--text-main); box-shadow: 0 2px 15px rgba(0,0,0,0.2); border: 1px solid var(--border); }
         .mode-tab.hidden { display: none !important; }
 
-        /* Game Stats Bar (Horizontal underneath navbar to save space) */
+        .lucide { width: 18px; height: 18px; stroke-width: 2.2; display: inline-block; vertical-align: middle; }
+
+        /* --- Game Stats Bar (Hidden initially, shows below nav only on games mode) --- */
         .games-stats-bar {
             display: none; background: rgba(65, 105, 225, 0.1); border: 1px solid rgba(65, 105, 225, 0.2);
-            padding: 8px 16px; border-radius: 16px; align-items: center; justify-content: space-between; font-size: 0.85rem; color: #93c5fd; flex-shrink: 0; margin-bottom: 8px;
+            padding: 8px 16px; border-radius: 16px; align-items: center; justify-content: space-between; font-size: 0.85rem; color: #93c5fd; flex-shrink: 0; margin-bottom: 10px;
         }
         .games-stats-bar.active { display: flex; }
         .hud-hearts { color: var(--danger); letter-spacing: 2px;}
 
-        /* Sidebar */
+        /* --- Sidebar --- */
         .sidebar-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); z-index: 999; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
         .sidebar-overlay.active { opacity: 1; pointer-events: auto; }
-        .sidebar { position: fixed; top: 0; left: -320px; width: 300px; height: 100vh; background: var(--surface); border-right: 1px solid var(--border); z-index: 1000; transition: left 0.4s; display: flex; flex-direction: column; padding: 20px; overflow-y: auto;}
+        
+        .sidebar {
+            position: fixed; top: 0; left: -320px; width: 300px; height: 100vh; height: 100dvh;
+            background: var(--surface); border-right: 1px solid var(--border);
+            z-index: 1000; transition: left 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex; flex-direction: column; padding: 20px; box-shadow: 15px 0 50px rgba(0,0,0,0.5);
+            overflow-y: auto;
+        }
         .sidebar.open { left: 0; }
+        
         .sidebar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 15px;}
+        .sidebar h3 { margin: 0; font-size: 1.15rem; color: var(--text-main); font-weight: 800; display: flex; align-items: center; gap: 8px;}
         
         .chat-history-list { flex: 1; display: flex; flex-direction: column; gap: 6px; }
-        .history-item { background: transparent; color: var(--text-main); padding: 10px 12px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; font-size: 0.88rem; }
+        .history-item { background: transparent; color: var(--text-main); padding: 10px 12px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; font-size: 0.88rem; transition: all 0.2s;}
         .history-item:hover { background: var(--card); }
         .history-item.active { background: rgba(65, 105, 225, 0.1); border: 1px solid var(--primary); color: var(--primary); font-weight: bold; }
+        .history-item-content { display: flex; align-items: center; gap: 8px; flex: 1; overflow: hidden; }
         .delete-history-btn { background: none; border: none; color: var(--text-dim); cursor: pointer; padding: 4px; border-radius: 6px; }
         .delete-history-btn:hover { color: var(--danger); background: rgba(239, 68, 68, 0.1); }
 
-        .tab-section { display: none; flex-direction: column; gap: 10px; flex: 1; min-height: 0; }
+        /* --- Sections Layout --- */
+        .tab-section { display: none; flex-direction: column; flex: 1; min-height: 0; }
         .tab-section.active { display: flex; }
+        
         .card { background: var(--surface); border-radius: 20px; border: 1px solid var(--border); padding: 16px; display: flex; flex-direction: column; gap: 10px; }
 
-        /* Chat feed */
+        /* --- Chat Layout --- */
         .chat-container-wrapper { position: relative; flex: 1; display: flex; flex-direction: column; min-height: 0; }
-        .chat-feed { display: flex; flex-direction: column; gap: 24px; flex: 1; overflow-y: auto; padding: 10px 4px 20px 4px; scroll-behavior: smooth; }
+        .chat-feed {
+            display: flex; flex-direction: column; gap: 24px; flex: 1; overflow-y: auto; padding: 10px 4px 20px 4px;
+            background: transparent; scroll-behavior: smooth;
+        }
         
-        .message-row { display: flex; flex-direction: column; gap: 6px; width: 100%; animation: slideUp 0.3s; }
+        .message-row { display: flex; flex-direction: column; gap: 6px; width: 100%; animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
         @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
         
-        .message-sender { font-size: 0.75rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase; display: flex; align-items: center; gap: 6px; }
-        .message-text-user { font-size: 0.95rem; line-height: 1.6; background: var(--surface); padding: 12px 16px; border-radius: 20px; border-top-right-radius: 4px; width: fit-content; max-width: 85%; border: 1px solid var(--border); align-self: flex-end; }
-        .message-text-ai { font-size: 1.05rem; line-height: 1.75; font-weight: 500; align-self: flex-start; max-width: 95%;}
+        .message-sender { font-size: 0.75rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px; }
+        
+        .message-text-user { 
+            font-size: 0.95rem; line-height: 1.6; color: var(--text-main); font-weight: 400; word-break: break-word;
+            background: var(--surface); padding: 12px 16px; border-radius: 20px; border-top-right-radius: 4px; width: fit-content; max-width: 85%;
+            border: 1px solid var(--border); box-shadow: 0 4px 15px rgba(0,0,0,0.1); align-self: flex-end;
+        }
+        
+        .message-text-ai { font-size: 1.05rem; line-height: 1.75; color: var(--text-main); font-weight: 500; word-break: break-word; align-self: flex-start; max-width: 95%;}
 
         .submarine-logo { width: 72px; height: 72px; filter: drop-shadow(0 0 20px rgba(65, 105, 225, 0.5)); color: var(--primary); }
-        .complex-card-box { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 16px; margin: 6px 0; box-shadow: 0 4px 25px rgba(0,0,0,0.25); overflow-x: auto; }
+
+        .complex-card-box {
+            background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 16px;
+            margin: 6px 0; box-shadow: 0 4px 25px rgba(0,0,0,0.25); position: relative; overflow-x: auto;
+        }
         .complex-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 8px; font-size: 0.8rem; color: var(--primary); font-weight: bold; }
-        .copy-code-btn, .audio-speech-btn { background: transparent; border: 1px solid var(--border); color: var(--text-dim); border-radius: 12px; padding: 6px 14px; font-size: 0.8rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s;}
-        .copy-code-btn:hover, .audio-speech-btn:hover { background: var(--card); color: var(--primary); }
-
-        .hologram-thinking { display: flex; align-items: center; gap: 10px; color: var(--primary); font-weight: 600; font-size: 0.85rem; background: rgba(65, 105, 225, 0.05); border: 1px solid rgba(65, 105, 225, 0.15); padding: 12px 18px; border-radius: 16px; width: fit-content; }
-        .pulse-dot { width: 8px; height: 8px; background: var(--primary); border-radius: 50%; animation: pulse-anim 1s infinite ease-in-out; }
-        @keyframes pulse-anim { 0%, 100% { transform: scale(0.8); opacity: 0.3; } 50% { transform: scale(1.4); opacity: 1; } }
-
-        /* Input Glass Panel */
-        .chat-input-container { flex-shrink: 0; padding-bottom: 6px; position: relative; }
-        .input-glass-panel { background: rgba(15, 16, 20, 0.85); backdrop-filter: blur(24px); border: 1px solid var(--border); border-radius: 28px; padding: 8px 10px 8px 16px; box-shadow: 0 12px 40px rgba(0,0,0,0.5); display: flex; align-items: center; gap: 10px; transition: all 0.3s ease; position: relative; z-index: 10;}
-        .input-glass-panel:focus-within { border-color: rgba(65, 105, 225, 0.5); box-shadow: 0 12px 40px rgba(65, 105, 225, 0.15); }
-        textarea { background: transparent; color: var(--text-main); border: none; outline: none; font-size: 1rem; resize: none; max-height: 120px; min-height: 24px; width: 100%; padding: 8px 0; }
         
-        .magic-menu { position: absolute; bottom: 70px; left: 10px; background: var(--surface); border: 1px solid var(--border); border-radius: 18px; padding: 8px; display: flex; flex-direction: column; gap: 4px; opacity: 0; pointer-events: none; transition: all 0.3s; box-shadow: 0 12px 30px rgba(0,0,0,0.6); z-index: 20; }
+        .copy-code-btn { background: var(--card); color: var(--text-dim); border: 1px solid var(--border); border-radius: 8px; padding: 5px 10px; font-size: 0.75rem; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: all 0.2s; }
+        .copy-code-btn:hover { background: var(--primary); color: white; border-color: var(--primary); }
+
+        .audio-speech-btn { background: transparent; border: 1px solid var(--border); color: var(--text-dim); border-radius: 12px; padding: 6px 14px; font-size: 0.8rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; margin-top: 8px; transition: all 0.2s;}
+        .audio-speech-btn:hover { background: var(--card); color: var(--primary); }
+
+        .hologram-thinking {
+            display: flex; align-items: center; gap: 10px; color: var(--primary); font-weight: 600; font-size: 0.85rem;
+            background: rgba(65, 105, 225, 0.05); border: 1px solid rgba(65, 105, 225, 0.15); padding: 12px 18px; border-radius: 16px; width: fit-content;
+        }
+        .pulse-dot { width: 8px; height: 8px; background: var(--primary); border-radius: 50%; animation: pulse-anim 1s infinite ease-in-out; }
+        @keyframes pulse-anim { 0%, 100% { transform: scale(0.8); opacity: 0.3; } 50% { transform: scale(1.4); opacity: 1; box-shadow: 0 0 10px var(--primary); } }
+
+        /* --- Input Box (RESTORED TO BOTTOM FIRMLY) --- */
+        .chat-input-container { flex-shrink: 0; padding-bottom: 6px; position: relative; margin-top: auto;}
+        .input-glass-panel {
+            background: rgba(15, 16, 20, 0.85); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+            border: 1px solid var(--border); border-radius: 28px; padding: 8px 10px 8px 16px;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.5); display: flex; align-items: center; gap: 10px;
+            transition: all 0.3s ease; position: relative; z-index: 10;
+        }
+        .input-glass-panel:focus-within { border-color: rgba(65, 105, 225, 0.5); box-shadow: 0 12px 40px rgba(65, 105, 225, 0.15); }
+        .input-glass-panel.locked { opacity: 0.6; pointer-events: none; }
+
+        textarea {
+            background: transparent; color: var(--text-main); border: none; outline: none;
+            font-family: 'Inter', sans-serif; font-size: 1rem; resize: none; max-height: 120px; min-height: 24px; line-height: 1.5; width: 100%;
+            padding: 8px 0;
+        }
+        textarea::placeholder { color: #64748b; }
+
+        .magic-menu {
+            position: absolute; bottom: 70px; left: 10px; background: var(--surface); border: 1px solid var(--border);
+            border-radius: 18px; padding: 8px; display: flex; flex-direction: column; gap: 4px;
+            opacity: 0; transform: translateY(15px) scale(0.95); pointer-events: none;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: 0 12px 30px rgba(0,0,0,0.6); z-index: 20;
+        }
         .magic-menu.show { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
-        .magic-item { display: flex; align-items: center; gap: 10px; padding: 10px 16px; font-size: 0.9rem; border-radius: 12px; cursor: pointer; transition: all 0.2s; }
+        
+        .magic-item { 
+            display: flex; align-items: center; gap: 10px; padding: 10px 16px; color: var(--text-main); 
+            font-size: 0.9rem; font-weight: 500; border-radius: 12px; cursor: pointer; transition: all 0.2s;
+        }
         .magic-item:hover { background: var(--card); color: var(--primary); }
 
-        .tool-btn { background: transparent; border: none; color: var(--text-dim); border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; flex-shrink: 0; }
+        .tool-btn {
+            background: transparent; border: none; color: var(--text-dim); border-radius: 50%; width: 36px; height: 36px;
+            display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; flex-shrink: 0;
+        }
         .tool-btn:hover { background: var(--card); color: var(--text-main); }
-        .tool-btn.active-magic { color: var(--primary); transform: rotate(45deg); }
-        .send-btn-royal { background: var(--primary); color: white; border: none; border-radius: 50%; width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 15px var(--primary-glow); flex-shrink: 0; }
+        .tool-btn.active-magic { background: var(--card); color: var(--primary); transform: rotate(45deg); }
+        .tool-btn.recording { color: var(--danger) !important; animation: pulse 1.2s infinite; }
+
+        @keyframes pulse { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(1.1); } 100% { opacity: 1; transform: scale(1); } }
+
+        .send-btn-royal {
+            background: var(--primary); color: white; border: none; border-radius: 50%; width: 42px; height: 42px;
+            display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 4px 15px var(--primary-glow); flex-shrink: 0;
+        }
+        .send-btn-royal:active { transform: scale(0.9); }
+        .send-btn-royal.loading { background: transparent; border: 2px solid var(--border); box-shadow: none; pointer-events: none; }
+        .spinner-icon { animation: spin 1s linear infinite; color: var(--text-dim); }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        .btn { background: var(--card); color: var(--text-main); border: 1px solid var(--border); padding: 12px 18px; border-radius: 16px; font-family: 'Inter', sans-serif; font-weight: 600; font-size: 0.9rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s; }
+        .btn:hover { background: var(--surface); border-color: var(--primary); color: var(--primary); }
+        .btn-purple { background: linear-gradient(135deg, #1d4ed8, #4169E1); color: white; border: none; box-shadow: 0 4px 20px var(--primary-glow);}
         
-        .btn { background: var(--card); color: var(--text-main); border: 1px solid var(--border); padding: 12px 18px; border-radius: 16px; font-weight: 600; font-size: 0.9rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s; }
-        .btn-purple { background: linear-gradient(135deg, #1d4ed8, #4169E1); color: white; border: none; }
         input[type="file"] { display: none; }
         .image-preview-bar { display: none; align-items: center; justify-content: space-between; background: rgba(65, 105, 225, 0.1); border: 1px solid rgba(65, 105, 225, 0.3); padding: 8px 12px; border-radius: 16px; font-size: 0.82rem; color: #93c5fd; margin-bottom: 8px; }
     </style>
@@ -345,7 +436,7 @@ HTML_CODE = """<!DOCTYPE html>
         </button>
 
         <button class="btn btn-purple" onclick="switchSection('docsTab')" style="width: 100%; justify-content: center; margin-bottom: 15px; border-radius: 16px;" id="btnCurriculum">
-            <i data-lucide="folder-kanban"></i> Curriculum Documents
+            <i data-lucide="folder-kanban"></i> Curriculum
         </button>
 
         <div class="sidebar-section-title"><i data-lucide="history"></i> History</div>
@@ -359,11 +450,20 @@ HTML_CODE = """<!DOCTYPE html>
     </aside>
 
     <div class="main-wrapper">
+        <!-- شريط التنقل العلوي المستقل (مفصول عن باقي العناصر ليعود لشكله الفخم) -->
         <div class="top-nav-bar">
-            <button class="icon-btn" onclick="toggleSidebar()" title="Menu">
-                <i data-lucide="align-left"></i>
-            </button>
-            <div class="app-brand">ge<span>_</span>nius</div>
+            <div class="nav-left-group">
+                <button class="icon-btn" onclick="toggleSidebar()" title="Menu">
+                    <i data-lucide="align-left"></i>
+                </button>
+                <div class="app-brand">
+                    <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M16 13v-2a2 2 0 0 0-2-2h-1v-2a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v2H7a2 2 0 0 0-2 2v2"/>
+                        <path d="M4 11h16a2 2 0 0 1 2 2v2a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5v-2a2 2 0 0 1 2-2z"/>
+                    </svg>
+                    ge<span>_</span>nius
+                </div>
+            </div>
 
             <div class="mode-switcher-bar">
                 <button class="mode-tab hidden" id="modeTeacher" onclick="switchMode('teacher')">Dashboard</button>
@@ -373,30 +473,29 @@ HTML_CODE = """<!DOCTYPE html>
             </div>
         </div>
 
-        <!-- شريط نقاط الخبرة والألعاب (يظهر أفقياً بأناقة) -->
+        <!-- شريط نقاط الخبرة والألعاب (يظهر فقط في نمط الالعاب لكي لا يزاحم الواجهة) -->
         <div class="games-stats-bar" id="gamesStatsBar">
             <span class="hud-hearts" id="hudHearts">❤️❤️❤️❤️❤️</span>
             <span>⭐ XP: <strong id="userXp">0</strong></span>
-            <span style="color: #93c5fd;">Ready!</span>
+            <span style="color: #93c5fd;">Ready to play!</span>
         </div>
 
         <!-- Teacher Dashboard Tab -->
-        <div class="tab-section" id="teacherTab">
+        <div class="tab-section" id="teacherTab" style="gap:15px; overflow-y:auto; padding:0 4px;">
             <div class="card" style="text-align:center;">
-                <h3 style="color:var(--primary); margin-top:0;"><i data-lucide="upload-cloud"></i> Upload Curriculum Materials</h3>
+                <h3 style="color:var(--primary); margin-top:0;"><i data-lucide="upload-cloud"></i> Upload Curriculum</h3>
                 <p style="color:var(--text-dim); font-size:0.9rem;">Upload PDFs, DOCs, or Images. The ge_nius engine will automatically compress and integrate them globally.</p>
-                
-                <div style="display:flex; gap:10px; justify-content:center; margin-top:20px;">
+                <div style="display:flex; gap:10px; justify-content:center; margin-top:15px;">
                     <label for="teacherUploadBtn" class="btn btn-purple" style="width:auto; padding:12px 30px;"><i data-lucide="file-plus"></i> Select File (PDF/Image)</label>
-                    <!-- إتاحة رفع الـ PDF للأساتذة -->
                     <input type="file" id="teacherUploadBtn" accept=".pdf, .doc, .docx, image/*">
                 </div>
-                <div id="teacherUploadStatus" style="margin-top:15px; font-weight:bold; font-size:0.85rem;"></div>
+                <div id="teacherUploadStatus" style="margin-top:10px; font-weight:bold; font-size:0.85rem;"></div>
             </div>
-            <h4 style="margin-bottom:0;">Global Curriculum Archive</h4>
-            <div id="teacherDocsList" style="display:flex; flex-direction:column; gap:10px; overflow-y:auto; flex:1;"></div>
+            <h4 style="margin:0; color:var(--text-main);">Global Curriculum Archive</h4>
+            <div id="teacherDocsList" style="display:flex; flex-direction:column; gap:10px; padding-bottom:20px;"></div>
         </div>
 
+        <!-- Chat / Ask Tab -->
         <div class="tab-section active" id="askTab">
             <div class="chat-container-wrapper">
                 <div class="chat-feed" id="chatFeed">
@@ -406,11 +505,12 @@ HTML_CODE = """<!DOCTYPE html>
                             <path d="M4 11h16a2 2 0 0 1 2 2v2a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5v-2a2 2 0 0 1 2-2z"/>
                             <circle cx="12" cy="15" r="2"/><path d="M20 15h2"/><path d="M2 15h2"/>
                         </svg>
-                        <p style="margin: 0; font-size: 1rem; color: var(--text-dim);">Platform Ready.</p>
+                        <p style="margin: 0; font-size: 1rem; max-width: 250px; line-height: 1.5; color: var(--text-dim);">Platform Ready.</p>
                     </div>
                 </div>
             </div>
 
+            <!-- مربع إدخال النصوص الثابت أسفل الشاشة -->
             <div class="chat-input-container">
                 <div class="image-preview-bar" id="questionImgPreview">
                     <span style="display: flex; align-items: center; gap: 6px;"><i data-lucide="image" style="width: 14px; height: 14px;"></i> Document attached</span>
@@ -426,7 +526,7 @@ HTML_CODE = """<!DOCTYPE html>
                     <label for="qFileInputGallery" class="magic-item">
                         <i data-lucide="image-plus" style="color:var(--primary)"></i> Upload PDF/Doc
                     </label>
-                    <!-- الإصلاح الجوهري هنا: قبول ملفات PDF لكي يظهر File Manager -->
+                    <!-- قبول ملفات PDF والمستندات للطلاب -->
                     <input type="file" id="qFileInputGallery" accept=".pdf, .doc, .docx, image/*">
 
                     <div class="magic-item" id="btnSummarize" onclick="triggerSummarizer()" style="display:none; color:var(--accent-gold); font-weight:bold;">
@@ -436,7 +536,7 @@ HTML_CODE = """<!DOCTYPE html>
 
                 <div class="input-glass-panel" id="inputPanel">
                     <button class="tool-btn" id="magicBtn" onclick="toggleMagicMenu()" title="Attach">
-                        <i data-lucide="paperclip"></i>
+                        <i data-lucide="plus"></i>
                     </button>
 
                     <textarea id="userQuery" placeholder="Ask ge_nius..." rows="1" oninput="autoResizeTextarea(this)"></textarea>
@@ -452,8 +552,9 @@ HTML_CODE = """<!DOCTYPE html>
             </div>
         </div>
 
-        <div class="tab-section" id="docsTab">
-            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+        <!-- Curriculum Docs Tab -->
+        <div class="tab-section" id="docsTab" style="gap:15px; overflow-y:auto; padding:0 4px;">
+            <div style="display: flex; align-items: center; justify-content: space-between;">
                 <h3 style="margin:0; font-size: 1.15rem; color: var(--text-main); font-weight: 700;">Curriculum</h3>
                 <button class="btn" style="padding: 8px 12px; font-size: 0.8rem;" onclick="switchSection('askTab')">
                     <i data-lucide="arrow-left"></i> Back
@@ -466,12 +567,11 @@ HTML_CODE = """<!DOCTYPE html>
                     <input type="file" id="docFileInputCamera" accept="image/*" capture="environment">
                     
                     <label for="docFileInputGallery" class="btn btn-purple" style="flex: 1; text-align: center; margin:0;"><i data-lucide="folder"></i> Files/Gallery</label>
-                    <!-- الإصلاح الجوهري للطلاب أيضاً -->
                     <input type="file" id="docFileInputGallery" accept=".pdf, .doc, .docx, image/*" multiple>
                 </div>
                 <div id="uploadStatus" style="font-size: 0.82rem; font-weight: bold; text-align:center; margin-top:8px;"></div>
             </div>
-            <div class="card" style="flex: 1; overflow-y: auto;">
+            <div class="card" style="flex: 1; min-height:200px;">
                 <div id="docsList" style="display: flex; flex-direction: column; gap: 10px;"></div>
             </div>
         </div>
@@ -650,8 +750,8 @@ HTML_CODE = """<!DOCTYPE html>
         }
 
         // --- Sessions & Modes ---
-        let chatSessions = JSON.parse(localStorage.getItem('ge_nius_sessions_royal_v2')) || {};
-        let currentSessionId = localStorage.getItem('ge_nius_current_session_royal_v2');
+        let chatSessions = JSON.parse(localStorage.getItem('ge_nius_sessions_royal_v3')) || {};
+        let currentSessionId = localStorage.getItem('ge_nius_current_session_royal_v3');
 
         function initSessions() {
             if (!currentSessionId || !chatSessions[currentSessionId]) { createNewSessionQuiet(); } 
@@ -752,8 +852,8 @@ HTML_CODE = """<!DOCTYPE html>
         }
 
         function saveSessionsData() {
-            localStorage.setItem('ge_nius_sessions_royal_v2', JSON.stringify(chatSessions));
-            localStorage.setItem('ge_nius_current_session_royal_v2', currentSessionId);
+            localStorage.setItem('ge_nius_sessions_royal_v3', JSON.stringify(chatSessions));
+            localStorage.setItem('ge_nius_current_session_royal_v3', currentSessionId);
             renderChatHistoryList();
         }
 
