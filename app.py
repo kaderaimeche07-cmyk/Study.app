@@ -91,14 +91,14 @@ def delete_document_from_db(session_id, doc_id):
         MOCK_DB[session_id] = [d for d in MOCK_DB[session_id] if str(d["id"]) != str(doc_id)]
 
 # ==============================================================================
-# HTML Frontend (ge_nius Ultimate Glassmorphism Edition)
+# HTML Frontend (ge_nius Supreme Pro Edition)
 # ==============================================================================
 HTML_CODE = """<!DOCTYPE html>
 <html lang="en" dir="auto">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ge_nius Assistant - Ultimate Glassmorphism</title>
+    <title>ge_nius Assistant - Supreme Edition</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@700;900&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -114,23 +114,22 @@ HTML_CODE = """<!DOCTYPE html>
 
     <style>
         :root {
-            --bg-main: #070605; 
-            --surface: #12100f; 
-            --card: #1c1917;
+            --bg-main: #090807; 
+            --surface: #151312; 
+            --card: #201d1c;
             --primary: #3b82f6; 
             --accent-purple: #8b5cf6; 
             --accent-green: #10b981;
             --danger: #ef4444; 
             --text-main: #fafaf9; 
             --text-dim: #999490;
-            --border: rgba(255, 255, 255, 0.08); 
-            --glass: rgba(18, 16, 15, 0.85);
+            --border: rgba(255, 255, 255, 0.07); 
         }
 
         body.light-mode {
             --bg-main: #f8fafc; --surface: #ffffff; --card: #f1f5f9;
             --primary: #2563eb; --text-main: #0f172a; --text-dim: #64748b;
-            --border: rgba(0, 0, 0, 0.08); --glass: rgba(255, 255, 255, 0.85);
+            --border: rgba(0, 0, 0, 0.08); 
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -139,17 +138,16 @@ HTML_CODE = """<!DOCTYPE html>
             font-family: 'Inter', sans-serif; 
             background-color: var(--bg-main); color: var(--text-main);
             margin: 0; padding: 0; width: 100vw; height: 100vh; height: 100dvh; overflow: hidden;
-            background-image: radial-gradient(circle at 10% 10%, rgba(139, 92, 246, 0.07), transparent 40%),
-                              radial-gradient(circle at 90% 90%, rgba(59, 130, 246, 0.07), transparent 40%);
+            background-image: radial-gradient(circle at 10% 10%, rgba(139, 92, 246, 0.06), transparent 40%),
+                              radial-gradient(circle at 90% 90%, rgba(59, 130, 246, 0.06), transparent 40%);
             background-attachment: fixed;
         }
 
         .main-wrapper { 
-            padding: 8px; display: flex; flex-direction: column; gap: 8px; 
+            padding: 10px; display: flex; flex-direction: column; gap: 8px; 
             width: 100%; height: 100%; height: 100dvh; max-width: 900px; margin: 0 auto; 
         }
 
-        /* الجزيرة العلوية المتصلة (Top Dynamic Island) */
         .top-nav-bar {
             display: flex; justify-content: space-between; align-items: center;
             padding: 4px 6px; flex-shrink: 0; gap: 8px;
@@ -160,23 +158,24 @@ HTML_CODE = """<!DOCTYPE html>
             border-radius: 12px; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center;
             cursor: pointer; transition: all 0.2s; flex-shrink: 0;
         }
-        .icon-btn:hover { background: var(--primary); color: white; transform: scale(1.05); }
+        .icon-btn:hover { background: var(--primary); color: white; }
 
+        /* شريط اختيار المناهج والأنماط */
         .mode-switcher-bar {
-            display: flex; gap: 4px; background: var(--surface); padding: 3px; border-radius: 14px;
-            border: 1px solid var(--border); flex: 1; overflow-x: auto; box-shadow: inset 0 2px 5px rgba(0,0,0,0.2);
+            display: flex; gap: 4px; background: var(--surface); padding: 3px; border-radius: 12px;
+            border: 1px solid var(--border); flex: 1; overflow-x: auto;
         }
         .mode-tab {
-            flex: 1; padding: 6px 10px; background: transparent; border: none; color: var(--text-dim);
-            font-family: 'Inter', sans-serif; font-weight: 600; font-size: 0.8rem; cursor: pointer;
-            border-radius: 10px; white-space: nowrap; display: flex; align-items: center; justify-content: center; gap: 5px; transition: all 0.2s;
+            flex: 1; padding: 7px 10px; background: transparent; border: none; color: var(--text-dim);
+            font-family: 'Inter', sans-serif; font-weight: 600; font-size: 0.82rem; cursor: pointer;
+            border-radius: 9px; white-space: nowrap; display: flex; align-items: center; justify-content: center; gap: 5px; transition: all 0.2s;
         }
-        .mode-tab.active { background: var(--primary); color: white; box-shadow: 0 2px 12px rgba(59,130,246,0.35); }
+        .mode-tab.active { background: var(--primary); color: white; box-shadow: 0 2px 10px rgba(59,130,246,0.3); }
 
         .lucide { width: 17px; height: 17px; stroke-width: 2.2; display: inline-block; vertical-align: middle; }
 
         /* Sidebar & Overlay */
-        .sidebar-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(6px); z-index: 999; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+        .sidebar-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 999; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
         .sidebar-overlay.active { opacity: 1; pointer-events: auto; }
         
         .sidebar {
@@ -207,47 +206,30 @@ HTML_CODE = """<!DOCTYPE html>
         
         .card { background: var(--surface); border-radius: 16px; border: 1px solid var(--border); padding: 14px; display: flex; flex-direction: column; gap: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
 
-        /* لوحة التحكم والذكاء ومؤقت التركيز (Pomodoro & Persona) */
-        .top-utility-bar {
-            display: flex; align-items: center; justify-content: space-between; gap: 6px; flex-shrink: 0; font-size: 0.8rem;
+        /* لوحة التحكم في الشخصية ونقاط الخبرة للالعاب */
+        .persona-panel {
+            background: var(--surface); border: 1px solid var(--border); padding: 8px 12px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; font-size: 0.82rem; gap: 10px;
         }
         .persona-select {
-            background: var(--surface); color: var(--text-main); border: 1px solid var(--border);
-            padding: 5px 8px; border-radius: 10px; font-family: 'Inter', sans-serif; outline: none; cursor: pointer; font-size: 0.78rem; flex: 1;
+            background: var(--card); color: var(--text-main); border: 1px solid var(--border);
+            padding: 4px 8px; border-radius: 8px; font-family: 'Inter', sans-serif; outline: none; cursor: pointer; font-size: 0.8rem;
         }
-        .pomodoro-badge {
-            background: rgba(59, 130, 246, 0.12); border: 1px solid rgba(59, 130, 246, 0.3); padding: 5px 10px; border-radius: 10px;
-            color: #60a5fa; font-weight: 700; display: flex; align-items: center; gap: 6px; cursor: pointer; transition: all 0.2s;
-        }
-        .pomodoro-badge:hover { background: var(--primary); color: white; }
 
         .games-stats-bar {
             display: none; background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.2);
-            padding: 6px 12px; border-radius: 10px; align-items: center; justify-content: space-between; font-size: 0.8rem; color: #c4b5fd; flex-shrink: 0;
+            padding: 6px 12px; border-radius: 10px; align-items: center; justify-content: space-between; font-size: 0.82rem; color: #c4b5fd; flex-shrink: 0;
         }
         .games-stats-bar.active { display: flex; }
 
-        /* نافذة المناهج العائمة الشفافة (Glassmorphism Bottom Sheet) */
-        .glass-sheet-overlay {
-            position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.65); backdrop-filter: blur(8px);
-            z-index: 2000; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; display: flex; align-items: flex-end; justify-content: center;
-        }
-        .glass-sheet-overlay.active { opacity: 1; pointer-events: auto; }
-        .glass-sheet-content {
-            background: var(--glass); backdrop-filter: blur(20px); border-top: 1px solid var(--border); border-left: 1px solid var(--border); border-right: 1px solid var(--border);
-            width: 100%; max-width: 900px; max-height: 80vh; border-top-left-radius: 24px; border-top-right-radius: 24px;
-            padding: 20px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 -10px 40px rgba(0,0,0,0.5);
-            transform: translateY(100%); transition: transform 0.35s cubic-bezier(0.1, 0.9, 0.2, 1); overflow-y: auto;
-        }
-        .glass-sheet-overlay.active .glass-sheet-content { transform: translateY(0); }
-
-        /* Chat Feed & Smart Jumpers */
+        /* Chat Feed & Smart Scroll Jumpers */
         .chat-container-wrapper { position: relative; flex: 1; display: flex; flex-direction: column; min-height: 0; }
         .chat-feed {
-            display: flex; flex-direction: column; gap: 14px; flex: 1; overflow-y: auto; padding: 10px 4px;
+            display: flex; flex-direction: column; gap: 16px; flex: 1; overflow-y: auto; padding: 10px 4px;
             background: transparent; scroll-behavior: smooth;
         }
         
+        /* الأسهم العائمة تظهر حسب اللمس والمسافة */
         .scroll-jumpers {
             position: absolute; right: 10px; bottom: 10px; display: flex; flex-direction: column; gap: 6px; z-index: 10;
             opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
@@ -260,22 +242,17 @@ HTML_CODE = """<!DOCTYPE html>
         }
         .jump-btn:hover { background: var(--primary); color: white; transform: scale(1.1); }
 
+        /* رسائل المحادثة بدون أطر ثقيلة (صغيرة للمستخدم، كبيرة وواضحة للذكاء) */
         .message-row { display: flex; flex-direction: column; gap: 3px; width: 100%; animation: fadeIn 0.25s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
         
         .message-sender { font-size: 0.72rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 5px; }
+        
+        /* كلام المستخدم صغير وقليل وفتيح */
         .message-text-user { font-size: 0.9rem; line-height: 1.5; color: var(--text-dim); font-weight: 400; word-break: break-word; }
+        
+        /* كلام الذكاء الاصطناعي كبير وغامق واحترافي */
         .message-text-ai { font-size: 1.05rem; line-height: 1.75; color: var(--text-main); font-weight: 600; word-break: break-word; }
-
-        /* شريط الردود التنبيهية السريعة (Quick Chips) */
-        .quick-chips-bar {
-            display: flex; gap: 6px; overflow-x: auto; padding: 4px 2px; margin-top: 4px; scrollbar-width: none;
-        }
-        .quick-chip {
-            background: var(--surface); border: 1px solid var(--border); color: #93c5fd; padding: 5px 12px; border-radius: 16px;
-            font-size: 0.78rem; font-weight: 600; cursor: pointer; white-space: nowrap; transition: all 0.2s; display: inline-flex; align-items: center; gap: 5px;
-        }
-        .quick-chip:hover { background: var(--primary); color: white; border-color: var(--primary); }
 
         .complex-card-box {
             background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px;
@@ -283,8 +260,8 @@ HTML_CODE = """<!DOCTYPE html>
         }
         .complex-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; border-bottom: 1px solid var(--border); padding-bottom: 4px; font-size: 0.78rem; color: var(--accent-purple); font-weight: bold; }
         
-        .copy-code-btn, .flashcard-btn { background: var(--card); color: var(--text-dim); border: 1px solid var(--border); border-radius: 6px; padding: 3px 7px; font-size: 0.72rem; cursor: pointer; display: flex; align-items: center; gap: 4px; }
-        .copy-code-btn:hover, .flashcard-btn:hover { background: var(--primary); color: white; }
+        .copy-code-btn { background: var(--card); color: var(--text-dim); border: 1px solid var(--border); border-radius: 6px; padding: 3px 7px; font-size: 0.72rem; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+        .copy-code-btn:hover { background: var(--primary); color: white; }
 
         .audio-speech-btn { background: var(--surface); border: 1px solid var(--border); color: var(--primary); border-radius: 7px; padding: 3px 8px; font-size: 0.78rem; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; margin-top: 4px; }
         .audio-speech-btn:hover { background: var(--primary); color: white; }
@@ -357,7 +334,7 @@ HTML_CODE = """<!DOCTYPE html>
             <i data-lucide="plus-circle"></i> New Session
         </button>
 
-        <button class="btn btn-purple" onclick="toggleGlassSheet(true)" style="width: 100%; justify-content: center; margin-bottom: 10px;">
+        <button class="btn btn-purple" onclick="switchSection('docsTab')" style="width: 100%; justify-content: center; margin-bottom: 10px;">
             <i data-lucide="folder-kanban"></i> Curriculum Documents (<span id="docCountBadgeSidebar">0</span>)
         </button>
 
@@ -371,48 +348,13 @@ HTML_CODE = """<!DOCTYPE html>
         </div>
     </aside>
 
-    <!-- نافذة المناهج العائمة الشفافة (Glassmorphism Bottom Sheet) -->
-    <div class="glass-sheet-overlay" id="glassSheetOverlay" onclick="toggleGlassSheet(false)">
-        <div class="glass-sheet-content" onclick="event.stopPropagation()">
-            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 10px;">
-                <h3 style="margin:0; font-size: 1.1rem; color: #60a5fa; display: flex; align-items: center; gap: 8px;">
-                    <i data-lucide="folder-kanban"></i> Curriculum Documents
-                </h3>
-                <button class="icon-btn" style="width:32px; height:32px;" onclick="toggleGlassSheet(false)"><i data-lucide="x"></i></button>
-            </div>
-
-            <div class="card" style="background: var(--card);">
-                <span style="font-weight: 700; font-size: 0.9rem; color: var(--text-main); display: flex; align-items: center; gap: 6px;">
-                    <i data-lucide="file-up"></i> Upload Study Materials
-                </span>
-                <div style="display: flex; gap: 6px; margin-top: 4px;">
-                    <label for="docFileInputCamera" class="btn btn-purple" style="flex: 1; text-align: center; margin:0; padding: 9px;">
-                        <i data-lucide="camera"></i> Camera
-                    </label>
-                    <input type="file" id="docFileInputCamera" accept="image/*" capture="environment">
-
-                    <label for="docFileInputGallery" class="btn btn-purple" style="flex: 1; text-align: center; margin:0; padding: 9px;">
-                        <i data-lucide="images"></i> Gallery
-                    </label>
-                    <input type="file" id="docFileInputGallery" accept="image/*" multiple>
-                </div>
-                <div id="uploadStatus" class="status-msg"></div>
-            </div>
-
-            <div class="card" style="background: var(--card); max-height: 250px; overflow-y: auto;">
-                <span style="font-weight: 700; font-size: 0.85rem; color: var(--text-dim);">Stored Archive:</span>
-                <div id="docsList" style="display: flex; flex-direction: column; gap: 8px;"></div>
-            </div>
-        </div>
-    </div>
-
     <div class="main-wrapper">
-        <!-- الجزيرة العلوية المتصلة (Top Dynamic Island) -->
         <div class="top-nav-bar">
             <button class="icon-btn" onclick="toggleSidebar()" title="Menu">
                 <i data-lucide="align-right"></i>
             </button>
 
+            <!-- شريط المناهج والأنماط -->
             <div class="mode-switcher-bar">
                 <button class="mode-tab active" id="modeStudy" onclick="switchMode('study')">
                     <i data-lucide="graduation-cap"></i> Study
@@ -425,27 +367,25 @@ HTML_CODE = """<!DOCTYPE html>
                 </button>
             </div>
 
-            <button class="icon-btn" onclick="toggleGlassSheet(true)" title="Curriculum Documents">
-                <i data-lucide="folder-kanban"></i>
+            <button class="icon-btn" onclick="toggleTheme()" title="Theme">
+                <i data-lucide="sun" id="themeIconTop"></i>
             </button>
         </div>
 
-        <!-- شريط الخدمات الذكية (الذكاء + مؤقت التركيز Pomodoro) -->
-        <div class="top-utility-bar">
+        <!-- لوحة التحكم في مستوى وشخصية الذكاء الاصطناعي -->
+        <div class="persona-panel">
+            <span style="display:flex; align-items:center; gap:6px; color:var(--text-dim);"><i data-lucide="sliders" style="width:14px; height:14px;"></i> AI Persona:</span>
             <select id="aiPersonaSelect" class="persona-select">
                 <option value="strict">Strict & Professional</option>
                 <option value="humor">Entertainment & Light Humor</option>
                 <option value="roast">Witty & Playful Challenge</option>
                 <option value="human" selected>Human-like & Warm</option>
             </select>
-            <div class="pomodoro-badge" onclick="togglePomodoroTimer()" title="Focus Pomodoro Timer">
-                <i data-lucide="timer" style="width:14px; height:14px;"></i> <span id="pomodoroDisplay">25:00</span>
-            </div>
         </div>
 
         <!-- شريط نقاط الخبرة والألعاب -->
         <div class="games-stats-bar" id="gamesStatsBar">
-            <span>⭐ XP: <strong id="userXp">125</strong></span>
+            <span>⭐ XP: <strong id="userXp">120</strong></span>
             <span>🏆 Win Rate: <strong id="userWinRate">85%</strong></span>
             <span style="color: #a78bfa;" id="gameEncourageMsg">Keep going, genius!</span>
         </div>
@@ -455,23 +395,16 @@ HTML_CODE = """<!DOCTYPE html>
                 <div class="chat-feed" id="chatFeed" onscroll="checkScrollPosition()" ontouchmove="checkScrollPosition()">
                     <div id="welcomeMsg" style="color: var(--text-dim); text-align: center; padding: 40px 20px; display: flex; flex-direction: column; align-items: center; gap: 8px;">
                         <i data-lucide="sparkles" style="width: 30px; height: 30px; color: var(--primary);"></i>
-                        <h3 style="margin: 0; color: var(--text-main); font-weight: 700;">ge_nius Ultimate</h3>
-                        <p style="margin: 0; font-size: 0.88rem;">Glassmorphism design & smart adaptive workspace.</p>
+                        <h3 style="margin: 0; color: var(--text-main); font-weight: 700;">ge_nius Supreme</h3>
+                        <p style="margin: 0; font-size: 0.88rem;">Select a mode above and start exploring.</p>
                     </div>
                 </div>
 
-                <!-- الأسهم العائمة التفاعلية -->
+                <!-- الأسهم العائمة التفاعلية تظهر فقط في المحادثات الطويلة وتتبع اللمس والسحب -->
                 <div class="scroll-jumpers" id="scrollJumpers">
                     <button class="jump-btn" id="jumpUpBtn" onclick="scrollToTop()" title="Scroll to Top" style="display:none;"><i data-lucide="chevron-up"></i></button>
                     <button class="jump-btn" id="jumpDownBtn" onclick="scrollToBottom()" title="Scroll to Bottom" style="display:flex;"><i data-lucide="chevron-down"></i></button>
                 </div>
-            </div>
-
-            <!-- شريط الردود التنبيهية السريعة (Quick Chips) -->
-            <div class="quick-chips-bar" id="quickChipsBar">
-                <button class="quick-chip" onclick="sendQuickPrompt('Explain this in simpler terms')"><i data-lucide="sparkle"></i> Simplify</button>
-                <button class="quick-chip" onclick="sendQuickPrompt('Give me a practical engineering example')"><i data-lucide="wrench"></i> Example</button>
-                <button class="quick-chip" onclick="sendQuickPrompt('Test me with a quiz question')"><i data-lucide="help-circle"></i> Quiz me</button>
             </div>
 
             <div class="chat-input-container">
@@ -483,7 +416,7 @@ HTML_CODE = """<!DOCTYPE html>
                         </span>
                     </div>
 
-                    <textarea id="userQuery" placeholder="Message ge_nius..." rows="1" oninput="autoResizeTextarea(this)"></textarea>
+                    <textarea id="userQuery" placeholder="Type your prompt..." rows="1" oninput="autoResizeTextarea(this)"></textarea>
                     
                     <div class="input-actions-bar">
                         <div class="input-left-tools">
@@ -513,6 +446,38 @@ HTML_CODE = """<!DOCTYPE html>
                 </div>
             </div>
         </div>
+
+        <div class="tab-section" id="docsTab">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
+                <h3 style="margin:0; font-size: 1.05rem; color: var(--text-main);">Curriculum Documents</h3>
+                <button class="btn" onclick="switchSection('askTab')" style="padding: 5px 10px; font-size: 0.78rem;">
+                    <i data-lucide="arrow-left"></i> Back to Chat
+                </button>
+            </div>
+
+            <div class="card">
+                <span style="font-weight: 700; font-size: 0.9rem; color: #60a5fa; display: flex; align-items: center; gap: 6px;">
+                    <i data-lucide="file-up"></i> Upload Study Materials
+                </span>
+                <div style="display: flex; gap: 6px; margin-top: 4px;">
+                    <label for="docFileInputCamera" class="btn btn-purple" style="flex: 1; text-align: center; margin:0; padding: 9px;">
+                        <i data-lucide="camera"></i> Camera
+                    </label>
+                    <input type="file" id="docFileInputCamera" accept="image/*" capture="environment">
+
+                    <label for="docFileInputGallery" class="btn btn-purple" style="flex: 1; text-align: center; margin:0; padding: 9px;">
+                        <i data-lucide="images"></i> Gallery
+                    </label>
+                    <input type="file" id="docFileInputGallery" accept="image/*" multiple>
+                </div>
+                <div id="uploadStatus" class="status-msg"></div>
+            </div>
+
+            <div class="card" style="flex: 1; overflow-y: auto;">
+                <span style="font-weight: 700; font-size: 0.85rem; color: var(--text-dim);">Stored Documents Archive:</span>
+                <div id="docsList" style="display: flex; flex-direction: column; gap: 8px;"></div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -523,11 +488,13 @@ HTML_CODE = """<!DOCTYPE html>
             localStorage.setItem('theme', isLight ? 'light' : 'dark');
             const iconId = isLight ? 'moon' : 'sun';
             document.getElementById('themeIcon').setAttribute('data-lucide', iconId);
+            document.getElementById('themeIconTop').setAttribute('data-lucide', iconId);
             lucide.createIcons();
         }
         if (localStorage.getItem('theme') === 'light') { 
             document.body.classList.add('light-mode'); 
             document.getElementById('themeIcon').setAttribute('data-lucide', 'moon');
+            document.getElementById('themeIconTop').setAttribute('data-lucide', 'moon');
             lucide.createIcons(); 
         }
 
@@ -536,10 +503,10 @@ HTML_CODE = """<!DOCTYPE html>
             document.getElementById('sidebarOverlay').classList.toggle('active');
         }
 
-        function toggleGlassSheet(show) {
-            const sheet = document.getElementById('glassSheetOverlay');
-            if (show) sheet.classList.add('active');
-            else sheet.classList.remove('active');
+        function switchSection(sectionId) {
+            document.querySelectorAll('.tab-section').forEach(s => s.classList.remove('active'));
+            document.getElementById(sectionId).classList.add('active');
+            if(document.getElementById('sidebar').classList.contains('open')) toggleSidebar();
         }
 
         function autoResizeTextarea(el) {
@@ -547,36 +514,7 @@ HTML_CODE = """<!DOCTYPE html>
             el.style.height = (el.scrollHeight) + 'px';
         }
 
-        // Pomodoro Focus Timer Logic
-        let pomodoroSeconds = 25 * 60;
-        let pomodoroTimer = null;
-        let isPomodoroActive = false;
-
-        function togglePomodoroTimer() {
-            if (isPomodoroActive) {
-                clearInterval(pomodoroTimer);
-                isPomodoroActive = false;
-                alert('Focus timer paused.');
-            } else {
-                isPomodoroActive = true;
-                alert('Focus timer started! 25 minutes of deep study.');
-                pomodoroTimer = setInterval(() => {
-                    if (pomodoroSeconds > 0) {
-                        pomodoroSeconds--;
-                        let m = Math.floor(pomodoroSeconds / 60);
-                        let s = pomodoroSeconds % 60;
-                        document.getElementById('pomodoroDisplay').innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
-                    } else {
-                        clearInterval(pomodoroTimer);
-                        isPomodoroActive = false;
-                        alert('Pomodoro session completed! Take a 5 min break.');
-                        pomodoroSeconds = 25 * 60;
-                    }
-                }, 1000);
-            }
-        }
-
-        // ذكاء الأسهم العائمة
+        // ذكاء الأسهم العائمة التفاعلية حسب اتجاه اللمس والمسافة
         let lastScrollTop = 0;
         function checkScrollPosition() {
             const chatFeed = document.getElementById('chatFeed');
@@ -587,13 +525,18 @@ HTML_CODE = """<!DOCTYPE html>
             const st = chatFeed.scrollTop;
             const maxScroll = chatFeed.scrollHeight - chatFeed.clientHeight;
 
+            // تظهر الأسهم فقط إذا كانت المحادثة طويلة نسبياً
             if (chatFeed.scrollHeight > chatFeed.clientHeight + 150) {
                 jumpers.classList.add('visible');
+                
+                // تحديد اتجاه اللمس أو السحب
                 if (st > lastScrollTop) {
+                    // سحب لأسفل -> إظهار سهم الصعود أو إخفاء النزول عند النهاية
                     upBtn.style.display = 'flex';
                     if (st >= maxScroll - 20) downBtn.style.display = 'none';
                     else downBtn.style.display = 'flex';
                 } else {
+                    // سحب لأعلى -> إظهار سهم النزول
                     downBtn.style.display = 'flex';
                     if (st <= 20) upBtn.style.display = 'none';
                     else upBtn.style.display = 'flex';
@@ -605,7 +548,8 @@ HTML_CODE = """<!DOCTYPE html>
         }
 
         function scrollToTop() {
-            document.getElementById('chatFeed').scrollTo({ top: 0, behavior: 'smooth' });
+            const chatFeed = document.getElementById('chatFeed');
+            chatFeed.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function scrollToBottom() {
@@ -613,6 +557,7 @@ HTML_CODE = """<!DOCTYPE html>
             chatFeed.scrollTo({ top: chatFeed.scrollHeight, behavior: 'smooth' });
         }
 
+        // تخزين واجهات مستقلة تماماً لكل نمط (Study, General, Games)
         let modeContents = { study: "", general: "", games: "" };
         let currentMode = 'study';
         let isAudioMuted = false;
@@ -638,8 +583,8 @@ HTML_CODE = """<!DOCTYPE html>
             lucide.createIcons({root: btn});
         }
 
-        let chatSessions = JSON.parse(localStorage.getItem('ge_nius_sessions_ultimate')) || {};
-        let currentSessionId = localStorage.getItem('ge_nius_current_session_ultimate');
+        let chatSessions = JSON.parse(localStorage.getItem('ge_nius_sessions_supreme')) || {};
+        let currentSessionId = localStorage.getItem('ge_nius_current_session_supreme');
 
         function initSessions() {
             if (!currentSessionId || !chatSessions[currentSessionId]) {
@@ -663,14 +608,18 @@ HTML_CODE = """<!DOCTYPE html>
             if(document.getElementById('sidebar').classList.contains('open')) toggleSidebar();
         }
 
+        // عند التنقل بين المناهج، يتم تغيير الواجهة فوراً وفصل المحتوى مع الحفاظ على كل وضع
         function switchMode(mode) {
+            // حفظ الواجهة الحالية للنمط الحالي
             modeContents[currentMode] = chatFeed.innerHTML;
+
             currentMode = mode;
             document.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
             if(mode === 'study') document.getElementById('modeStudy').classList.add('active');
             else if(mode === 'general') document.getElementById('modeGeneral').classList.add('active');
             else if(mode === 'games') document.getElementById('modeGames').classList.add('active');
 
+            // إظهار أو إخفاء شريط نقاط الألعاب
             if (mode === 'games') {
                 gamesStatsBar.classList.add('active');
                 updateGameStatsUI();
@@ -678,6 +627,7 @@ HTML_CODE = """<!DOCTYPE html>
                 gamesStatsBar.classList.remove('active');
             }
 
+            // استرجاع واجهة النمط الجديد أو إظهار الترحيب الفارغ
             if (modeContents[mode] && modeContents[mode].trim() !== '') {
                 chatFeed.innerHTML = modeContents[mode];
             } else {
@@ -714,8 +664,11 @@ HTML_CODE = """<!DOCTYPE html>
             } else {
                 modeContents = { study: "", general: "", games: "" };
             }
-            if(session && session.mode) switchMode(session.mode);
-            else switchMode('study');
+            if(session && session.mode) {
+                switchMode(session.mode);
+            } else {
+                switchMode('study');
+            }
             renderChatHistoryList();
             if(document.getElementById('sidebar').classList.contains('open')) toggleSidebar();
         }
@@ -726,8 +679,12 @@ HTML_CODE = """<!DOCTYPE html>
                 delete chatSessions[id];
                 if(id === currentSessionId) {
                     const keys = Object.keys(chatSessions);
-                    if(keys.length > 0) { currentSessionId = keys[0]; loadChatSession(currentSessionId); }
-                    else { createNewChatSession(); }
+                    if(keys.length > 0) {
+                        currentSessionId = keys[0];
+                        loadChatSession(currentSessionId);
+                    } else {
+                        createNewChatSession();
+                    }
                 } else {
                     saveSessionsData();
                     renderChatHistoryList();
@@ -735,10 +692,13 @@ HTML_CODE = """<!DOCTYPE html>
             }
         }
 
+        // الحفظ التلقائي في السجل لا يتم إلا عند مغادرة الموقع نهائياً أو عند إرسال أول رسالة
         function saveCurrentChatHtml(userQueryText = null) {
             if(!chatSessions[currentSessionId]) return;
             modeContents[currentMode] = chatFeed.innerHTML;
             chatSessions[currentSessionId].modesData = modeContents;
+            
+            // دمج كل النصوص لتكوين عنوان السجل
             if (userQueryText && chatSessions[currentSessionId].title === "New Session") {
                 chatSessions[currentSessionId].title = userQueryText.substring(0, 20) + "...";
             }
@@ -746,8 +706,8 @@ HTML_CODE = """<!DOCTYPE html>
         }
 
         function saveSessionsData() {
-            localStorage.setItem('ge_nius_sessions_ultimate', JSON.stringify(chatSessions));
-            localStorage.setItem('ge_nius_current_session_ultimate', currentSessionId);
+            localStorage.setItem('ge_nius_sessions_supreme', JSON.stringify(chatSessions));
+            localStorage.setItem('ge_nius_current_session_supreme', currentSessionId);
             renderChatHistoryList();
         }
 
@@ -784,18 +744,10 @@ HTML_CODE = """<!DOCTYPE html>
             if ('speechSynthesis' in window) {
                 window.speechSynthesis.cancel();
                 const utterance = new SpeechSynthesisUtterance(decodeURIComponent(text));
-                utterance.rate = 1.0; utterance.pitch = 1.0;
+                utterance.rate = 1.0;
+                utterance.pitch = 1.0;
                 window.speechSynthesis.speak(utterance);
             }
-        };
-
-        function sendQuickPrompt(txt) {
-            document.getElementById('userQuery').value = txt;
-            submitQuestion();
-        }
-
-        window.makeFlashcard = function(btn, text) {
-            alert("Smart Flashcard Generated! \nQ: What is the core concept?\nA: " + decodeURIComponent(text).substring(0, 100) + "...");
         };
 
         let recognition = null;
@@ -916,6 +868,7 @@ HTML_CODE = """<!DOCTYPE html>
             let userTextDisplay = query.replace(/\\n/g, '<br>');
             if (attachedQuestionBase64) { userTextDisplay = (query ? userTextDisplay + '<br>' : '') + '<span style="color:#60a5fa; font-size:0.85em"><i data-lucide="image" style="width:14px;height:14px;"></i> Image attached</span>'; }
 
+            // كلام المستخدم صغير، قليل وفاتح
             const userRow = document.createElement('div'); userRow.className = 'message-row';
             userRow.innerHTML = `<div class="message-sender"><i data-lucide="user" style="width:12px;height:12px;"></i> You</div><div class="message-text-user">${userTextDisplay}</div>`;
             chatFeed.appendChild(userRow); lucide.createIcons({root: userRow});
@@ -947,25 +900,35 @@ HTML_CODE = """<!DOCTYPE html>
                     const fullText = data.answer;
                     const encoded = encodeURIComponent(fullText);
                     
+                    // تحديث نقاط الالعاب إذا كان النمط هو الألعاب
                     if (currentMode === 'games') {
-                        userXP += 15; userTotalGames += 1; userWins += 1;
+                        userXP += 15;
+                        userTotalGames += 1;
+                        userWins += 1;
                         updateGameStatsUI();
                     }
                     
-                    aiRow.innerHTML = `
-                        <div class="message-sender"><i data-lucide="bot" style="width:12px;height:12px;color:#60a5fa"></i> ge_nius</div>
-                        <div class="complex-card-box">
-                            <div class="complex-card-header">
-                                <span>Analysis & Solution</span>
-                                <div style="display:flex; gap:6px;">
-                                    <button class="flashcard-btn" onclick="makeFlashcard(this, '${encoded}')"><i data-lucide="layers" style="width:11px;height:11px;"></i> Flashcard</button>
+                    // كلام الذكاء الاصطناعي كبير، غامق واحترافي
+                    if (fullText.includes("```") || fullText.length > 500) {
+                        aiRow.innerHTML = `
+                            <div class="message-sender"><i data-lucide="bot" style="width:12px;height:12px;color:#60a5fa"></i> ge_nius</div>
+                            <div class="complex-card-box">
+                                <div class="complex-card-header">
+                                    <span>Detailed Solution / Code Block</span>
                                     <button class="copy-code-btn" onclick="copyCodeText(this, '${encoded}')"><i data-lucide="copy" style="width:11px;height:11px;"></i> Copy</button>
                                 </div>
+                                <div class="message-text-ai ai-content">${marked.parse(fullText)}</div>
                             </div>
+                            <div><button class="audio-speech-btn" onclick="speakText('${encoded}')"><i data-lucide="volume-2" style="width:13px;height:13px;"></i> Read Aloud</button></div>
+                        `;
+                    } else {
+                        aiRow.innerHTML = `
+                            <div class="message-sender"><i data-lucide="bot" style="width:12px;height:12px;color:#60a5fa"></i> ge_nius</div>
                             <div class="message-text-ai ai-content">${marked.parse(fullText)}</div>
-                        </div>
-                        <div><button class="audio-speech-btn" onclick="speakText('${encoded}')"><i data-lucide="volume-2" style="width:13px;height:13px;"></i> Read Aloud</button></div>
-                    `;
+                            <div><button class="audio-speech-btn" onclick="speakText('${encoded}')"><i data-lucide="volume-2" style="width:13px;height:13px;"></i> Read Aloud</button></div>
+                        `;
+                    }
+                    
                     speakText(encoded);
                 } else {
                     aiRow.innerHTML = `<div class="message-sender" style="color:var(--danger)">ge_nius</div><div class="message-text-ai">Error: ${data.error || 'Failed.'}</div>`;
@@ -989,7 +952,7 @@ HTML_CODE = """<!DOCTYPE html>
 """
 
 # ==============================================================================
-# Python Backend Server (Ultimate Glassmorphism)
+# Python Backend Server (Supreme Optimized)
 # ==============================================================================
 class StudyAppRequestHandler(BaseHTTPRequestHandler):
 
@@ -1084,6 +1047,7 @@ class StudyAppRequestHandler(BaseHTTPRequestHandler):
                 if question_image_base64:
                     messages_content.append({"type": "image_url", "image_url": {"url": question_image_base64}})
 
+                # توجيه الـ Persona حسب اختيار المستخدم
                 persona_instructions = {
                     "strict": "Persona: Strict & Professional. Be highly formal, objective, precise, and academic.",
                     "humor": "Persona: Entertainment & Light Humor. Keep it witty, fun, and add light jokes while maintaining accuracy.",
