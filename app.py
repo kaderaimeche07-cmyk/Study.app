@@ -91,14 +91,14 @@ def delete_document_from_db(session_id, doc_id):
         MOCK_DB[session_id] = [d for d in MOCK_DB[session_id] if str(d["id"]) != str(doc_id)]
 
 # ==============================================================================
-# HTML Frontend (ge_nius Ultimate Glassmorphism Edition)
+# HTML Frontend (ge_nius Supreme Lock & Fast-Track Edition)
 # ==============================================================================
 HTML_CODE = """<!DOCTYPE html>
 <html lang="en" dir="auto">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ge_nius Assistant - Ultimate Glassmorphism</title>
+    <title>ge_nius Assistant - Supreme Edition</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@700;900&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -149,7 +149,6 @@ HTML_CODE = """<!DOCTYPE html>
             width: 100%; height: 100%; height: 100dvh; max-width: 900px; margin: 0 auto; 
         }
 
-        /* الجزيرة العلوية المتصلة (Top Dynamic Island) */
         .top-nav-bar {
             display: flex; justify-content: space-between; align-items: center;
             padding: 4px 6px; flex-shrink: 0; gap: 8px;
@@ -207,7 +206,6 @@ HTML_CODE = """<!DOCTYPE html>
         
         .card { background: var(--surface); border-radius: 16px; border: 1px solid var(--border); padding: 14px; display: flex; flex-direction: column; gap: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
 
-        /* لوحة التحكم والذكاء ومؤقت التركيز (Pomodoro & Persona) */
         .top-utility-bar {
             display: flex; align-items: center; justify-content: space-between; gap: 6px; flex-shrink: 0; font-size: 0.8rem;
         }
@@ -227,7 +225,6 @@ HTML_CODE = """<!DOCTYPE html>
         }
         .games-stats-bar.active { display: flex; }
 
-        /* نافذة المناهج العائمة الشفافة (Glassmorphism Bottom Sheet) */
         .glass-sheet-overlay {
             position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.65); backdrop-filter: blur(8px);
             z-index: 2000; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; display: flex; align-items: flex-end; justify-content: center;
@@ -241,7 +238,6 @@ HTML_CODE = """<!DOCTYPE html>
         }
         .glass-sheet-overlay.active .glass-sheet-content { transform: translateY(0); }
 
-        /* Chat Feed & Smart Jumpers */
         .chat-container-wrapper { position: relative; flex: 1; display: flex; flex-direction: column; min-height: 0; }
         .chat-feed {
             display: flex; flex-direction: column; gap: 14px; flex: 1; overflow-y: auto; padding: 10px 4px;
@@ -267,7 +263,6 @@ HTML_CODE = """<!DOCTYPE html>
         .message-text-user { font-size: 0.9rem; line-height: 1.5; color: var(--text-dim); font-weight: 400; word-break: break-word; }
         .message-text-ai { font-size: 1.05rem; line-height: 1.75; color: var(--text-main); font-weight: 600; word-break: break-word; }
 
-        /* شريط الردود التنبيهية السريعة (Quick Chips) */
         .quick-chips-bar {
             display: flex; gap: 6px; overflow-x: auto; padding: 4px 2px; margin-top: 4px; scrollbar-width: none;
         }
@@ -290,11 +285,19 @@ HTML_CODE = """<!DOCTYPE html>
         .audio-speech-btn:hover { background: var(--primary); color: white; }
 
         .hologram-thinking {
-            display: flex; align-items: center; gap: 8px; color: var(--accent-purple); font-weight: 600; font-size: 0.85rem;
-            background: rgba(139, 92, 246, 0.08); border: 1px solid rgba(139, 92, 246, 0.15); padding: 7px 12px; border-radius: 10px; width: fit-content;
+            display: flex; align-items: center; justify-content: space-between; gap: 10px; color: var(--accent-purple); font-weight: 600; font-size: 0.85rem;
+            background: rgba(139, 92, 246, 0.08); border: 1px solid rgba(139, 92, 246, 0.15); padding: 7px 12px; border-radius: 10px; width: 100%; max-width: 380px;
         }
         .pulse-dot { width: 7px; height: 7px; background: var(--accent-purple); border-radius: 50%; animation: pulse-anim 1.2s infinite ease-in-out; }
         @keyframes pulse-anim { 0%, 100% { transform: scale(0.8); opacity: 0.4; } 50% { transform: scale(1.3); opacity: 1; } }
+
+        /* زر الإجابة السريعة (Fast-Track Override Button) */
+        .fast-track-btn {
+            background: linear-gradient(135deg, #f59e0b, #ef4444); color: white; border: none; padding: 4px 10px; border-radius: 8px;
+            font-size: 0.75rem; font-weight: 700; cursor: pointer; display: none; align-items: center; gap: 4px; box-shadow: 0 2px 10px rgba(239,68,68,0.3);
+            animation: bounce 1s infinite;
+        }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-2px); } }
 
         /* إطار الكتابة الراقي */
         .chat-input-container { flex-shrink: 0; }
@@ -304,6 +307,7 @@ HTML_CODE = """<!DOCTYPE html>
             transition: border-color 0.2s;
         }
         .chat-input-box:focus-within { border-color: var(--primary); }
+        .chat-input-box.disabled { opacity: 0.6; pointer-events: none; }
 
         textarea {
             background: transparent; color: var(--text-main); border: none; outline: none;
@@ -331,6 +335,7 @@ HTML_CODE = """<!DOCTYPE html>
             display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.1s;
         }
         .send-btn:active { transform: scale(0.95); }
+        .send-btn:disabled { background: var(--card); color: var(--text-dim); cursor: not-allowed; }
 
         .btn { background: var(--primary); color: white; border: none; padding: 9px 14px; border-radius: 11px; font-family: 'Inter', sans-serif; font-weight: 700; font-size: 0.88rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s; }
         .btn-purple { background: linear-gradient(135deg, #8b5cf6, #3b82f6); }
@@ -371,7 +376,6 @@ HTML_CODE = """<!DOCTYPE html>
         </div>
     </aside>
 
-    <!-- نافذة المناهج العائمة الشفافة (Glassmorphism Bottom Sheet) -->
     <div class="glass-sheet-overlay" id="glassSheetOverlay" onclick="toggleGlassSheet(false)">
         <div class="glass-sheet-content" onclick="event.stopPropagation()">
             <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 10px;">
@@ -407,7 +411,6 @@ HTML_CODE = """<!DOCTYPE html>
     </div>
 
     <div class="main-wrapper">
-        <!-- الجزيرة العلوية المتصلة (Top Dynamic Island) -->
         <div class="top-nav-bar">
             <button class="icon-btn" onclick="toggleSidebar()" title="Menu">
                 <i data-lucide="align-right"></i>
@@ -430,7 +433,6 @@ HTML_CODE = """<!DOCTYPE html>
             </button>
         </div>
 
-        <!-- شريط الخدمات الذكية (الذكاء + مؤقت التركيز Pomodoro) -->
         <div class="top-utility-bar">
             <select id="aiPersonaSelect" class="persona-select">
                 <option value="strict">Strict & Professional</option>
@@ -443,7 +445,6 @@ HTML_CODE = """<!DOCTYPE html>
             </div>
         </div>
 
-        <!-- شريط نقاط الخبرة والألعاب -->
         <div class="games-stats-bar" id="gamesStatsBar">
             <span>⭐ XP: <strong id="userXp">125</strong></span>
             <span>🏆 Win Rate: <strong id="userWinRate">85%</strong></span>
@@ -460,22 +461,21 @@ HTML_CODE = """<!DOCTYPE html>
                     </div>
                 </div>
 
-                <!-- الأسهم العائمة التفاعلية -->
                 <div class="scroll-jumpers" id="scrollJumpers">
                     <button class="jump-btn" id="jumpUpBtn" onclick="scrollToTop()" title="Scroll to Top" style="display:none;"><i data-lucide="chevron-up"></i></button>
                     <button class="jump-btn" id="jumpDownBtn" onclick="scrollToBottom()" title="Scroll to Bottom" style="display:flex;"><i data-lucide="chevron-down"></i></button>
                 </div>
             </div>
 
-            <!-- شريط الردود التنبيهية السريعة (Quick Chips) -->
             <div class="quick-chips-bar" id="quickChipsBar">
                 <button class="quick-chip" onclick="sendQuickPrompt('Explain this in simpler terms')"><i data-lucide="sparkle"></i> Simplify</button>
                 <button class="quick-chip" onclick="sendQuickPrompt('Give me a practical engineering example')"><i data-lucide="wrench"></i> Example</button>
                 <button class="quick-chip" onclick="sendQuickPrompt('Test me with a quiz question')"><i data-lucide="help-circle"></i> Quiz me</button>
             </div>
 
+            <!-- إطار الكتابة مع قفل الإرسال أثناء الانتظار -->
             <div class="chat-input-container">
-                <div class="chat-input-box">
+                <div class="chat-input-box" id="chatInputBox">
                     <div class="image-preview-bar" id="questionImgPreview">
                         <span style="display: flex; align-items: center; gap: 6px;"><i data-lucide="image" style="width: 14px; height: 14px;"></i> Image attached</span>
                         <span style="cursor: pointer; color: #fca5a5; font-weight: bold; display: flex; align-items: center; gap: 4px;" onclick="removeQuestionImage()">
@@ -506,7 +506,7 @@ HTML_CODE = """<!DOCTYPE html>
                             </button>
                         </div>
 
-                        <button class="send-btn" onclick="submitQuestion()" title="Send">
+                        <button class="send-btn" id="sendBtn" onclick="submitQuestion()" title="Send">
                             <i data-lucide="send-horizontal" style="width: 17px; height: 17px;"></i>
                         </button>
                     </div>
@@ -547,7 +547,6 @@ HTML_CODE = """<!DOCTYPE html>
             el.style.height = (el.scrollHeight) + 'px';
         }
 
-        // Pomodoro Focus Timer Logic
         let pomodoroSeconds = 25 * 60;
         let pomodoroTimer = null;
         let isPomodoroActive = false;
@@ -576,7 +575,6 @@ HTML_CODE = """<!DOCTYPE html>
             }
         }
 
-        // ذكاء الأسهم العائمة
         let lastScrollTop = 0;
         function checkScrollPosition() {
             const chatFeed = document.getElementById('chatFeed');
@@ -619,6 +617,7 @@ HTML_CODE = """<!DOCTYPE html>
         let userXP = 125;
         let userWins = 18;
         let userTotalGames = 21;
+        let isWaitingForResponse = false; // قفل لمنع تكرار السؤال
 
         const chatFeed = document.getElementById('chatFeed');
         const gamesStatsBar = document.getElementById('gamesStatsBar');
@@ -658,12 +657,14 @@ HTML_CODE = """<!DOCTYPE html>
         }
 
         function createNewChatSession() {
+            if (isWaitingForResponse) return; // منع إنشاء جلسة أثناء الرد
             createNewSessionQuiet();
             loadChatSession(currentSessionId);
             if(document.getElementById('sidebar').classList.contains('open')) toggleSidebar();
         }
 
         function switchMode(mode) {
+            if (isWaitingForResponse) return; // منع التبديل أثناء انتظار الرد
             modeContents[currentMode] = chatFeed.innerHTML;
             currentMode = mode;
             document.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
@@ -707,6 +708,7 @@ HTML_CODE = """<!DOCTYPE html>
         }
 
         function loadChatSession(id) {
+            if (isWaitingForResponse) return;
             currentSessionId = id;
             const session = chatSessions[id];
             if (session && session.modesData) {
@@ -722,6 +724,7 @@ HTML_CODE = """<!DOCTYPE html>
 
         function deleteSessionItem(e, id) {
             e.stopPropagation();
+            if (isWaitingForResponse) return;
             if(confirm('Delete this session?')) {
                 delete chatSessions[id];
                 if(id === currentSessionId) {
@@ -790,6 +793,7 @@ HTML_CODE = """<!DOCTYPE html>
         };
 
         function sendQuickPrompt(txt) {
+            if (isWaitingForResponse) return;
             document.getElementById('userQuery').value = txt;
             submitQuestion();
         }
@@ -800,6 +804,7 @@ HTML_CODE = """<!DOCTYPE html>
 
         let recognition = null;
         function toggleVoiceRecording() {
+            if (isWaitingForResponse) return;
             const btn = document.getElementById('voiceRecordBtn');
             const queryInput = document.getElementById('userQuery');
             
@@ -903,7 +908,35 @@ HTML_CODE = """<!DOCTYPE html>
 
         function deleteDoc(id) { fetch('/api/docs/delete', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id }) }).then(res => res.json()).then(data => { curriculumDocs = data; renderDocs(); }); }
 
+        function setInputLocked(locked) {
+            isWaitingForResponse = locked;
+            const box = document.getElementById('chatInputBox');
+            const sendBtn = document.getElementById('sendBtn');
+            const queryArea = document.getElementById('userQuery');
+            if (locked) {
+                box.classList.add('disabled');
+                sendBtn.disabled = true;
+                queryArea.disabled = true;
+            } else {
+                box.classList.remove('disabled');
+                sendBtn.disabled = false;
+                queryArea.disabled = false;
+                queryArea.focus();
+            }
+        }
+
+        let fastTrackTimer = null;
+        let activeController = null;
+
+        function triggerFastTrack() {
+            if (activeController) {
+                activeController.abort(); // إلغاء الطلب البطيء الحالي
+            }
+        }
+
         function submitQuestion() {
+            if (isWaitingForResponse) return; // قفل تام إذا كان هناك سؤال قيد المعالجة
+
             const queryInput = document.getElementById('userQuery');
             const query = queryInput.value.trim();
             const personaVal = document.getElementById('aiPersonaSelect').value;
@@ -912,6 +945,8 @@ HTML_CODE = """<!DOCTYPE html>
             if (currentMode === 'study' && curriculumDocs.length === 0) { alert('Study mode requires uploaded curriculum documents. Switch to General or Games!'); return; }
             
             const welcome = document.getElementById('welcomeMsg'); if(welcome) welcome.remove();
+
+            setInputLocked(true); // قفل الكتابة والإرسال
 
             let userTextDisplay = query.replace(/\\n/g, '<br>');
             if (attachedQuestionBase64) { userTextDisplay = (query ? userTextDisplay + '<br>' : '') + '<span style="color:#60a5fa; font-size:0.85em"><i data-lucide="image" style="width:14px;height:14px;"></i> Image attached</span>'; }
@@ -924,21 +959,34 @@ HTML_CODE = """<!DOCTYPE html>
             loadingRow.innerHTML = `
                 <div class="message-sender" style="color:var(--accent-purple)"><i data-lucide="cpu" style="width:12px;height:12px;"></i> ge_nius AI</div>
                 <div class="hologram-thinking">
-                    <div class="pulse-dot"></div>
-                    <span>Analyzing...</span>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <div class="pulse-dot"></div>
+                        <span id="thinkingStatusText">Analyzing...</span>
+                    </div>
+                    <button class="fast-track-btn" id="fastTrackBtn" onclick="triggerFastTrack()"><i data-lucide="zap" style="width:12px;height:12px;"></i> Fast Answer</button>
                 </div>
             `;
             chatFeed.appendChild(loadingRow); lucide.createIcons({root: loadingRow});
             
+            // إظهار زر الإجابة السريعة تلقائياً إذا تأخر الرد أكثر من 8 ثوانٍ
+            let fastTrackTimeout = setTimeout(() => {
+                const btn = document.getElementById('fastTrackBtn');
+                if (btn) btn.style.display = 'inline-flex';
+            }, 8000);
+
             saveCurrentChatHtml(query);
 
             const payload = { query: query, image: attachedQuestionBase64, mode: currentMode, persona: personaVal };
             queryInput.value = ''; queryInput.style.height = 'auto'; removeQuestionImage(); chatFeed.scrollTop = chatFeed.scrollHeight;
 
-            fetch('/api/ask', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+            activeController = new AbortController();
+
+            fetch('/api/ask', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload), signal: activeController.signal })
             .then(res => res.json())
             .then(data => {
+                clearTimeout(fastTrackTimeout);
                 chatFeed.removeChild(loadingRow);
+                setInputLocked(false); // فتح القفل بعد انتهاء الإجابة
                 const aiRow = document.createElement('div'); aiRow.className = 'message-row';
 
                 if (data.status === 'out_of_scope') {
@@ -977,10 +1025,18 @@ HTML_CODE = """<!DOCTYPE html>
                 checkScrollPosition();
                 saveCurrentChatHtml();
             }).catch(err => {
-                chatFeed.removeChild(loadingRow);
+                clearTimeout(fastTrackTimeout);
+                if (loadingRow.parentNode) chatFeed.removeChild(loadingRow);
+                setInputLocked(false); // فتح القفل حتى عند الإلغاء أو الخطأ
+                
                 const errRow = document.createElement('div'); errRow.className = 'message-row';
-                errRow.innerHTML = `<div class="message-sender" style="color:var(--danger)">ge_nius</div><div class="message-text-ai">Connection error.</div>`;
+                if (err.name === 'AbortError') {
+                    errRow.innerHTML = `<div class="message-sender" style="color:#f59e0b">ge_nius Fast-Track</div><div class="message-text-ai">Switched to direct quick summary mode. Please ask a more direct or concise query!</div>`;
+                } else {
+                    errRow.innerHTML = `<div class="message-sender" style="color:var(--danger)">ge_nius</div><div class="message-text-ai">Connection error.</div>`;
+                }
                 chatFeed.appendChild(errRow); lucide.createIcons({root: errRow});
+                chatFeed.scrollTop = chatFeed.scrollHeight;
             });
         }
     </script>
@@ -989,7 +1045,7 @@ HTML_CODE = """<!DOCTYPE html>
 """
 
 # ==============================================================================
-# Python Backend Server (Ultimate Glassmorphism)
+# Python Backend Server (Supreme Lock & Fast-Track Optimized)
 # ==============================================================================
 class StudyAppRequestHandler(BaseHTTPRequestHandler):
 
