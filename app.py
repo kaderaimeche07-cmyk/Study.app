@@ -10,6 +10,8 @@ from datetime import datetime
 import os
 import uuid
 from http import cookies
+import zlib
+import base64
 
 # ==============================================================================
 # AI API Key & System Config
@@ -22,6 +24,9 @@ MODEL_NAME = "Qwen3-30B-A3B-Thinking"
 MOCK_DB = {}
 MOCK_DB_DOC_ID = 1
 
+MOCK_USERS = {}      # email -> {password, role, level, name, xp, hearts}
+MOCK_SESSIONS = {}   # session_id -> email
+
 def get_db_connection():
     database_url = os.environ.get("DATABASE_URL")
     if not database_url:
@@ -31,7 +36,24 @@ def get_db_connection():
     except Exception as e:
         return None
 
-def load_curriculum(session_id):
+def compress_file_data(base64_data):
+    """خوارزمية ذكية لضغط الملفات باستخدام zlib"""
+    try:
+        header, encoded = base64_data.split(",", 1)
+        data = base64.b64decode(encoded)
+        compressed = zlib.compress(data, level=9)
+        return header, compressed
+    except:
+        return None, None
+
+def get_current_user(session_id):
+    email = MOCK_SESSIONS.get(session_id)
+    if email and email in MOCK_USERS:
+        return MOCK_USERS[email]
+    return None
+
+def load_curriculum(session_id, user=None):
+    docs = MOCK_DB.get("GLOBAL_DOCS", []).copy()
     conn = get_db_connection()
     if conn:
         try:
@@ -41,16 +63,26 @@ def load_curriculum(session_id):
             rows = cur.fetchall()
             cur.close()
             conn.close()
-            return [{"id": r[0], "title": r[1], "concepts": r[2]} for r in rows]
+            for r in rows:
+                docs.append({"id": r[0], "title": r[1], "concepts": r[2]})
         except Exception as e:
             pass
         finally:
             try: conn.close()
             except: pass
-    return MOCK_DB.get(session_id, [])
+    else:
+        docs.extend(MOCK_DB.get(session_id, []))
+    return docs
 
-def add_document_to_db(session_id, title, content):
+def add_document_to_db(session_id, title, content, is_global=False):
     global MOCK_DB, MOCK_DB_DOC_ID
+    if is_global:
+        if "GLOBAL_DOCS" not in MOCK_DB:
+            MOCK_DB["GLOBAL_DOCS"] = []
+        MOCK_DB["GLOBAL_DOCS"].append({"id": MOCK_DB_DOC_ID, "title": title, "concepts": content})
+        MOCK_DB_DOC_ID += 1
+        return
+
     conn = get_db_connection()
     if conn:
         try:
@@ -73,6 +105,9 @@ def add_document_to_db(session_id, title, content):
 
 def delete_document_from_db(session_id, doc_id):
     global MOCK_DB
+    if "GLOBAL_DOCS" in MOCK_DB:
+        MOCK_DB["GLOBAL_DOCS"] = [d for d in MOCK_DB["GLOBAL_DOCS"] if str(d["id"]) != str(doc_id)]
+    
     conn = get_db_connection()
     if conn:
         try:
@@ -91,7 +126,7 @@ def delete_document_from_db(session_id, doc_id):
         MOCK_DB[session_id] = [d for d in MOCK_DB[session_id] if str(d["id"]) != str(doc_id)]
 
 # ==============================================================================
-# HTML Frontend (ge_nius Royal World-Class UI Final Polish)
+# HTML Frontend (ge_nius Royal World-Class UI Refined with 6 Features)
 # ==============================================================================
 HTML_CODE = """<!DOCTYPE html>
 <html lang="en" dir="auto">
@@ -114,16 +149,11 @@ HTML_CODE = """<!DOCTYPE html>
 
     <style>
         :root {
-            --bg-main: #030304; 
-            --surface: #0f1014; 
-            --card: #18191f;
-            --primary: #4169E1; 
-            --primary-glow: rgba(65, 105, 225, 0.4);
-            --danger: #ef4444; 
-            --text-main: #f8fafc; 
-            --text-dim: #94a3b8;
-            --border: rgba(255, 255, 255, 0.06); 
-            --glass: rgba(15, 16, 20, 0.75);
+            --bg-main: #030304; --surface: #0f1014; --card: #18191f;
+            --primary: #4169E1; --primary-glow: rgba(65, 105, 225, 0.4);
+            --danger: #ef4444; --accent-gold: #fbbf24; --accent-green: #10b981;
+            --text-main: #f8fafc; --text-dim: #94a3b8;
+            --border: rgba(255, 255, 255, 0.06); --glass: rgba(15, 16, 20, 0.7);
         }
 
         body.light-mode {
@@ -138,207 +168,164 @@ HTML_CODE = """<!DOCTYPE html>
         html, body {
             font-family: 'Inter', sans-serif; 
             background-color: var(--bg-main); color: var(--text-main);
-            margin: 0; padding: 0; width: 100vw; height: 100vh; height: 100dvh; overflow: hidden;
-            background-image: 
-                radial-gradient(ellipse at 10% 10%, rgba(65, 105, 225, 0.08) 0%, transparent 50%),
-                radial-gradient(ellipse at 90% 90%, rgba(139, 92, 246, 0.05) 0%, transparent 50%);
+            margin: 0; padding: 0; width: 100vw; height: 100vh; overflow: hidden;
+            background-image: radial-gradient(ellipse at 10% 10%, rgba(65, 105, 225, 0.08) 0%, transparent 50%),
+                              radial-gradient(ellipse at 90% 90%, rgba(139, 92, 246, 0.05) 0%, transparent 50%);
             background-attachment: fixed;
         }
 
         .main-wrapper { 
-            padding: 10px; display: flex; flex-direction: column; gap: 0; 
-            width: 100%; height: 100%; height: 100dvh; max-width: 900px; margin: 0 auto; 
+            padding: 12px 10px; display: flex; flex-direction: column; gap: 0; 
+            width: 100%; height: 100%; max-width: 900px; margin: 0 auto; 
         }
 
-        /* شريط التنقل العلوي مع الاسم المستقل وأيقونة الغواصة */
+        /* --- Auth Overlay CSS --- */
+        #authOverlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(3, 3, 4, 0.95); backdrop-filter: blur(20px);
+            z-index: 9999; display: flex; justify-content: center; align-items: center; padding: 20px;
+            transition: opacity 0.4s ease;
+        }
+        .auth-card {
+            background: var(--surface); border: 1px solid var(--border); border-radius: 24px;
+            padding: 30px; width: 100%; max-width: 400px; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            display: flex; flex-direction: column; gap: 15px;
+        }
+        .role-selector { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+        .role-card {
+            background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+            padding: 12px 5px; text-align: center; cursor: pointer; font-size: 0.8rem; font-weight: 600;
+            color: var(--text-dim); transition: all 0.2s; display: flex; flex-direction: column; align-items: center; gap: 6px;
+        }
+        .role-card.active { background: rgba(65, 105, 225, 0.15); color: var(--primary); border-color: var(--primary); }
+        .custom-input, .custom-select {
+            width: 100%; background: var(--bg-main); border: 1px solid var(--border); color: var(--text-main);
+            padding: 12px 16px; border-radius: 12px; font-family: 'Inter', sans-serif; font-size: 0.95rem; outline: none;
+        }
+        
+        /* Top Navbar */
         .top-nav-bar {
             display: flex; justify-content: space-between; align-items: center;
-            padding: 8px 14px; flex-shrink: 0; gap: 12px; background: var(--glass);
-            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--border); border-radius: 24px; box-shadow: 0 4px 30px rgba(0,0,0,0.3);
-            margin-bottom: 10px;
+            padding: 6px 12px; flex-shrink: 0; gap: 10px; background: var(--glass);
+            backdrop-filter: blur(20px); border: 1px solid var(--border); border-radius: 24px;
+            box-shadow: 0 4px 30px rgba(0,0,0,0.3); margin-bottom: 8px;
         }
-
-        .nav-left-group { display: flex; align-items: center; gap: 10px; }
-
-        .app-brand {
-            font-family: 'Outfit', sans-serif;
-            font-weight: 900;
-            font-size: 1.2rem;
-            color: var(--text-main);
-            letter-spacing: -0.5px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
+        .app-brand { font-family: 'Outfit', sans-serif; font-weight: 900; font-size: 1.25rem; display: flex; align-items: center; gap: 6px; }
         .app-brand span { color: var(--primary); }
-        .brand-icon { width: 22px; height: 22px; color: var(--primary); }
-
-        .icon-btn {
-            background: transparent; border: none; color: var(--text-main);
-            border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
-            cursor: pointer; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); flex-shrink: 0;
-        }
+        .icon-btn { background: transparent; border: none; color: var(--text-main); border-radius: 50%; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.2s; }
         .icon-btn:hover { background: var(--card); color: var(--primary); transform: scale(1.05); }
 
-        .mode-switcher-bar {
-            display: flex; gap: 4px; background: rgba(0,0,0,0.2); padding: 3px; border-radius: 18px;
-        }
-        .mode-tab {
-            padding: 6px 12px; background: transparent; border: none; color: var(--text-dim);
-            font-family: 'Inter', sans-serif; font-weight: 600; font-size: 0.8rem; cursor: pointer;
-            border-radius: 14px; white-space: nowrap; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.3s;
-        }
-        .mode-tab.active { background: var(--surface); color: var(--text-main); box-shadow: 0 2px 15px rgba(0,0,0,0.2); border: 1px solid var(--border); }
+        .mode-switcher-bar { display: flex; gap: 4px; background: rgba(0,0,0,0.2); padding: 4px; border-radius: 20px; overflow-x: auto; }
+        .mode-tab { padding: 6px 12px; background: transparent; border: none; color: var(--text-dim); font-weight: 600; font-size: 0.82rem; cursor: pointer; border-radius: 16px; display: flex; align-items: center; gap: 6px; }
+        .mode-tab.active { background: var(--surface); color: var(--text-main); border: 1px solid var(--border); }
+        .mode-tab.hidden { display: none !important; }
 
-        .lucide { width: 18px; height: 18px; stroke-width: 2.2; display: inline-block; vertical-align: middle; }
+        /* Game Stats Bar (Horizontal underneath navbar to save space) */
+        .games-stats-bar {
+            display: none; background: rgba(65, 105, 225, 0.1); border: 1px solid rgba(65, 105, 225, 0.2);
+            padding: 8px 16px; border-radius: 16px; align-items: center; justify-content: space-between; font-size: 0.85rem; color: #93c5fd; flex-shrink: 0; margin-bottom: 8px;
+        }
+        .games-stats-bar.active { display: flex; }
+        .hud-hearts { color: var(--danger); letter-spacing: 2px;}
 
-        /* القائمة الجانبية (Sidebar) */
+        /* Sidebar */
         .sidebar-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); z-index: 999; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
         .sidebar-overlay.active { opacity: 1; pointer-events: auto; }
-        
-        .sidebar {
-            position: fixed; top: 0; left: -320px; width: 300px; height: 100vh; height: 100dvh;
-            background: var(--surface); border-right: 1px solid var(--border);
-            z-index: 1000; transition: left 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-            display: flex; flex-direction: column; padding: 20px; box-shadow: 15px 0 50px rgba(0,0,0,0.5);
-            overflow-y: auto;
-        }
+        .sidebar { position: fixed; top: 0; left: -320px; width: 300px; height: 100vh; background: var(--surface); border-right: 1px solid var(--border); z-index: 1000; transition: left 0.4s; display: flex; flex-direction: column; padding: 20px; overflow-y: auto;}
         .sidebar.open { left: 0; }
-        
         .sidebar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 15px;}
-        .sidebar h3 { margin: 0; font-size: 1.15rem; color: var(--text-main); font-weight: 800; display: flex; align-items: center; gap: 8px;}
         
-        .sidebar-section-title { font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; margin: 15px 0 8px 0; display: flex; align-items: center; gap: 6px;}
-        
-        .persona-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
-        .persona-chip {
-            background: var(--bg-main); border: 1px solid var(--border); border-radius: 12px;
-            padding: 10px; font-size: 0.8rem; font-family: 'Inter', sans-serif; font-weight: 600;
-            color: var(--text-dim); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px;
-            transition: all 0.2s ease;
-        }
-        .persona-chip:hover { background: var(--card); color: var(--text-main); }
-        .persona-chip.active { background: rgba(65, 105, 225, 0.15); color: var(--primary); border-color: var(--primary); }
-
         .chat-history-list { flex: 1; display: flex; flex-direction: column; gap: 6px; }
-        .history-item {
-            background: transparent; border: 1px solid transparent; color: var(--text-main);
-            padding: 10px 12px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: space-between;
-            font-family: 'Inter', sans-serif; font-size: 0.88rem; transition: all 0.2s;
-        }
+        .history-item { background: transparent; color: var(--text-main); padding: 10px 12px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; font-size: 0.88rem; }
         .history-item:hover { background: var(--card); }
         .history-item.active { background: rgba(65, 105, 225, 0.1); border: 1px solid var(--primary); color: var(--primary); font-weight: bold; }
-        .history-item-content { display: flex; align-items: center; gap: 8px; flex: 1; overflow: hidden; }
         .delete-history-btn { background: none; border: none; color: var(--text-dim); cursor: pointer; padding: 4px; border-radius: 6px; }
         .delete-history-btn:hover { color: var(--danger); background: rgba(239, 68, 68, 0.1); }
 
         .tab-section { display: none; flex-direction: column; gap: 10px; flex: 1; min-height: 0; }
         .tab-section.active { display: flex; }
-        
         .card { background: var(--surface); border-radius: 20px; border: 1px solid var(--border); padding: 16px; display: flex; flex-direction: column; gap: 10px; }
 
+        /* Chat feed */
         .chat-container-wrapper { position: relative; flex: 1; display: flex; flex-direction: column; min-height: 0; }
-        .chat-feed {
-            display: flex; flex-direction: column; gap: 24px; flex: 1; overflow-y: auto; padding: 10px 4px 20px 4px;
-            background: transparent; scroll-behavior: smooth;
-        }
+        .chat-feed { display: flex; flex-direction: column; gap: 24px; flex: 1; overflow-y: auto; padding: 10px 4px 20px 4px; scroll-behavior: smooth; }
         
-        .message-row { display: flex; flex-direction: column; gap: 6px; width: 100%; animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+        .message-row { display: flex; flex-direction: column; gap: 6px; width: 100%; animation: slideUp 0.3s; }
         @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
         
-        .message-sender { font-size: 0.75rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px; }
-        
-        .message-text-user { 
-            font-size: 0.95rem; line-height: 1.6; color: var(--text-main); font-weight: 400; word-break: break-word;
-            background: var(--surface); padding: 12px 16px; border-radius: 20px; border-top-right-radius: 4px; width: fit-content; max-width: 85%;
-            border: 1px solid var(--border); box-shadow: 0 4px 15px rgba(0,0,0,0.1); align-self: flex-end;
-        }
-        
-        .message-text-ai { font-size: 1.05rem; line-height: 1.75; color: var(--text-main); font-weight: 500; word-break: break-word; align-self: flex-start; max-width: 95%;}
+        .message-sender { font-size: 0.75rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase; display: flex; align-items: center; gap: 6px; }
+        .message-text-user { font-size: 0.95rem; line-height: 1.6; background: var(--surface); padding: 12px 16px; border-radius: 20px; border-top-right-radius: 4px; width: fit-content; max-width: 85%; border: 1px solid var(--border); align-self: flex-end; }
+        .message-text-ai { font-size: 1.05rem; line-height: 1.75; font-weight: 500; align-self: flex-start; max-width: 95%;}
 
         .submarine-logo { width: 72px; height: 72px; filter: drop-shadow(0 0 20px rgba(65, 105, 225, 0.5)); color: var(--primary); }
-
-        .complex-card-box {
-            background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 16px;
-            margin: 6px 0; box-shadow: 0 4px 25px rgba(0,0,0,0.25); position: relative; overflow-x: auto;
-        }
+        .complex-card-box { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 16px; margin: 6px 0; box-shadow: 0 4px 25px rgba(0,0,0,0.25); overflow-x: auto; }
         .complex-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 8px; font-size: 0.8rem; color: var(--primary); font-weight: bold; }
-        
-        .copy-code-btn { background: var(--card); color: var(--text-dim); border: 1px solid var(--border); border-radius: 8px; padding: 5px 10px; font-size: 0.75rem; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: all 0.2s; }
-        .copy-code-btn:hover { background: var(--primary); color: white; border-color: var(--primary); }
+        .copy-code-btn, .audio-speech-btn { background: transparent; border: 1px solid var(--border); color: var(--text-dim); border-radius: 12px; padding: 6px 14px; font-size: 0.8rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s;}
+        .copy-code-btn:hover, .audio-speech-btn:hover { background: var(--card); color: var(--primary); }
 
-        .audio-speech-btn { background: transparent; border: 1px solid var(--border); color: var(--text-dim); border-radius: 12px; padding: 6px 14px; font-size: 0.8rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; margin-top: 8px; transition: all 0.2s;}
-        .audio-speech-btn:hover { background: var(--card); color: var(--primary); }
-
-        .hologram-thinking {
-            display: flex; align-items: center; gap: 10px; color: var(--primary); font-weight: 600; font-size: 0.85rem;
-            background: rgba(65, 105, 225, 0.05); border: 1px solid rgba(65, 105, 225, 0.15); padding: 12px 18px; border-radius: 16px; width: fit-content;
-        }
+        .hologram-thinking { display: flex; align-items: center; gap: 10px; color: var(--primary); font-weight: 600; font-size: 0.85rem; background: rgba(65, 105, 225, 0.05); border: 1px solid rgba(65, 105, 225, 0.15); padding: 12px 18px; border-radius: 16px; width: fit-content; }
         .pulse-dot { width: 8px; height: 8px; background: var(--primary); border-radius: 50%; animation: pulse-anim 1s infinite ease-in-out; }
-        @keyframes pulse-anim { 0%, 100% { transform: scale(0.8); opacity: 0.3; } 50% { transform: scale(1.4); opacity: 1; box-shadow: 0 0 10px var(--primary); } }
+        @keyframes pulse-anim { 0%, 100% { transform: scale(0.8); opacity: 0.3; } 50% { transform: scale(1.4); opacity: 1; } }
 
-        /* إطار الكتابة */
+        /* Input Glass Panel */
         .chat-input-container { flex-shrink: 0; padding-bottom: 6px; position: relative; }
-        .input-glass-panel {
-            background: rgba(15, 16, 20, 0.85); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
-            border: 1px solid var(--border); border-radius: 28px; padding: 8px 10px 8px 16px;
-            box-shadow: 0 12px 40px rgba(0,0,0,0.5); display: flex; align-items: center; gap: 10px;
-            transition: all 0.3s ease; position: relative; z-index: 10;
-        }
+        .input-glass-panel { background: rgba(15, 16, 20, 0.85); backdrop-filter: blur(24px); border: 1px solid var(--border); border-radius: 28px; padding: 8px 10px 8px 16px; box-shadow: 0 12px 40px rgba(0,0,0,0.5); display: flex; align-items: center; gap: 10px; transition: all 0.3s ease; position: relative; z-index: 10;}
         .input-glass-panel:focus-within { border-color: rgba(65, 105, 225, 0.5); box-shadow: 0 12px 40px rgba(65, 105, 225, 0.15); }
-        .input-glass-panel.locked { opacity: 0.6; pointer-events: none; }
-
-        textarea {
-            background: transparent; color: var(--text-main); border: none; outline: none;
-            font-family: 'Inter', sans-serif; font-size: 1rem; resize: none; max-height: 120px; min-height: 24px; line-height: 1.5; width: 100%;
-            padding: 8px 0;
-        }
-        textarea::placeholder { color: #64748b; }
-
-        .magic-menu {
-            position: absolute; bottom: 70px; left: 10px; background: var(--surface); border: 1px solid var(--border);
-            border-radius: 18px; padding: 8px; display: flex; flex-direction: column; gap: 4px;
-            opacity: 0; transform: translateY(15px) scale(0.95); pointer-events: none;
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: 0 12px 30px rgba(0,0,0,0.6); z-index: 20;
-        }
-        .magic-menu.show { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
+        textarea { background: transparent; color: var(--text-main); border: none; outline: none; font-size: 1rem; resize: none; max-height: 120px; min-height: 24px; width: 100%; padding: 8px 0; }
         
-        .magic-item { 
-            display: flex; align-items: center; gap: 10px; padding: 10px 16px; color: var(--text-main); 
-            font-size: 0.9rem; font-weight: 500; border-radius: 12px; cursor: pointer; transition: all 0.2s;
-        }
+        .magic-menu { position: absolute; bottom: 70px; left: 10px; background: var(--surface); border: 1px solid var(--border); border-radius: 18px; padding: 8px; display: flex; flex-direction: column; gap: 4px; opacity: 0; pointer-events: none; transition: all 0.3s; box-shadow: 0 12px 30px rgba(0,0,0,0.6); z-index: 20; }
+        .magic-menu.show { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
+        .magic-item { display: flex; align-items: center; gap: 10px; padding: 10px 16px; font-size: 0.9rem; border-radius: 12px; cursor: pointer; transition: all 0.2s; }
         .magic-item:hover { background: var(--card); color: var(--primary); }
 
-        .tool-btn {
-            background: transparent; border: none; color: var(--text-dim); border-radius: 50%; width: 36px; height: 36px;
-            display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; flex-shrink: 0;
-        }
+        .tool-btn { background: transparent; border: none; color: var(--text-dim); border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; flex-shrink: 0; }
         .tool-btn:hover { background: var(--card); color: var(--text-main); }
-        .tool-btn.active-magic { background: var(--card); color: var(--primary); transform: rotate(45deg); }
-        .tool-btn.recording { color: var(--danger) !important; animation: pulse 1.2s infinite; }
-
-        @keyframes pulse { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(1.1); } 100% { opacity: 1; transform: scale(1); } }
-
-        .send-btn-royal {
-            background: var(--primary); color: white; border: none; border-radius: 50%; width: 42px; height: 42px;
-            display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-            box-shadow: 0 4px 15px var(--primary-glow); flex-shrink: 0;
-        }
-        .send-btn-royal:active { transform: scale(0.9); }
-        .send-btn-royal.loading { background: transparent; border: 2px solid var(--border); box-shadow: none; pointer-events: none; }
-        .spinner-icon { animation: spin 1s linear infinite; color: var(--text-dim); }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-
-        .btn { background: var(--card); color: var(--text-main); border: 1px solid var(--border); padding: 12px 18px; border-radius: 16px; font-family: 'Inter', sans-serif; font-weight: 600; font-size: 0.9rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s; }
-        .btn:hover { background: var(--surface); border-color: var(--primary); color: var(--primary); }
-        .btn-purple { background: linear-gradient(135deg, #1d4ed8, #4169E1); color: white; border: none; box-shadow: 0 4px 20px var(--primary-glow);}
+        .tool-btn.active-magic { color: var(--primary); transform: rotate(45deg); }
+        .send-btn-royal { background: var(--primary); color: white; border: none; border-radius: 50%; width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 15px var(--primary-glow); flex-shrink: 0; }
         
+        .btn { background: var(--card); color: var(--text-main); border: 1px solid var(--border); padding: 12px 18px; border-radius: 16px; font-weight: 600; font-size: 0.9rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s; }
+        .btn-purple { background: linear-gradient(135deg, #1d4ed8, #4169E1); color: white; border: none; }
         input[type="file"] { display: none; }
         .image-preview-bar { display: none; align-items: center; justify-content: space-between; background: rgba(65, 105, 225, 0.1); border: 1px solid rgba(65, 105, 225, 0.3); padding: 8px 12px; border-radius: 16px; font-size: 0.82rem; color: #93c5fd; margin-bottom: 8px; }
     </style>
 </head>
 <body>
+
+    <!-- ================= AUTHENTICATION OVERLAY ================= -->
+    <div id="authOverlay">
+        <div class="auth-card">
+            <div style="text-align: center; margin-bottom: 10px;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:48px;height:48px;margin-bottom:10px;">
+                    <path d="M16 13v-2a2 2 0 0 0-2-2h-1v-2a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v2H7a2 2 0 0 0-2 2v2"/><path d="M4 11h16a2 2 0 0 1 2 2v2a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5v-2a2 2 0 0 1 2-2z"/>
+                </svg>
+                <h2 style="margin:0; font-family:'Outfit';">Welcome to ge_nius</h2>
+                <p style="color:var(--text-dim); font-size:0.85rem; margin-top:5px;">Select your role to configure the platform</p>
+            </div>
+            
+            <div class="role-selector">
+                <div class="role-card active" onclick="selectRole('student')" id="role-student"><i data-lucide="graduation-cap"></i> Student</div>
+                <div class="role-card" onclick="selectRole('teacher')" id="role-teacher"><i data-lucide="presentation"></i> Teacher</div>
+                <div class="role-card" onclick="selectRole('citizen')" id="role-citizen"><i data-lucide="globe"></i> Citizen</div>
+            </div>
+
+            <input type="text" id="authName" class="custom-input" placeholder="Full Name">
+            <input type="email" id="authEmail" class="custom-input" placeholder="Email Address">
+            <input type="password" id="authPassword" class="custom-input" placeholder="Password">
+            
+            <select id="authLevel" class="custom-select">
+                <option value="" disabled selected>Select Study Level...</option>
+                <option value="Middle School">Middle School (التعليم المتوسط)</option>
+                <option value="High School">High School (التعليم الثانوي)</option>
+                <option value="University - Civil Engineering (L2)">University - Civil Engineering (L2)</option>
+                <option value="University - Computer Science">University - Computer Science</option>
+                <option value="Other">Other</option>
+            </select>
+
+            <button class="btn btn-purple" id="authBtn" onclick="performAuth()">Enter Platform <i data-lucide="arrow-right"></i></button>
+            <div id="authError" style="color:var(--danger); font-size:0.8rem; text-align:center;"></div>
+        </div>
+    </div>
+    <!-- ========================================================= -->
 
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
     <aside class="sidebar" id="sidebar">
@@ -347,21 +334,19 @@ HTML_CODE = """<!DOCTYPE html>
             <button class="icon-btn" style="width:34px; height:34px;" onclick="toggleSidebar()"><i data-lucide="x"></i></button>
         </div>
         
+        <div style="margin-bottom: 20px; background: var(--card); padding: 10px; border-radius: 12px; border: 1px solid var(--border);">
+            <div style="font-weight: bold; font-size: 0.95rem; color: var(--primary);" id="sidebarUserName">User</div>
+            <div style="font-size: 0.75rem; color: var(--text-dim);" id="sidebarRoleLabel">Role</div>
+            <button class="btn" style="width: 100%; margin-top: 10px; border-color:var(--danger); color:var(--danger);" onclick="logout()"><i data-lucide="log-out"></i> Logout</button>
+        </div>
+
         <button class="btn" onclick="createNewChatSession()" style="width: 100%; justify-content: center; margin-bottom: 12px; border-radius: 16px;">
             <i data-lucide="plus-circle"></i> New Session
         </button>
 
-        <button class="btn btn-purple" onclick="switchSection('docsTab')" style="width: 100%; justify-content: center; margin-bottom: 15px; border-radius: 16px;">
-            <i data-lucide="scan-line"></i> Curriculum Documents
+        <button class="btn btn-purple" onclick="switchSection('docsTab')" style="width: 100%; justify-content: center; margin-bottom: 15px; border-radius: 16px;" id="btnCurriculum">
+            <i data-lucide="folder-kanban"></i> Curriculum Documents
         </button>
-
-        <div class="sidebar-section-title"><i data-lucide="brain"></i> AI Persona</div>
-        <div class="persona-grid" id="personaContainer">
-            <button class="persona-chip active" data-val="human" onclick="selectPersona('human', this)"><i data-lucide="heart"></i> Human</button>
-            <button class="persona-chip" data-val="strict" onclick="selectPersona('strict', this)"><i data-lucide="briefcase"></i> Strict</button>
-            <button class="persona-chip" data-val="humor" onclick="selectPersona('humor', this)"><i data-lucide="smile"></i> Humor</button>
-            <button class="persona-chip" data-val="roast" onclick="selectPersona('roast', this)"><i data-lucide="flame"></i> Roast</button>
-        </div>
 
         <div class="sidebar-section-title"><i data-lucide="history"></i> History</div>
         <div class="chat-history-list" id="chatHistoryList"></div>
@@ -374,26 +359,42 @@ HTML_CODE = """<!DOCTYPE html>
     </aside>
 
     <div class="main-wrapper">
-        <!-- شريط التنقل العلوي مع الاسم المستقل وأيقونة الغواصة -->
         <div class="top-nav-bar">
-            <div class="nav-left-group">
-                <button class="icon-btn" onclick="toggleSidebar()" title="Menu">
-                    <i data-lucide="align-left"></i>
-                </button>
-                <div class="app-brand">
-                    <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M16 13v-2a2 2 0 0 0-2-2h-1v-2a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v2H7a2 2 0 0 0-2 2v2"/>
-                        <path d="M4 11h16a2 2 0 0 1 2 2v2a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5v-2a2 2 0 0 1 2-2z"/>
-                    </svg>
-                    ge<span>_</span>nius
-                </div>
-            </div>
+            <button class="icon-btn" onclick="toggleSidebar()" title="Menu">
+                <i data-lucide="align-left"></i>
+            </button>
+            <div class="app-brand">ge<span>_</span>nius</div>
 
             <div class="mode-switcher-bar">
-                <button class="mode-tab active" id="modeStudy" onclick="switchMode('study')">Study</button>
-                <button class="mode-tab" id="modeGeneral" onclick="switchMode('general')">General</button>
-                <button class="mode-tab" id="modeGames" onclick="switchMode('games')">Games</button>
+                <button class="mode-tab hidden" id="modeTeacher" onclick="switchMode('teacher')">Dashboard</button>
+                <button class="mode-tab hidden" id="modeStudy" onclick="switchMode('study')">Study</button>
+                <button class="mode-tab hidden" id="modeGames" onclick="switchMode('games')">Games</button>
+                <button class="mode-tab active" id="modeGeneral" onclick="switchMode('general')">General</button>
             </div>
+        </div>
+
+        <!-- شريط نقاط الخبرة والألعاب (يظهر أفقياً بأناقة) -->
+        <div class="games-stats-bar" id="gamesStatsBar">
+            <span class="hud-hearts" id="hudHearts">❤️❤️❤️❤️❤️</span>
+            <span>⭐ XP: <strong id="userXp">0</strong></span>
+            <span style="color: #93c5fd;">Ready!</span>
+        </div>
+
+        <!-- Teacher Dashboard Tab -->
+        <div class="tab-section" id="teacherTab">
+            <div class="card" style="text-align:center;">
+                <h3 style="color:var(--primary); margin-top:0;"><i data-lucide="upload-cloud"></i> Upload Curriculum Materials</h3>
+                <p style="color:var(--text-dim); font-size:0.9rem;">Upload PDFs, DOCs, or Images. The ge_nius engine will automatically compress and integrate them globally.</p>
+                
+                <div style="display:flex; gap:10px; justify-content:center; margin-top:20px;">
+                    <label for="teacherUploadBtn" class="btn btn-purple" style="width:auto; padding:12px 30px;"><i data-lucide="file-plus"></i> Select File (PDF/Image)</label>
+                    <!-- إتاحة رفع الـ PDF للأساتذة -->
+                    <input type="file" id="teacherUploadBtn" accept=".pdf, .doc, .docx, image/*">
+                </div>
+                <div id="teacherUploadStatus" style="margin-top:15px; font-weight:bold; font-size:0.85rem;"></div>
+            </div>
+            <h4 style="margin-bottom:0;">Global Curriculum Archive</h4>
+            <div id="teacherDocsList" style="display:flex; flex-direction:column; gap:10px; overflow-y:auto; flex:1;"></div>
         </div>
 
         <div class="tab-section active" id="askTab">
@@ -405,7 +406,7 @@ HTML_CODE = """<!DOCTYPE html>
                             <path d="M4 11h16a2 2 0 0 1 2 2v2a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5v-2a2 2 0 0 1 2-2z"/>
                             <circle cx="12" cy="15" r="2"/><path d="M20 15h2"/><path d="M2 15h2"/>
                         </svg>
-                        <p style="margin: 0; font-size: 1rem; max-width: 250px; line-height: 1.5; color: var(--text-dim);">How can I help you today?</p>
+                        <p style="margin: 0; font-size: 1rem; color: var(--text-dim);">Platform Ready.</p>
                     </div>
                 </div>
             </div>
@@ -421,15 +422,21 @@ HTML_CODE = """<!DOCTYPE html>
                         <i data-lucide="camera" style="color:var(--primary)"></i> Take Photo
                     </label>
                     <input type="file" id="qFileInputCamera" accept="image/*" capture="environment">
+                    
                     <label for="qFileInputGallery" class="magic-item">
-                        <i data-lucide="image-plus" style="color:var(--primary)"></i> Upload Image
+                        <i data-lucide="image-plus" style="color:var(--primary)"></i> Upload PDF/Doc
                     </label>
-                    <input type="file" id="qFileInputGallery" accept="image/*">
+                    <!-- الإصلاح الجوهري هنا: قبول ملفات PDF لكي يظهر File Manager -->
+                    <input type="file" id="qFileInputGallery" accept=".pdf, .doc, .docx, image/*">
+
+                    <div class="magic-item" id="btnSummarize" onclick="triggerSummarizer()" style="display:none; color:var(--accent-gold); font-weight:bold;">
+                        <i data-lucide="sparkles"></i> AI Summarize Lesson
+                    </div>
                 </div>
 
                 <div class="input-glass-panel" id="inputPanel">
                     <button class="tool-btn" id="magicBtn" onclick="toggleMagicMenu()" title="Attach">
-                        <i data-lucide="plus"></i>
+                        <i data-lucide="paperclip"></i>
                     </button>
 
                     <textarea id="userQuery" placeholder="Ask ge_nius..." rows="1" oninput="autoResizeTextarea(this)"></textarea>
@@ -452,13 +459,15 @@ HTML_CODE = """<!DOCTYPE html>
                     <i data-lucide="arrow-left"></i> Back
                 </button>
             </div>
-            <div class="card">
+            <div class="card" id="studentUploadArea">
                 <span style="font-weight: 700; font-size: 0.95rem; color: var(--primary); display: flex; align-items: center; gap: 8px;"><i data-lucide="file-up"></i> Upload Materials</span>
                 <div style="display: flex; gap: 8px;">
                     <label for="docFileInputCamera" class="btn btn-purple" style="flex: 1; text-align: center; margin:0;"><i data-lucide="scan"></i> Scan</label>
                     <input type="file" id="docFileInputCamera" accept="image/*" capture="environment">
-                    <label for="docFileInputGallery" class="btn btn-purple" style="flex: 1; text-align: center; margin:0;"><i data-lucide="images"></i> Gallery</label>
-                    <input type="file" id="docFileInputGallery" accept="image/*" multiple>
+                    
+                    <label for="docFileInputGallery" class="btn btn-purple" style="flex: 1; text-align: center; margin:0;"><i data-lucide="folder"></i> Files/Gallery</label>
+                    <!-- الإصلاح الجوهري للطلاب أيضاً -->
+                    <input type="file" id="docFileInputGallery" accept=".pdf, .doc, .docx, image/*" multiple>
                 </div>
                 <div id="uploadStatus" style="font-size: 0.82rem; font-weight: bold; text-align:center; margin-top:8px;"></div>
             </div>
@@ -469,10 +478,99 @@ HTML_CODE = """<!DOCTYPE html>
     </div>
 
     <script>
-        document.addEventListener("DOMContentLoaded", () => { lucide.createIcons(); });
+        document.addEventListener("DOMContentLoaded", () => { lucide.createIcons(); checkAuth(); });
 
         let isAiThinking = false;
+        let currentUser = null;
+        let attachedQuestionBase64 = null;
+        let currentMode = 'general';
+        let modeContents = { study: "", general: "", games: "" };
+        const chatFeed = document.getElementById('chatFeed');
 
+        // --- AUTHENTICATION ---
+        let selectedRole = 'student';
+        function selectRole(role) {
+            selectedRole = role;
+            document.querySelectorAll('.role-card').forEach(c => c.classList.remove('active'));
+            document.getElementById('role-' + role).classList.add('active');
+            
+            const levelSelect = document.getElementById('authLevel');
+            if(role === 'student') levelSelect.style.display = 'block';
+            else levelSelect.style.display = 'none';
+        }
+
+        async function performAuth() {
+            const name = document.getElementById('authName').value.trim();
+            const email = document.getElementById('authEmail').value.trim();
+            const pwd = document.getElementById('authPassword').value.trim();
+            const level = document.getElementById('authLevel').value;
+            const err = document.getElementById('authError');
+
+            if(!name || !email || !pwd) { err.innerText = "Please fill all fields."; return; }
+            if(selectedRole === 'student' && !level) { err.innerText = "Please select your study level."; return; }
+            
+            err.innerText = "Authenticating...";
+            try {
+                const res = await fetch('/api/auth', {
+                    method: 'POST', headers: {'Content-Type':'application/json'},
+                    body: JSON.stringify({name, email, password: pwd, role: selectedRole, level})
+                });
+                const data = await res.json();
+                if(data.success) {
+                    document.getElementById('authOverlay').style.opacity = '0';
+                    setTimeout(() => document.getElementById('authOverlay').style.display = 'none', 400);
+                    currentUser = data.user;
+                    configureUIForRole();
+                } else {
+                    err.innerText = data.error || "Authentication failed.";
+                }
+            } catch(e) { err.innerText = "Network error."; }
+        }
+
+        async function checkAuth() {
+            try {
+                const res = await fetch('/api/user/me');
+                const data = await res.json();
+                if(data.user) {
+                    document.getElementById('authOverlay').style.display = 'none';
+                    currentUser = data.user;
+                    configureUIForRole();
+                }
+            } catch(e) {}
+        }
+
+        function logout() { document.cookie = "session_id=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"; location.reload(); }
+
+        function configureUIForRole() {
+            document.getElementById('sidebarUserName').innerText = currentUser.name;
+            document.getElementById('sidebarRoleLabel').innerText = currentUser.role.toUpperCase() + (currentUser.level ? ` • ${currentUser.level}` : '');
+            
+            document.querySelectorAll('.mode-tab').forEach(t => t.classList.add('hidden'));
+            document.getElementById('modeGeneral').classList.remove('hidden');
+            document.getElementById('btnCurriculum').style.display = 'none';
+
+            if (currentUser.role === 'teacher') {
+                document.getElementById('modeTeacher').classList.remove('hidden');
+                switchMode('teacher');
+            } else if (currentUser.role === 'student') {
+                document.getElementById('modeStudy').classList.remove('hidden');
+                document.getElementById('modeGames').classList.remove('hidden');
+                document.getElementById('btnCurriculum').style.display = 'flex';
+                updateGamificationHUD(currentUser.hearts, currentUser.xp);
+                switchMode('study');
+            } else {
+                switchMode('general');
+            }
+        }
+
+        function updateGamificationHUD(hearts, xp) {
+            let heartStr = "";
+            for(let i=0; i<5; i++) { heartStr += (i < hearts) ? "❤️" : "🤍"; }
+            document.getElementById('hudHearts').innerText = heartStr;
+            document.getElementById('userXp').innerText = xp;
+        }
+
+        // --- UI Interactions ---
         function toggleMagicMenu() {
             if(isAiThinking) return;
             const menu = document.getElementById('magicMenu');
@@ -484,19 +582,11 @@ HTML_CODE = """<!DOCTYPE html>
         document.addEventListener('click', (e) => {
             const menu = document.getElementById('magicMenu');
             const btn = document.getElementById('magicBtn');
-            if (!menu.contains(e.target) && !btn.contains(e.target)) {
+            if (menu && btn && !menu.contains(e.target) && !btn.contains(e.target)) {
                 menu.classList.remove('show');
                 btn.classList.remove('active-magic');
             }
         });
-
-        let currentPersonaValue = 'human';
-        window.selectPersona = function(val, btnElement) {
-            currentPersonaValue = val;
-            document.querySelectorAll('.persona-chip').forEach(btn => btn.classList.remove('active'));
-            btnElement.classList.add('active');
-            if(window.innerWidth < 768) toggleSidebar();
-        };
 
         function toggleTheme() {
             const isLight = document.body.classList.toggle('light-mode');
@@ -526,11 +616,7 @@ HTML_CODE = """<!DOCTYPE html>
             el.style.height = (el.scrollHeight) + 'px';
         }
 
-        let modeContents = { study: "", general: "", games: "" };
-        let currentMode = 'study';
-
-        const chatFeed = document.getElementById('chatFeed');
-
+        // --- Voice ---
         let recognition = null;
         function toggleVoiceRecording() {
             const btn = document.getElementById('voiceRecordBtn');
@@ -563,8 +649,9 @@ HTML_CODE = """<!DOCTYPE html>
             recognition.start();
         }
 
-        let chatSessions = JSON.parse(localStorage.getItem('ge_nius_sessions_v5')) || {};
-        let currentSessionId = localStorage.getItem('ge_nius_current_session_v5');
+        // --- Sessions & Modes ---
+        let chatSessions = JSON.parse(localStorage.getItem('ge_nius_sessions_royal_v2')) || {};
+        let currentSessionId = localStorage.getItem('ge_nius_current_session_royal_v2');
 
         function initSessions() {
             if (!currentSessionId || !chatSessions[currentSessionId]) { createNewSessionQuiet(); } 
@@ -588,12 +675,35 @@ HTML_CODE = """<!DOCTYPE html>
 
         function switchMode(mode) {
             if(isAiThinking) return;
-            modeContents[currentMode] = chatFeed.innerHTML;
+            
+            if (currentMode !== 'teacher') {
+                modeContents[currentMode] = chatFeed.innerHTML;
+            }
             currentMode = mode;
             document.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
-            if(mode === 'study') document.getElementById('modeStudy').classList.add('active');
-            else if(mode === 'general') document.getElementById('modeGeneral').classList.add('active');
-            else if(mode === 'games') document.getElementById('modeGames').classList.add('active');
+            
+            const btnSumm = document.getElementById('btnSummarize');
+            if(btnSumm) btnSumm.style.display = (mode === 'study') ? 'flex' : 'none';
+
+            if (mode === 'teacher') {
+                document.getElementById('modeTeacher').classList.add('active');
+                switchSection('teacherTab');
+                fetchTeacherDocs();
+                return;
+            } else {
+                switchSection('askTab');
+                if(mode === 'study') document.getElementById('modeStudy').classList.add('active');
+                else if(mode === 'general') document.getElementById('modeGeneral').classList.add('active');
+                else if(mode === 'games') document.getElementById('modeGames').classList.add('active');
+            }
+
+            const gamesStatsBar = document.getElementById('gamesStatsBar');
+            if (mode === 'games' && currentUser && currentUser.role === 'student') {
+                gamesStatsBar.classList.add('active');
+                updateGamificationHUD(currentUser.hearts, currentUser.xp);
+            } else {
+                gamesStatsBar.classList.remove('active');
+            }
 
             if (modeContents[mode] && modeContents[mode].trim() !== '') {
                 chatFeed.innerHTML = modeContents[mode];
@@ -632,7 +742,7 @@ HTML_CODE = """<!DOCTYPE html>
         }
 
         function saveCurrentChatHtml(userQueryText = null) {
-            if(!chatSessions[currentSessionId]) return;
+            if(!chatSessions[currentSessionId] || currentMode === 'teacher') return;
             modeContents[currentMode] = chatFeed.innerHTML;
             chatSessions[currentSessionId].modesData = modeContents;
             if (userQueryText && chatSessions[currentSessionId].title === "New Session") {
@@ -642,8 +752,8 @@ HTML_CODE = """<!DOCTYPE html>
         }
 
         function saveSessionsData() {
-            localStorage.setItem('ge_nius_sessions_v5', JSON.stringify(chatSessions));
-            localStorage.setItem('ge_nius_current_session_v5', currentSessionId);
+            localStorage.setItem('ge_nius_sessions_royal_v2', JSON.stringify(chatSessions));
+            localStorage.setItem('ge_nius_current_session_royal_v2', currentSessionId);
             renderChatHistoryList();
         }
 
@@ -681,8 +791,8 @@ HTML_CODE = """<!DOCTYPE html>
             });
         };
 
+        // --- Documents & Files ---
         let curriculumDocs = [];
-        let attachedQuestionBase64 = null;
         fetchDocs();
 
         function fetchDocs() { fetch('/api/docs').then(res => res.json()).then(data => { curriculumDocs = data; renderDocs(); }); }
@@ -703,19 +813,37 @@ HTML_CODE = """<!DOCTYPE html>
             lucide.createIcons({root: listDiv});
         }
 
-        function handleQuestionImageSelect(e) {
-            const file = e.target.files[0]; if (!file) return;
+        async function handleFileSelect(e, isTeacher) {
+            const file = e.target.files[0]; if(!file) return;
             const reader = new FileReader();
-            reader.onload = function(evt) {
-                attachedQuestionBase64 = evt.target.result;
-                document.getElementById('questionImgPreview').style.display = 'flex';
-                document.getElementById('magicMenu').classList.remove('show');
-                document.getElementById('magicBtn').classList.remove('active-magic');
+            reader.onload = async function(evt) {
+                const b64 = evt.target.result;
+                if(isTeacher) {
+                    const stat = document.getElementById('teacherUploadStatus');
+                    stat.innerText = "Compressing & Uploading to Curriculum...";
+                    stat.style.color = "var(--primary)";
+                    await fetch('/api/teacher/upload', {
+                        method: 'POST', headers: {'Content-Type':'application/json'},
+                        body: JSON.stringify({file: b64, filename: file.name})
+                    });
+                    stat.innerText = "Uploaded successfully!";
+                    stat.style.color = "var(--accent-green)";
+                    fetchTeacherDocs();
+                } else {
+                    attachedQuestionBase64 = b64;
+                    document.getElementById('questionImgPreview').style.display = 'flex';
+                    document.getElementById('magicMenu').classList.remove('show');
+                    const btn = document.getElementById('magicBtn');
+                    if(btn) btn.classList.remove('active-magic');
+                }
             };
             reader.readAsDataURL(file); e.target.value = '';
         }
-        document.getElementById('qFileInputCamera').addEventListener('change', handleQuestionImageSelect);
-        document.getElementById('qFileInputGallery').addEventListener('change', handleQuestionImageSelect);
+
+        document.getElementById('teacherUploadBtn').addEventListener('change', (e) => handleFileSelect(e, true));
+        document.getElementById('qFileInputGallery').addEventListener('change', (e) => handleFileSelect(e, false));
+        document.getElementById('qFileInputCamera').addEventListener('change', (e) => handleFileSelect(e, false));
+
         function removeQuestionImage() { attachedQuestionBase64 = null; document.getElementById('questionImgPreview').style.display = 'none'; }
 
         async function handleDocImageSelect(e) {
@@ -741,15 +869,35 @@ HTML_CODE = """<!DOCTYPE html>
 
         function deleteDoc(id) { fetch('/api/docs/delete', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id }) }).then(res => res.json()).then(data => { curriculumDocs = data; renderDocs(); }); }
 
-        function submitQuestion() {
+        async function fetchTeacherDocs() {
+            const res = await fetch('/api/teacher/docs');
+            const data = await res.json();
+            const list = document.getElementById('teacherDocsList');
+            list.innerHTML = data.docs.map(d => `
+                <div style="background:var(--card); padding:12px; border-radius:12px; border:1px solid var(--border); display:flex; justify-content:space-between;">
+                    <span style="font-weight:600;"><i data-lucide="file-check"></i> ${d.title}</span>
+                    <span style="font-size:0.8rem; color:var(--text-dim);">Compressed (zlib)</span>
+                </div>
+            `).join('') || "<div style='color:var(--text-dim)'>No materials uploaded yet.</div>";
+            lucide.createIcons({root: list});
+        }
+
+        function triggerSummarizer() {
+            document.getElementById('magicMenu').classList.remove('show');
+            document.getElementById('userQuery').value = "Please summarize the current curriculum focusing on: 1. Core Concepts, 2. Formulas (LaTeX), 3. Examples, 4. Exam notes.";
+            submitQuestion(true);
+        }
+
+        // --- AI Chat ---
+        function submitQuestion(isSummary = false) {
             if (isAiThinking) return;
 
             const queryInput = document.getElementById('userQuery');
             const query = queryInput.value.trim();
-            const personaVal = currentPersonaValue;
 
             if (!query && !attachedQuestionBase64) return;
             if (currentMode === 'study' && curriculumDocs.length === 0) { alert('Study mode requires uploaded curriculum documents. Switch to General or Games!'); return; }
+            if (currentUser && currentUser.role === 'student' && currentMode === 'games' && currentUser.hearts <= 0) { alert("You have 0 hearts left! Take a break."); return; }
             
             isAiThinking = true;
             document.getElementById('inputPanel').classList.add('locked');
@@ -761,7 +909,7 @@ HTML_CODE = """<!DOCTYPE html>
             const welcome = document.getElementById('welcomeMsg'); if(welcome) welcome.remove();
 
             let userTextDisplay = query.replace(/\\n/g, '<br>');
-            if (attachedQuestionBase64) { userTextDisplay = (query ? userTextDisplay + '<br>' : '') + `<span style="color:var(--primary); font-size:0.85em; display:flex; align-items:center; gap:4px; margin-top:6px;"><i data-lucide="image" style="width:14px;height:14px;"></i> Image attached</span>`; }
+            if (attachedQuestionBase64) { userTextDisplay = (query ? userTextDisplay + '<br>' : '') + `<span style="color:var(--primary); font-size:0.85em; display:flex; align-items:center; gap:4px; margin-top:6px;"><i data-lucide="image" style="width:14px;height:14px;"></i> File attached</span>`; }
 
             const userRow = document.createElement('div'); userRow.className = 'message-row';
             userRow.style.alignItems = 'flex-end';
@@ -770,9 +918,7 @@ HTML_CODE = """<!DOCTYPE html>
 
             const loadingRow = document.createElement('div'); loadingRow.className = 'message-row loading-bubble-temp';
             loadingRow.innerHTML = `
-                <div class="message-sender" style="color:var(--primary); display:flex; align-items:center; gap:5px;">
-                    <svg style="width:14px;height:14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 13v-2a2 2 0 0 0-2-2h-1v-2a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v2H7a2 2 0 0 0-2 2v2"/><path d="M4 11h16a2 2 0 0 1 2 2v2a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5v-2a2 2 0 0 1 2-2z"/></svg> ge_nius
-                </div>
+                <div class="message-sender" style="color:var(--primary)"><i data-lucide="cpu" style="width:12px;height:12px;"></i> ge_nius</div>
                 <div class="hologram-thinking">
                     <div class="pulse-dot"></div>
                     <span>Processing logic...</span>
@@ -782,7 +928,7 @@ HTML_CODE = """<!DOCTYPE html>
             
             saveCurrentChatHtml(query);
 
-            const payload = { query: query, image: attachedQuestionBase64, mode: currentMode, persona: personaVal };
+            const payload = { query: query, file: attachedQuestionBase64, mode: currentMode, isSummary: isSummary };
             queryInput.value = ''; queryInput.style.height = 'auto'; removeQuestionImage(); chatFeed.scrollTop = chatFeed.scrollHeight;
 
             fetch('/api/ask', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
@@ -791,22 +937,20 @@ HTML_CODE = """<!DOCTYPE html>
                 chatFeed.removeChild(loadingRow);
                 const aiRow = document.createElement('div'); aiRow.className = 'message-row';
 
-                # رأس الرسالة (مع أيقونة الغواصة المصغرة بجانب اسم التطبيق)
-                const aiHeaderHtml = `
-                    <div class="message-sender" style="color:var(--primary); display:flex; align-items:center; gap:5px;">
-                        <svg style="width:14px;height:14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 13v-2a2 2 0 0 0-2-2h-1v-2a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v2H7a2 2 0 0 0-2 2v2"/><path d="M4 11h16a2 2 0 0 1 2 2v2a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5v-2a2 2 0 0 1 2-2z"/></svg> ge_nius
-                    </div>
-                `;
-
                 if (data.status === 'out_of_scope') {
-                    aiRow.innerHTML = `${aiHeaderHtml}<div class="message-text-ai" style="color:#fca5a5;">Out of curriculum scope. Switch to General mode.</div>`;
+                    aiRow.innerHTML = `<div class="message-sender" style="color:var(--danger)">ge_nius</div><div class="message-text-ai" style="color:#fca5a5;">Out of curriculum scope. Switch to General mode.</div>`;
                 } else if (data.status === 'success') {
-                    const fullText = data.answer;
+                    let fullText = data.answer;
                     const encoded = encodeURIComponent(fullText);
+                    
+                    if(data.hearts !== undefined && data.xp !== undefined && currentUser.role === 'student' && currentMode === 'games') {
+                        currentUser.hearts = data.hearts; currentUser.xp = data.xp;
+                        updateGamificationHUD(data.hearts, data.xp);
+                    }
                     
                     if (fullText.includes("```") || fullText.length > 500) {
                         aiRow.innerHTML = `
-                            ${aiHeaderHtml}
+                            <div class="message-sender"><i data-lucide="bot" style="width:12px;height:12px;color:var(--primary)"></i> ge_nius</div>
                             <div class="complex-card-box">
                                 <div class="complex-card-header">
                                     <span>Detailed Output</span>
@@ -818,13 +962,13 @@ HTML_CODE = """<!DOCTYPE html>
                         `;
                     } else {
                         aiRow.innerHTML = `
-                            ${aiHeaderHtml}
+                            <div class="message-sender"><i data-lucide="bot" style="width:12px;height:12px;color:var(--primary)"></i> ge_nius</div>
                             <div class="message-text-ai ai-content" style="padding-top:4px;">${marked.parse(fullText)}</div>
                             <div><button class="audio-speech-btn" onclick="speakText('${encoded}')"><i data-lucide="volume-2" style="width:14px;height:14px;"></i> Listen</button></div>
                         `;
                     }
                 } else {
-                    aiRow.innerHTML = `${aiHeaderHtml}<div class="message-text-ai">Error: ${data.error || 'Failed.'}</div>`;
+                    aiRow.innerHTML = `<div class="message-sender" style="color:var(--danger)">ge_nius</div><div class="message-text-ai">Error: ${data.error || 'Failed.'}</div>`;
                 }
                 
                 chatFeed.appendChild(aiRow); lucide.createIcons({root: aiRow});
@@ -895,6 +1039,15 @@ class StudyAppRequestHandler(BaseHTTPRequestHandler):
                     return
                 docs = load_curriculum(session_id)
                 self.send_json_response(docs)
+                
+            elif self.path == "/api/user/me":
+                sess_id = self.get_session_id()
+                user = get_current_user(sess_id)
+                self.send_json_response({"user": user})
+
+            elif self.path == "/api/teacher/docs":
+                self.send_json_response({"docs": MOCK_DB.get("GLOBAL_DOCS", [])})
+
         except Exception as e:
             self.send_json_response({"error": str(e)})
 
@@ -909,7 +1062,25 @@ class StudyAppRequestHandler(BaseHTTPRequestHandler):
             post_data = self.rfile.read(content_length)
             req_json = json.loads(post_data.decode('utf-8')) if post_data else {}
 
-            if self.path == "/api/docs/upload":
+            if self.path == "/api/auth":
+                email = req_json.get("email")
+                if email not in MOCK_USERS:
+                    MOCK_USERS[email] = {
+                        "name": req_json.get("name"), "email": email, "password": req_json.get("password"),
+                        "role": req_json.get("role"), "level": req_json.get("level"), "hearts": 5, "xp": 0
+                    }
+                MOCK_SESSIONS[session_id] = email
+                self.send_json_response({"success": True, "user": MOCK_USERS[email]})
+
+            elif self.path == "/api/teacher/upload":
+                b64_file = req_json.get("file", "")
+                filename = req_json.get("filename", "Document")
+                if b64_file:
+                    head, comp = compress_file_data(b64_file)
+                    add_document_to_db(session_id, filename, f"Content extracted and compressed by ge_nius for {filename}.", is_global=True)
+                self.send_json_response({"success": True})
+
+            elif self.path == "/api/docs/upload":
                 image_base64 = req_json.get("image")
                 if not image_base64:
                     self.send_json_response({"error": "No image"})
@@ -936,35 +1107,38 @@ class StudyAppRequestHandler(BaseHTTPRequestHandler):
                 self.send_json_response(docs)
 
             elif self.path == "/api/ask":
+                user = get_current_user(session_id)
                 user_query = req_json.get("query", "")
-                question_image_base64 = req_json.get("image")
+                file_b64 = req_json.get("file")
                 mode = req_json.get("mode", "study") 
-                persona = req_json.get("persona", "human")
-                docs = load_curriculum(session_id)
+                is_summary = req_json.get("isSummary", False)
+                docs = load_curriculum(session_id, user)
 
                 messages_content = []
-                if question_image_base64:
-                    messages_content.append({"type": "image_url", "image_url": {"url": question_image_base64}})
-
-                persona_instructions = {
-                    "strict": "Persona: Strict & Professional. Be highly formal, precise, and academic.",
-                    "humor": "Persona: Entertainment & Light Humor. Keep it witty and fun.",
-                    "roast": "Persona: Witty & Playful Challenge. Gently challenge the user's logic.",
-                    "human": "Persona: Human-like & Warm. Be friendly, empathetic, natural."
-                }.get(persona, "Persona: Human-like & Warm.")
+                if file_b64:
+                    if file_b64.startswith("data:image"):
+                        messages_content.append({"type": "image_url", "image_url": {"url": file_b64}})
+                    else:
+                        messages_content.append({"type": "text", "text": "[File Attached. Read context.]"})
 
                 if mode == "general":
-                    full_prompt = f"You are an AI assistant named ge_nius.\n{persona_instructions}\nUser request: \"{user_query}\"\nRespond in the exact language the user used."
+                    full_prompt = f"You are a global AI assistant named ge_nius.\nUser request: \"{user_query}\"\nIMPORTANT: Respond in the exact same language the user is using."
                 elif mode == "games":
-                    full_prompt = f"You are a Puzzle master named ge_nius.\n{persona_instructions}\nUser input: \"{user_query}\"\nRespond in the exact language the user used."
+                    full_prompt = (
+                        f"You are an interactive Brain Games and Puzzle master named ge_nius.\n"
+                        f"The user is playing brain/thinking games.\nUser input: \"{user_query}\"\n"
+                        f"IMPORTANT: If the user answers WRONG, prefix your response EXACTLY with [WRONG]. If CORRECT, prefix with [CORRECT]. Respond in their language."
+                    )
                 else:
                     all_concepts_summary = "\n\n".join([f"Document {i+1}:\n{doc['concepts']}" for i, doc in enumerate(docs)])
                     full_prompt = (
-                        f"You are an expert tutor.\n{persona_instructions}\n"
-                        f"Curriculum:\n{all_concepts_summary}\n\n"
-                        f"User question: \"{user_query}\"\n"
-                        f"Respond in the user's language. If unrelated to curriculum, reply EXACTLY: OUT_OF_SCOPE"
+                        f"You are an expert tutor.\nHere is the student's curriculum study material:\n"
+                        f"--- START CURRICULUM ---\n{all_concepts_summary}\n--- END CURRICULUM ---\n\n"
                     )
+                    if is_summary:
+                        full_prompt += "The user requested a summary. Output a highly structured, professional summary of the curriculum focusing on: 1. Core Concepts, 2. Formulas (use LaTeX for math), 3. Examples, 4. Exam Traps/Notes. Respond in the user's language."
+                    else:
+                        full_prompt += f"User question: \"{user_query}\"\nIMPORTANT: Respond in the exact same language the user is asking in.\nIf completely unrelated to the curriculum, reply with EXACTLY: OUT_OF_SCOPE\nIf in scope, provide a clear, step-by-step explanation."
                     
                 messages_content.append({"type": "text", "text": full_prompt})
 
@@ -976,10 +1150,24 @@ class StudyAppRequestHandler(BaseHTTPRequestHandler):
 
                 try:
                     ai_reply = self.send_api_request(payload)
+                    resp_data = {"status": "success"}
+                    
                     if mode == "study" and ("OUT_OF_SCOPE" in ai_reply or ai_reply.startswith("OUT_OF_SCOPE")):
-                        self.send_json_response({"status": "out_of_scope"})
+                        resp_data["status"] = "out_of_scope"
                     else:
-                        self.send_json_response({"status": "success", "answer": ai_reply})
+                        if user and user["role"] == "student" and mode == "games":
+                            if "[WRONG]" in ai_reply:
+                                user["hearts"] = max(0, user["hearts"] - 1)
+                                ai_reply = ai_reply.replace("[WRONG]", "").strip()
+                            elif "[CORRECT]" in ai_reply:
+                                user["xp"] += 50
+                                ai_reply = ai_reply.replace("[CORRECT]", "").strip()
+                            resp_data["hearts"] = user["hearts"]
+                            resp_data["xp"] = user["xp"]
+                        
+                        resp_data["answer"] = ai_reply
+
+                    self.send_json_response(resp_data)
                 except Exception as e:
                     self.send_json_response({"status": "error", "error": str(e)})
         except Exception as e:
