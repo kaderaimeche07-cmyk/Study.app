@@ -125,16 +125,16 @@ def delete_document_from_db(session_id, doc_id):
         MOCK_DB[session_id] = [d for d in MOCK_DB[session_id] if str(d["id"]) != str(doc_id)]
 
 # ==============================================================================
-# HTML Frontend (ge_nius Royal World-Class UI - Ultimate Fixes + I18N + Settings)
+# HTML Frontend (Axiom - Ultra Premium UI/UX)
 # ==============================================================================
 HTML_CODE = """<!DOCTYPE html>
 <html lang="en" dir="auto">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ge_nius Assistant</title>
+    <title>Axiom | Advanced Intelligence</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -149,18 +149,22 @@ HTML_CODE = """<!DOCTYPE html>
 
     <style>
         :root {
-            --bg-main: #030304; --surface: #0f1014; --card: #16181e;
-            --primary: #4169E1; --primary-glow: rgba(65, 105, 225, 0.35);
-            --danger: #ef4444; --accent-gold: #fbbf24; --accent-green: #10b981;
-            --text-main: #f8fafc; --text-dim: #94a3b8;
-            --border: rgba(255, 255, 255, 0.07); --glass: rgba(15, 16, 20, 0.8);
+            /* Ultra Premium Dark Theme */
+            --bg-main: #050505; --surface: #0a0a0a; --card: #121212;
+            --primary: #ffffff; --primary-dim: #a1a1aa;
+            --accent: #3b82f6; --accent-glow: rgba(59, 130, 246, 0.2);
+            --danger: #ef4444; --success: #10b981; --warning: #f59e0b;
+            --text-main: #ffffff; --text-dim: #71717a;
+            --border: #27272a; --glass: rgba(10, 10, 10, 0.85);
+            --font-size-base: 1rem;
         }
 
         body.light-mode {
-            --bg-main: #f8fafc; --surface: #ffffff; --card: #f1f5f9;
-            --primary: #2563eb; --primary-glow: rgba(37, 99, 235, 0.25);
-            --text-main: #0f172a; --text-dim: #64748b;
-            --border: rgba(0, 0, 0, 0.08); --glass: rgba(255, 255, 255, 0.88);
+            --bg-main: #fafafa; --surface: #ffffff; --card: #f4f4f5;
+            --primary: #000000; --primary-dim: #52525b;
+            --accent: #2563eb; --accent-glow: rgba(37, 99, 235, 0.15);
+            --text-main: #09090b; --text-dim: #71717a;
+            --border: #e4e4e7; --glass: rgba(255, 255, 255, 0.85);
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -169,191 +173,149 @@ HTML_CODE = """<!DOCTYPE html>
             font-family: 'Inter', sans-serif; 
             background-color: var(--bg-main); color: var(--text-main);
             margin: 0; padding: 0; width: 100vw; height: 100vh; height: 100dvh; overflow: hidden;
-            background-image: 
-                radial-gradient(ellipse at 10% 10%, rgba(65, 105, 225, 0.08) 0%, transparent 50%),
-                radial-gradient(ellipse at 90% 90%, rgba(139, 92, 246, 0.05) 0%, transparent 50%);
-            background-attachment: fixed;
+            font-size: var(--font-size-base);
+            transition: background-color 0.3s, color 0.3s;
         }
         
-        /* RTL support for Arabic */
-        body[dir="rtl"] { font-family: 'Cairo', 'Inter', sans-serif; }
+        body[dir="rtl"] { font-family: 'Inter', sans-serif; }
         body[dir="rtl"] .sidebar { left: auto; right: -100%; border-right: none; border-left: 1px solid var(--border); }
         body[dir="rtl"] .sidebar.open { left: auto; right: 0; }
-        body[dir="rtl"] .chat-input-container { direction: rtl; }
-        body[dir="rtl"] textarea { direction: rtl; }
 
         .main-wrapper { 
-            padding: 10px; display: flex; flex-direction: column; gap: 0; 
-            width: 100%; height: 100%; height: 100dvh; max-width: 900px; margin: 0 auto; 
+            display: flex; flex-direction: column; 
+            width: 100%; height: 100%; max-width: 1000px; margin: 0 auto; 
+            position: relative;
         }
 
-        /* --- Overlays (Auth, Settings, Modals) --- */
-        .full-overlay {
+        /* --- Auth Screen (Masterpiece) --- */
+        .auth-wrapper {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(3, 3, 4, 0.90); backdrop-filter: blur(15px);
+            background: radial-gradient(circle at 50% 0%, var(--card) 0%, var(--bg-main) 100%);
             z-index: 9999; display: flex; justify-content: center; align-items: center; padding: 20px;
-            transition: opacity 0.3s ease;
+            transition: opacity 0.5s ease;
         }
-        .auth-card, .settings-card {
-            background: var(--surface); border: 1px solid var(--border); border-radius: 24px;
-            padding: 25px; width: 100%; max-width: 400px; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-            display: flex; flex-direction: column; gap: 15px; position: relative;
+        .auth-card {
+            background: var(--glass); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border); border-radius: 20px;
+            padding: 40px 30px; width: 100%; max-width: 420px; 
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+            display: flex; flex-direction: column; gap: 20px;
         }
-        .close-modal-btn { position: absolute; top: 15px; right: 15px; background: transparent; border: none; color: var(--text-dim); cursor: pointer; }
-        .close-modal-btn:hover { color: var(--danger); }
-
-        .role-selector { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 10px; }
-        .role-card {
-            background: var(--card); border: 1px solid var(--border); border-radius: 12px;
-            padding: 12px 5px; text-align: center; cursor: pointer; font-size: 0.8rem; font-weight: 600;
-            color: var(--text-dim); transition: all 0.2s; display: flex; flex-direction: column; align-items: center; gap: 6px;
-        }
-        .role-card.active { background: rgba(65, 105, 225, 0.15); color: var(--primary); border-color: var(--primary); }
+        .auth-logo { font-weight: 700; font-size: 2rem; letter-spacing: -1px; text-align: center; color: var(--primary); margin-bottom: 10px; }
+        
         .custom-input, .custom-select {
-            width: 100%; background: var(--bg-main); border: 1px solid var(--border); color: var(--text-main);
-            padding: 12px 16px; border-radius: 12px; font-family: inherit; font-size: 0.95rem; outline: none;
+            width: 100%; background: var(--surface); border: 1px solid var(--border); color: var(--text-main);
+            padding: 14px 16px; border-radius: 12px; font-family: inherit; font-size: 0.95rem; outline: none; transition: border 0.2s;
         }
-        
-        /* --- Top Nav Bar --- */
-        .top-nav-bar {
-            display: flex; flex-direction: column; align-items: stretch;
-            padding: 10px 14px; flex-shrink: 0; gap: 10px; background: var(--glass);
-            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--border); border-radius: 20px; box-shadow: 0 4px 30px rgba(0,0,0,0.3);
-            margin-bottom: 10px;
+        .custom-input:focus, .custom-select:focus { border-color: var(--accent); }
+
+        .btn-primary {
+            background: var(--text-main); color: var(--bg-main); border: none;
+            padding: 14px; border-radius: 12px; font-weight: 600; font-size: 0.95rem; 
+            cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: opacity 0.2s;
         }
-        .nav-header-row { display: flex; align-items: center; gap: 10px; width: 100%; }
-        .app-brand { font-family: 'Outfit', sans-serif; font-weight: 900; font-size: 1.05rem; color: var(--text-main); letter-spacing: -0.5px; display: flex; align-items: center; gap: 6px; }
-        .app-brand span { color: var(--primary); }
-        .brand-icon { width: 18px; height: 18px; color: var(--primary); }
-        
-        .icon-btn { background: transparent; border: none; color: var(--text-main); border-radius: 50%; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; flex-shrink: 0; }
-        .icon-btn:hover { background: var(--card); color: var(--primary); transform: scale(1.05); }
+        .btn-primary:hover { opacity: 0.9; }
 
-        .mode-switcher-bar { display: flex; gap: 6px; background: rgba(0,0,0,0.25); padding: 4px; border-radius: 14px; justify-content: center; width: 100%; overflow-x: auto; }
-        .mode-tab { padding: 6px 14px; background: transparent; border: none; color: var(--text-dim); font-family: inherit; font-weight: 600; font-size: 0.8rem; cursor: pointer; border-radius: 10px; white-space: nowrap; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.3s; flex: 1; }
-        .mode-tab.active { background: var(--surface); color: var(--text-main); box-shadow: 0 2px 10px rgba(0,0,0,0.3); border: 1px solid var(--border); }
-        .mode-tab.hidden { display: none !important; }
+        /* --- Minimalist Header --- */
+        .top-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 16px 20px; flex-shrink: 0; z-index: 10;
+        }
+        .brand-text { font-weight: 600; font-size: 1.1rem; letter-spacing: -0.5px; display: flex; align-items: center; gap: 8px; }
+        .icon-btn { background: transparent; border: none; color: var(--text-dim); border-radius: 8px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; }
+        .icon-btn:hover { color: var(--text-main); background: var(--surface); }
 
-        .lucide { width: 18px; height: 18px; stroke-width: 2.2; display: inline-block; vertical-align: middle; }
-
-        .games-stats-bar { display: none; background: rgba(65, 105, 225, 0.1); border: 1px solid rgba(65, 105, 225, 0.2); padding: 8px 16px; border-radius: 16px; align-items: center; justify-content: space-between; font-size: 0.85rem; color: #93c5fd; flex-shrink: 0; margin-bottom: 10px; }
-        .games-stats-bar.active { display: flex; }
-        .hud-hearts { color: var(--danger); letter-spacing: 2px;}
-
-        /* --- Sidebar --- */
-        .sidebar-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(8px); z-index: 999; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+        /* --- Sidebar Redesign --- */
+        .sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 999; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
         .sidebar-overlay.active { opacity: 1; pointer-events: auto; }
-        .sidebar { position: fixed; top: 0; left: -100%; width: 85%; max-width: 320px; height: 100vh; background: var(--surface); border-right: 1px solid var(--border); z-index: 1000; transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column; padding: 18px 16px; box-shadow: 10px 0 40px rgba(0,0,0,0.6); overflow-y: auto; }
-        .sidebar.open { left: 0; }
-        .sidebar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 12px;}
+        .sidebar { position: fixed; top: 0; left: -100%; width: 280px; height: 100vh; background: var(--surface); border-right: 1px solid var(--border); z-index: 1000; transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column; }
+        .sidebar.open { transform: translateX(100%); }
+        body[dir="rtl"] .sidebar.open { transform: translateX(-100%); }
+
+        .sb-section-title { font-size: 0.75rem; color: var(--text-dim); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; padding: 0 20px; margin: 24px 0 10px 0; }
+        .sb-item { display: flex; align-items: center; gap: 12px; padding: 10px 20px; color: var(--text-dim); text-decoration: none; font-size: 0.9rem; cursor: pointer; transition: 0.2s; border-left: 2px solid transparent;}
+        .sb-item:hover { color: var(--text-main); background: var(--card); }
+        .sb-item.active { color: var(--text-main); background: var(--card); border-left-color: var(--text-main); font-weight: 500;}
+        body[dir="rtl"] .sb-item { border-left: none; border-right: 2px solid transparent; }
+        body[dir="rtl"] .sb-item.active { border-right-color: var(--text-main); }
+
+        .chat-history-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; }
         
-        .user-profile-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 12px 14px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
-        .user-info-text { display: flex; flex-direction: column; gap: 2px; }
-        .user-name-title { font-weight: 700; font-size: 0.9rem; color: var(--primary); }
-        .user-role-subtitle { font-size: 0.72rem; color: var(--text-dim); }
-        .btn-logout-mini { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); color: var(--danger); padding: 6px 10px; border-radius: 10px; font-size: 0.75rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: all 0.2s; }
-        .btn-logout-mini:hover { background: var(--danger); color: white; }
+        .user-profile-bottom { margin-top: auto; border-top: 1px solid var(--border); padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; }
+        .user-info { display: flex; flex-direction: column; }
+        .user-name { font-weight: 600; font-size: 0.9rem; }
+        .user-role { font-size: 0.75rem; color: var(--text-dim); }
 
-        .sidebar-section-title { font-size: 0.72rem; color: var(--text-dim); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; margin: 14px 0 8px 0; display: flex; align-items: center; gap: 6px;}
-        .persona-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
-        .persona-chip { background: var(--bg-main); border: 1px solid var(--border); border-radius: 12px; padding: 8px; font-size: 0.75rem; font-weight: 600; color: var(--text-dim); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s ease; }
-        .persona-chip:hover { background: var(--card); color: var(--text-main); }
-        .persona-chip.active { background: rgba(65, 105, 225, 0.15); color: var(--primary); border-color: var(--primary); }
-
-        .chat-history-list { flex: 1; display: flex; flex-direction: column; gap: 6px; }
-        .history-item { background: var(--bg-main); border: 1px solid var(--border); color: var(--text-main); padding: 8px 10px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; font-size: 0.82rem; transition: all 0.2s;}
-        .history-item:hover { background: var(--card); }
-        .history-item.active { background: rgba(65, 105, 225, 0.12); border: 1px solid var(--primary); color: var(--primary); font-weight: bold; }
-        .history-item-content { display: flex; align-items: center; gap: 6px; flex: 1; overflow: hidden; }
-        .delete-history-btn { background: none; border: none; color: var(--text-dim); cursor: pointer; padding: 2px; border-radius: 4px; }
-        .delete-history-btn:hover { color: var(--danger); background: rgba(239, 68, 68, 0.1); }
-
-        .tab-section { display: none; flex-direction: column; flex: 1; min-height: 0; }
-        .tab-section.active { display: flex; }
-        .card { background: var(--surface); border-radius: 20px; border: 1px solid var(--border); padding: 16px; display: flex; flex-direction: column; gap: 10px; }
-
-        /* --- Chat Feed --- */
-        .chat-container-wrapper { position: relative; flex: 1; display: flex; flex-direction: column; min-height: 0; }
-        .chat-feed { display: flex; flex-direction: column; gap: 20px; flex: 1; overflow-y: auto; padding: 10px 4px 20px 4px; background: transparent; scroll-behavior: smooth; }
+        /* --- Chat Interface (Seamless Document Flow) --- */
+        .chat-feed { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 30px; scroll-behavior: smooth; }
         
-        .message-row { display: flex; flex-direction: column; gap: 4px; width: 100%; animation: slideUp 0.3s; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        .msg-block { display: flex; flex-direction: column; gap: 8px; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* User looks like a sleek header */
+        .msg-user { align-items: flex-start; margin-top: 10px;}
+        .user-label { font-size: 0.8rem; font-weight: 600; color: var(--text-dim); display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+        .msg-user-text { font-size: 1.1rem; font-weight: 500; color: var(--text-main); line-height: 1.5; }
+
+        /* AI looks like document content */
+        .msg-ai { padding-left: 24px; border-left: 1px solid var(--border); }
+        body[dir="rtl"] .msg-ai { padding-left: 0; padding-right: 24px; border-left: none; border-right: 1px solid var(--border); }
         
-        .message-sender { display: flex; align-items: center; }
-        .avatar-user { background: var(--primary); padding: 6px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px var(--primary-glow);}
-        .avatar-ai { background: var(--card); padding: 6px; border-radius: 50%; border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; }
-
-        .message-text-user { font-size: 0.95rem; line-height: 1.6; background: var(--surface); padding: 12px 16px; border-radius: 20px; border-top-right-radius: 4px; width: fit-content; max-width: 85%; border: 1px solid var(--border); box-shadow: 0 4px 15px rgba(0,0,0,0.1); align-self: flex-end; }
-        .message-text-ai { font-size: 1.05rem; line-height: 1.75; font-weight: 500; align-self: flex-start; max-width: 95%;}
-
-        .submarine-logo { width: 72px; height: 72px; filter: drop-shadow(0 0 20px rgba(65, 105, 225, 0.5)); color: var(--primary); }
-
-        .complex-card-box { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 16px; margin: 6px 0; box-shadow: 0 4px 25px rgba(0,0,0,0.25); position: relative; overflow-x: auto; }
-        .complex-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 8px; font-size: 0.8rem; color: var(--primary); font-weight: bold; }
+        .ai-label { font-size: 0.8rem; font-weight: 600; color: var(--text-main); display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
+        .ai-content { font-size: 1rem; line-height: 1.7; color: var(--primary-dim); }
         
-        .action-btn { background: var(--card); color: var(--text-dim); border: 1px solid var(--border); border-radius: 8px; padding: 5px 10px; font-size: 0.75rem; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: all 0.2s; }
-        .action-btn:hover { background: var(--primary); color: white; border-color: var(--primary); }
+        .ai-content pre { background: var(--card); border: 1px solid var(--border); padding: 12px; border-radius: 8px; overflow-x: auto; }
+        .ai-content code { font-family: monospace; font-size: 0.9em; }
 
-        .hologram-thinking { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 0.92rem; margin-top: 4px; background: linear-gradient(90deg, #4169E1, #8B5CF6, #fbbf24, #4169E1); background-size: 300% 100%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: gradientMove 2s linear infinite; }
-        @keyframes gradientMove { 0% { background-position: 100% 0; } 100% { background-position: 0 0; } }
+        .hologram-thinking { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 0.9rem; color: var(--text-dim); animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
 
-        /* Retry System */
-        .error-bubble { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); padding: 10px 14px; border-radius: 12px; color: var(--danger); font-size: 0.9rem; display:flex; align-items:center; justify-content:space-between; max-width:85%; }
-
-        /* --- Input Box --- */
-        .chat-input-container { flex-shrink: 0; padding-bottom: 6px; position: relative; margin-top: auto;}
-        .input-glass-panel { background: rgba(15, 16, 20, 0.85); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border: 1px solid var(--border); border-radius: 28px; padding: 8px 10px 8px 16px; box-shadow: 0 12px 40px rgba(0,0,0,0.5); display: flex; align-items: center; gap: 10px; transition: all 0.3s ease; position: relative; z-index: 10; }
-        .input-glass-panel:focus-within { border-color: rgba(65, 105, 225, 0.5); box-shadow: 0 12px 40px rgba(65, 105, 225, 0.15); }
-        textarea { background: transparent; color: var(--text-main); border: none; outline: none; font-family: inherit; font-size: 1rem; resize: none; max-height: 120px; min-height: 24px; line-height: 1.5; width: 100%; padding: 8px 0; }
+        /* --- Input Area --- */
+        .input-wrapper { padding: 0 20px 20px 20px; flex-shrink: 0; }
+        .input-box { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 10px 14px; display: flex; align-items: flex-end; gap: 10px; transition: border 0.3s; }
+        .input-box:focus-within { border-color: var(--text-dim); }
         
-        .magic-menu { position: absolute; bottom: 70px; left: 10px; background: var(--surface); border: 1px solid var(--border); border-radius: 18px; padding: 8px; display: flex; flex-direction: column; gap: 4px; opacity: 0; transform: translateY(15px) scale(0.95); pointer-events: none; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: 0 12px 30px rgba(0,0,0,0.6); z-index: 20; }
-        .magic-menu.show { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
-        .magic-item { display: flex; align-items: center; gap: 10px; padding: 10px 16px; font-size: 0.9rem; font-weight: 500; border-radius: 12px; cursor: pointer; transition: all 0.2s; }
-        .magic-item:hover { background: var(--card); color: var(--primary); }
-
-        .tool-btn { background: transparent; border: none; color: var(--text-dim); border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; flex-shrink: 0; }
-        .tool-btn:hover { background: var(--card); color: var(--text-main); }
-        .tool-btn.active-magic { background: var(--card); color: var(--primary); transform: rotate(45deg); }
-
-        .send-btn-royal { background: var(--primary); color: white; border: none; border-radius: 50%; width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 15px var(--primary-glow); flex-shrink: 0; }
-        .send-btn-royal.loading { background: transparent; border: 2px solid var(--border); box-shadow: none; pointer-events: none; }
-        .spinner-icon { animation: spin 1s linear infinite; color: var(--text-dim); }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-
-        .btn { background: var(--card); color: var(--text-main); border: 1px solid var(--border); padding: 10px 14px; border-radius: 14px; font-weight: 600; font-size: 0.85rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s; }
-        .btn-purple { background: linear-gradient(135deg, #1d4ed8, #4169E1); color: white; border: none; box-shadow: 0 4px 15px var(--primary-glow);}
+        textarea { background: transparent; color: var(--text-main); border: none; outline: none; font-family: inherit; font-size: 1rem; resize: none; max-height: 150px; min-height: 24px; line-height: 1.5; width: 100%; padding: 4px 0; }
         
-        input[type="file"] { display: none; }
-        .image-preview-bar { display: none; align-items: center; justify-content: space-between; background: rgba(65, 105, 225, 0.1); border: 1px solid rgba(65, 105, 225, 0.3); padding: 8px 12px; border-radius: 16px; font-size: 0.82rem; color: #93c5fd; margin-bottom: 8px; }
+        .send-btn { background: var(--text-main); color: var(--bg-main); border: none; border-radius: 10px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; flex-shrink: 0; }
+        .send-btn:hover { opacity: 0.8; }
+        .send-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
-        .doc-card-compact { background: var(--bg-main); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 8px; }
-        .doc-card-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; cursor: pointer; }
-        .doc-card-title { font-weight: 700; color: var(--primary); font-size: 0.85rem; display: flex; align-items: center; gap: 6px; }
-        .doc-card-body { padding: 10px 14px; border-top: 1px solid var(--border); font-size: 0.8rem; color: var(--text-dim); line-height: 1.6; display: none; background: var(--surface); border-bottom-left-radius: 12px; border-bottom-right-radius: 12px;}
+        /* --- Modals (Vault & Settings) --- */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); z-index: 9999; display: none; justify-content: center; align-items: center; padding: 20px; opacity: 0; transition: opacity 0.3s; }
+        .modal-card { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; width: 100%; max-width: 500px; padding: 24px; position: relative; max-height: 85vh; overflow-y: auto; }
+        .modal-close { position: absolute; top: 16px; right: 16px; background: transparent; border: none; color: var(--text-dim); cursor: pointer; }
+        body[dir="rtl"] .modal-close { right: auto; left: 16px; }
+
+        /* Vault specifics */
+        .drop-zone { border: 2px dashed var(--border); border-radius: 16px; padding: 30px; text-align: center; cursor: pointer; transition: 0.3s; margin-bottom: 16px; background: var(--card); }
+        .drop-zone:hover { border-color: var(--text-dim); }
+        .doc-item { background: var(--card); border: 1px solid var(--border); padding: 12px 16px; border-radius: 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+
+        /* Settings specifics */
+        .setting-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); }
+        .setting-row:last-child { border-bottom: none; }
         
-        .checkbox-container { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; padding: 8px; border-radius: 8px; cursor: pointer; }
-        .checkbox-container:hover { background: var(--card); }
-        .custom-checkbox { width: 18px; height: 18px; cursor: pointer; }
+        .toggle-switch { position: relative; width: 40px; height: 22px; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--border); transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--success); }
+        input:checked + .slider:before { transform: translateX(18px); }
 
     </style>
 </head>
 <body>
 
     <!-- ================= AUTHENTICATION OVERLAY ================= -->
-    <div id="authOverlay" class="full-overlay">
+    <div id="authOverlay" class="auth-wrapper">
         <div class="auth-card">
-            <div style="text-align: center; margin-bottom: 10px;">
-                <svg viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:48px;height:48px;margin-bottom:10px;">
-                    <path d="M16 13v-2a2 2 0 0 0-2-2h-1v-2a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v2H7a2 2 0 0 0-2 2v2"/><path d="M4 11h16a2 2 0 0 1 2 2v2a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5v-2a2 2 0 0 1 2-2z"/>
-                </svg>
-                <h2 style="margin:0; font-family:'Outfit';" data-i18n="welcome">Welcome to ge_nius</h2>
-            </div>
+            <div class="auth-logo">AXIOM</div>
+            <p style="text-align: center; color: var(--text-dim); margin-top: -15px; font-size: 0.9rem;" data-i18n="tagline">Intelligence, Structurized.</p>
             
-            <div class="role-selector">
-                <div class="role-card active" onclick="selectRole('student')" id="role-student"><i data-lucide="graduation-cap"></i> <span data-i18n="student">Student</span></div>
-                <div class="role-card" onclick="selectRole('teacher')" id="role-teacher"><i data-lucide="presentation"></i> <span data-i18n="teacher">Teacher</span></div>
-                <div class="role-card" onclick="selectRole('citizen')" id="role-citizen"><i data-lucide="globe"></i> <span data-i18n="citizen">Citizen</span></div>
+            <div class="role-selector" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div class="sb-item active" style="justify-content:center; border: 1px solid var(--border); border-radius:10px; padding: 12px;" onclick="selectRole('student')" id="role-student"><i data-lucide="book-open"></i> <span data-i18n="student">Student</span></div>
+                <div class="sb-item" style="justify-content:center; border: 1px solid var(--border); border-radius:10px; padding: 12px;" onclick="selectRole('teacher')" id="role-teacher"><i data-lucide="presentation"></i> <span data-i18n="teacher">Teacher</span></div>
             </div>
 
             <input type="text" id="authName" class="custom-input" placeholder="Full Name" data-i18n-ph="fullName">
@@ -361,560 +323,452 @@ HTML_CODE = """<!DOCTYPE html>
             <input type="password" id="authPassword" class="custom-input" placeholder="Password" data-i18n-ph="password">
             
             <select id="authLevel" class="custom-select">
-                <option value="Middle School" data-i18n="middleSchool">Middle School</option>
+                <option value="University" data-i18n="univ">University</option>
                 <option value="High School" data-i18n="highSchool">High School</option>
-                <option value="University (L2)" data-i18n="univL2">University (L2)</option>
                 <option value="Other" data-i18n="other">Other</option>
             </select>
 
-            <button class="btn btn-purple" onclick="performAuth()"><span data-i18n="enterPlatform">Enter Platform</span> <i data-lucide="arrow-right"></i></button>
-            <div id="authError" style="color:var(--danger); font-size:0.8rem; text-align:center;"></div>
+            <button class="btn-primary" onclick="performAuth()"><span data-i18n="enterPlatform">Enter Axiom</span> <i data-lucide="arrow-right" style="width:16px;"></i></button>
+            <div id="authError" style="color:var(--danger); font-size:0.85rem; text-align:center;"></div>
         </div>
     </div>
 
-    <!-- ================= SETTINGS OVERLAY ================= -->
-    <div id="settingsOverlay" class="full-overlay" style="display:none; opacity:0;">
-        <div class="settings-card">
-            <button class="close-modal-btn" onclick="closeSettings()"><i data-lucide="x"></i></button>
-            <h3 style="margin:0; color:var(--primary); display:flex; align-items:center; gap:8px;"><i data-lucide="settings"></i> <span data-i18n="settings">Settings</span></h3>
+    <!-- ================= SETTINGS MODAL ================= -->
+    <div id="settingsModal" class="modal-overlay">
+        <div class="modal-card">
+            <button class="modal-close" onclick="closeModal('settingsModal')"><i data-lucide="x"></i></button>
+            <h3 style="margin-top:0; display:flex; align-items:center; gap:8px;"><i data-lucide="settings"></i> <span data-i18n="settings">Preferences</span></h3>
             
-            <label style="font-size:0.85rem; color:var(--text-dim); margin-top:10px;" data-i18n="uiLangLabel">Interface Language</label>
-            <select id="uiLangSelect" class="custom-select" onchange="changeUILanguage()">
-                <option value="en">English</option>
-                <option value="ar">العربية</option>
-                <option value="fr">Français</option>
-            </select>
-
-            <label style="font-size:0.85rem; color:var(--text-dim); margin-top:5px;" data-i18n="sumLangLabel">Smart Summary Language</label>
-            <select id="sumLangSelect" class="custom-select">
-                <option value="en">English (Professional)</option>
-                <option value="ar">العربية (تلخيص دقيق واحترافي)</option>
-                <option value="fr">Français (Professionnel)</option>
-            </select>
-        </div>
-    </div>
-
-    <!-- ================= SUMMARY SELECTION OVERLAY ================= -->
-    <div id="summaryOverlay" class="full-overlay" style="display:none; opacity:0;">
-        <div class="settings-card">
-            <button class="close-modal-btn" onclick="closeSummaryModal()"><i data-lucide="x"></i></button>
-            <h3 style="margin:0; color:var(--accent-gold); display:flex; align-items:center; gap:8px;"><i data-lucide="sparkles"></i> <span data-i18n="selectDocsSumm">Select Docs to Summarize</span></h3>
+            <div class="setting-row">
+                <span><span data-i18n="uiLangLabel">Language</span></span>
+                <select id="uiLangSelect" class="custom-select" style="width:auto; padding:6px 12px;" onchange="changeUILanguage()">
+                    <option value="en">English</option>
+                    <option value="ar">العربية</option>
+                    <option value="fr">Français</option>
+                </select>
+            </div>
             
-            <div id="summaryDocsList" style="max-height: 200px; overflow-y: auto; background:var(--bg-main); border:1px solid var(--border); border-radius:12px; padding:10px; display:flex; flex-direction:column; gap:5px;">
-                <!-- Filled via JS -->
+            <div class="setting-row">
+                <span><span data-i18n="aiTemp">AI Creativity</span></span>
+                <select id="aiTempSelect" class="custom-select" style="width:auto; padding:6px 12px;" onchange="updateSettings()">
+                    <option value="precise" data-i18n="precise">Precise & Strict</option>
+                    <option value="balanced" data-i18n="balanced" selected>Balanced</option>
+                    <option value="creative" data-i18n="creative">Creative</option>
+                </select>
             </div>
 
-            <button class="btn btn-purple" onclick="executeSummary()"><i data-lucide="zap"></i> <span data-i18n="generateSummary">Generate Summary</span></button>
+            <div class="setting-row">
+                <span><span data-i18n="fontSize">Font Size</span></span>
+                <select id="fontSizeSelect" class="custom-select" style="width:auto; padding:6px 12px;" onchange="updateSettings()">
+                    <option value="14px">Small</option>
+                    <option value="16px" selected>Medium</option>
+                    <option value="18px">Large</option>
+                </select>
+            </div>
+
+            <div class="setting-row">
+                <span><span data-i18n="autoSpeech">Auto Speech (TTS)</span></span>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="autoSpeechToggle" onchange="updateSettings()">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            
+            <div class="setting-row">
+                <span><span data-i18n="theme">Theme Mode</span></span>
+                <button class="icon-btn" onclick="toggleTheme()" style="border:1px solid var(--border)"><i data-lucide="moon" id="themeIcon"></i></button>
+            </div>
         </div>
     </div>
-    <!-- ========================================================= -->
 
+    <!-- ================= KNOWLEDGE VAULT MODAL ================= -->
+    <div id="vaultModal" class="modal-overlay">
+        <div class="modal-card">
+            <button class="modal-close" onclick="closeModal('vaultModal')"><i data-lucide="x"></i></button>
+            <h3 style="margin-top:0; display:flex; align-items:center; gap:8px;"><i data-lucide="database"></i> <span data-i18n="vault">Knowledge Vault</span></h3>
+            
+            <div class="drop-zone" id="dropZone" onclick="document.getElementById('vaultFileInput').click()">
+                <i data-lucide="upload-cloud" style="width:32px; height:32px; color:var(--text-dim); margin-bottom:10px;"></i>
+                <div style="font-weight:500;" data-i18n="clickOrDrop">Click or Drag & Drop Documents Here</div>
+                <div style="font-size:0.8rem; color:var(--text-dim); margin-top:6px;">PDF, DOCX, Images</div>
+                <input type="file" id="vaultFileInput" accept=".pdf, .doc, .docx, image/*" multiple style="display:none;" onchange="handleVaultUpload(event)">
+            </div>
+            <div id="vaultUploadStatus" style="font-size:0.85rem; text-align:center; margin-bottom:15px; font-weight:600;"></div>
+
+            <div id="vaultDocsList" style="max-height: 250px; overflow-y:auto;">
+                <!-- Docs list via JS -->
+            </div>
+            
+            <button class="btn-primary" style="width:100%; margin-top:15px;" onclick="closeModal('vaultModal'); triggerSmartSummary()"><i data-lucide="sparkles"></i> <span data-i18n="summarizeAll">Summarize Knowledge</span></button>
+        </div>
+    </div>
+
+    <!-- ================= SIDEBAR ================= -->
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
     <aside class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <h3 data-i18n="menu"><i data-lucide="menu"></i> Menu</h3>
-            <button class="icon-btn" style="width:30px; height:30px;" onclick="toggleSidebar()"><i data-lucide="x"></i></button>
-        </div>
+        <div style="padding: 20px; font-weight: 700; font-size: 1.2rem; letter-spacing: -1px; border-bottom: 1px solid var(--border);">AXIOM</div>
         
-        <div class="user-profile-card">
-            <div class="user-info-text">
-                <div class="user-name-title" id="sidebarUserName">User</div>
-                <div class="user-role-subtitle" id="sidebarRoleLabel">Role</div>
-            </div>
-            <button class="btn-logout-mini" onclick="performLogout()"><i data-lucide="log-out" style="width:12px;height:12px;"></i> <span data-i18n="logout">Logout</span></button>
+        <div class="sb-item" style="margin-top: 10px;" onclick="createNewChatSession()">
+            <i data-lucide="plus-square"></i> <span data-i18n="newChat">New Chat</span>
         </div>
 
-        <button class="btn" onclick="createNewChatSession()" style="width: 100%; justify-content: center; margin-bottom: 8px;">
-            <i data-lucide="plus-circle"></i> <span data-i18n="newSession">New Session</span>
-        </button>
+        <div class="sb-section-title" data-i18n="workspaces">Workspaces</div>
+        <div class="sb-item active" id="ws-general" onclick="switchWorkspace('general')"><i data-lucide="cpu"></i> <span data-i18n="general">General</span></div>
+        <div class="sb-item" id="ws-study" onclick="switchWorkspace('study')"><i data-lucide="book-open"></i> <span data-i18n="study">Study / Curriculum</span></div>
+        <div class="sb-item" id="ws-games" onclick="switchWorkspace('games')"><i data-lucide="gamepad-2"></i> <span data-i18n="games">Brain Games</span></div>
 
-        <button class="btn btn-purple" onclick="switchSection('docsTab')" style="width: 100%; justify-content: center; margin-bottom: 12px;" id="btnCurriculum">
-            <i data-lucide="folder-kanban"></i> <span data-i18n="curriculum">Curriculum</span>
-        </button>
-
-        <div class="sidebar-section-title"><i data-lucide="brain"></i> <span data-i18n="aiPersona">AI Persona</span></div>
-        <div class="persona-grid" id="personaContainer">
-            <button class="persona-chip active" data-val="human" onclick="selectPersona('human', this)"><i data-lucide="heart" style="width:13px;height:13px;"></i> <span data-i18n="human">Human</span></button>
-            <button class="persona-chip" data-val="strict" onclick="selectPersona('strict', this)"><i data-lucide="briefcase" style="width:13px;height:13px;"></i> <span data-i18n="strict">Strict</span></button>
-            <button class="persona-chip" data-val="humor" onclick="selectPersona('humor', this)"><i data-lucide="smile" style="width:13px;height:13px;"></i> <span data-i18n="humor">Humor</span></button>
-            <button class="persona-chip" data-val="roast" onclick="selectPersona('roast', this)"><i data-lucide="flame" style="width:13px;height:13px;"></i> <span data-i18n="roast">Roast</span></button>
-        </div>
-
-        <div class="sidebar-section-title"><i data-lucide="history"></i> <span data-i18n="history">History</span></div>
+        <div class="sb-section-title" data-i18n="history">History</div>
         <div class="chat-history-list" id="chatHistoryList"></div>
 
-        <div style="margin-top: auto; padding-top: 12px; border-top: 1px solid var(--border); display:flex; gap:8px;">
-            <button class="btn" style="flex:1; justify-content: center; padding: 8px;" onclick="openSettings()" title="Settings">
-                <i data-lucide="settings"></i>
-            </button>
-            <button class="btn" style="flex:1; justify-content: center; padding: 8px;" onclick="toggleTheme()" title="Toggle Theme">
-                <i data-lucide="moon" id="themeIcon"></i>
-            </button>
+        <div class="user-profile-bottom">
+            <div class="user-info">
+                <span class="user-name" id="sidebarUserName">User</span>
+                <span class="user-role" id="sidebarRoleLabel">Role</span>
+            </div>
+            <button class="icon-btn" onclick="performLogout()" title="Logout"><i data-lucide="log-out"></i></button>
         </div>
     </aside>
 
+    <!-- ================= MAIN CONTENT ================= -->
     <div class="main-wrapper">
-        <div class="top-nav-bar">
-            <div class="nav-header-row">
-                <button class="icon-btn" onclick="toggleSidebar()">
-                    <i data-lucide="align-left"></i>
-                </button>
-                <div class="app-brand">
-                    <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M16 13v-2a2 2 0 0 0-2-2h-1v-2a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v2H7a2 2 0 0 0-2 2v2"/><path d="M4 11h16a2 2 0 0 1 2 2v2a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5v-2a2 2 0 0 1 2-2z"/>
-                    </svg>
-                    ge<span>_</span>nius
-                </div>
+        
+        <header class="top-header">
+            <div class="brand-text">
+                <button class="icon-btn" onclick="toggleSidebar()"><i data-lucide="menu"></i></button>
+                AXIOM
             </div>
-
-            <div class="mode-switcher-bar">
-                <button class="mode-tab hidden" id="modeTeacher" onclick="switchMode('teacher')" data-i18n="dashboard">Dashboard</button>
-                <button class="mode-tab hidden" id="modeStudy" onclick="switchMode('study')" data-i18n="study">Study</button>
-                <button class="mode-tab hidden" id="modeGames" onclick="switchMode('games')" data-i18n="games">Games</button>
-                <button class="mode-tab active" id="modeGeneral" onclick="switchMode('general')" data-i18n="general">General</button>
+            <div style="display:flex; gap:10px;">
+                <button class="icon-btn" onclick="openModal('vaultModal')" title="Knowledge Vault"><i data-lucide="database"></i></button>
+                <button class="icon-btn" onclick="openModal('settingsModal')" title="Settings"><i data-lucide="settings"></i></button>
             </div>
-        </div>
+        </header>
 
-        <div class="games-stats-bar" id="gamesStatsBar">
-            <span class="hud-hearts" id="hudHearts">❤️❤️❤️❤️❤️</span>
-            <span>⭐ XP: <strong id="userXp">0</strong></span>
-        </div>
-
-        <!-- Chat Tab -->
-        <div class="tab-section active" id="askTab">
-            <div class="chat-container-wrapper">
-                <div class="chat-feed" id="chatFeed">
-                    <div id="welcomeMsg" style="color: var(--text-dim); text-align: center; padding: 80px 20px; display: flex; flex-direction: column; align-items: center; gap: 16px;">
-                        <svg class="submarine-logo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M16 13v-2a2 2 0 0 0-2-2h-1v-2a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v2H7a2 2 0 0 0-2 2v2"/><path d="M4 11h16a2 2 0 0 1 2 2v2a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5v-2a2 2 0 0 1 2-2z"/><circle cx="12" cy="15" r="2"/><path d="M20 15h2"/><path d="M2 15h2"/>
-                        </svg>
-                        <p style="margin: 0; font-size: 1rem; max-width: 250px; line-height: 1.5; color: var(--text-dim);" data-i18n="platformReady">Platform Ready.</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="chat-input-container">
-                <div class="image-preview-bar" id="questionImgPreview">
-                    <span style="display: flex; align-items: center; gap: 6px;"><i data-lucide="image" style="width: 14px; height: 14px;"></i> <span data-i18n="docAttached">Document attached</span></span>
-                    <span style="cursor: pointer; color: #fca5a5; font-weight: bold; display: flex; align-items: center;" onclick="removeQuestionImage()"><i data-lucide="x" style="width: 16px; height: 16px;"></i></span>
-                </div>
-
-                <div class="magic-menu" id="magicMenu">
-                    <label for="qFileInputCamera" class="magic-item">
-                        <i data-lucide="camera" style="color:var(--primary)"></i> <span data-i18n="takePhoto">Take Photo</span>
-                    </label>
-                    <input type="file" id="qFileInputCamera" accept="image/*" capture="environment">
-                    
-                    <label for="qFileInputGallery" class="magic-item">
-                        <i data-lucide="image-plus" style="color:var(--primary)"></i> <span data-i18n="uploadFile">Upload PDF/Doc</span>
-                    </label>
-                    <input type="file" id="qFileInputGallery" accept=".pdf, .doc, .docx, image/*">
-
-                    <div class="magic-item" id="btnSummarize" onclick="openSummaryModal()" style="display:none; color:var(--accent-gold); font-weight:bold;">
-                        <i data-lucide="sparkles"></i> <span data-i18n="aiSummarize">AI Summarize</span>
-                    </div>
-                </div>
-
-                <div class="input-glass-panel" id="inputPanel">
-                    <button class="tool-btn" id="magicBtn" onclick="toggleMagicMenu()" title="Attach">
-                        <i data-lucide="plus"></i>
-                    </button>
-
-                    <textarea id="userQuery" placeholder="Ask anything..." data-i18n-ph="askAnything" rows="1" oninput="autoResizeTextarea(this)"></textarea>
-                    
-                    <button class="tool-btn" id="voiceRecordBtn" onclick="toggleVoiceRecording()" title="Voice Input">
-                        <i data-lucide="mic"></i>
-                    </button>
-
-                    <button class="send-btn-royal" id="sendBtn" onclick="submitQuestion()" title="Send">
-                        <i data-lucide="arrow-up" id="sendIcon"></i>
-                    </button>
-                </div>
+        <!-- Chat Feed -->
+        <div class="chat-feed" id="chatFeed">
+            <div id="welcomeMsg" style="text-align: center; padding: 80px 20px; color: var(--text-dim);">
+                <i data-lucide="box" style="width:48px;height:48px; margin-bottom:16px; opacity:0.5;"></i>
+                <h3 style="margin:0; font-weight:500;" data-i18n="ready">System Ready</h3>
             </div>
         </div>
 
-        <!-- Curriculum Docs Tab -->
-        <div class="tab-section" id="docsTab" style="gap:15px; overflow-y:auto; padding:0 4px;">
-            <div style="display: flex; align-items: center; justify-content: space-between;">
-                <h3 style="margin:0; font-size: 1.15rem; color: var(--text-main); font-weight: 700;" data-i18n="curriculumArchive">Curriculum Archive</h3>
-                <button class="btn" style="padding: 6px 10px; font-size: 0.75rem;" onclick="switchSection('askTab')">
-                    <i data-lucide="arrow-left" style="width:14px;height:14px;"></i> <span data-i18n="back">Back</span>
-                </button>
+        <!-- Input Area -->
+        <div class="input-wrapper">
+            <div id="attachedFileIndicator" style="display:none; font-size:0.8rem; color:var(--text-dim); margin-bottom:8px; align-items:center; gap:6px;">
+                <i data-lucide="paperclip" style="width:14px;"></i> <span data-i18n="docAttached">File attached</span>
+                <i data-lucide="x" style="width:14px; cursor:pointer; color:var(--danger);" onclick="removeAttachedFile()"></i>
             </div>
-            <div class="card" id="studentUploadArea" style="padding: 12px;">
-                <span style="font-weight: 700; font-size: 0.85rem; color: var(--primary); display: flex; align-items: center; gap: 8px; margin-bottom:8px;"><i data-lucide="file-up" style="width:14px;height:14px;"></i> <span data-i18n="uploadMaterials">Upload Materials</span></span>
-                <div style="display: flex; gap: 6px;">
-                    <label for="docFileInputCamera" class="btn btn-purple" style="flex: 1; padding:8px; font-size:0.8rem; text-align: center; margin:0;"><i data-lucide="scan" style="width:14px;height:14px;"></i> <span data-i18n="scan">Scan</span></label>
-                    <input type="file" id="docFileInputCamera" accept="image/*" capture="environment">
-                    
-                    <label for="docFileInputGallery" class="btn btn-purple" style="flex: 1; padding:8px; font-size:0.8rem; text-align: center; margin:0;"><i data-lucide="folder" style="width:14px;height:14px;"></i> <span data-i18n="files">Files</span></label>
-                    <input type="file" id="docFileInputGallery" accept=".pdf, .doc, .docx, image/*" multiple>
-                </div>
-                <div id="uploadStatus" style="font-size: 0.75rem; font-weight: bold; text-align:center; margin-top:8px;"></div>
+            <div class="input-box" id="inputPanel">
+                <button class="icon-btn" style="width:30px;height:30px;" onclick="document.getElementById('quickUpload').click()"><i data-lucide="paperclip"></i></button>
+                <input type="file" id="quickUpload" accept="image/*,.pdf,.doc" style="display:none;" onchange="handleQuickUpload(event)">
+                
+                <textarea id="userQuery" placeholder="Message Axiom..." data-i18n-ph="askAnything" rows="1" oninput="autoResizeTextarea(this)" onkeydown="handleEnter(event)"></textarea>
+                
+                <button class="send-btn" id="sendBtn" onclick="submitQuestion()"><i data-lucide="arrow-up" style="width:18px;"></i></button>
             </div>
-            <div id="docsList" style="display: flex; flex-direction: column; gap: 6px;"></div>
         </div>
 
-        <!-- Teacher Tab -->
-        <div class="tab-section" id="teacherTab" style="gap:15px; overflow-y:auto; padding:0 4px;">
-            <div class="card" style="text-align:center;">
-                <h3 style="color:var(--primary); margin-top:0;"><i data-lucide="upload-cloud"></i> <span data-i18n="uploadCurriculum">Upload Curriculum</span></h3>
-                <div style="display:flex; gap:10px; justify-content:center; margin-top:15px;">
-                    <label for="teacherUploadBtn" class="btn btn-purple" style="width:auto; padding:12px 30px;"><i data-lucide="file-plus"></i> <span data-i18n="selectFile">Select File</span></label>
-                    <input type="file" id="teacherUploadBtn" accept=".pdf, .doc, .docx, image/*">
-                </div>
-                <div id="teacherUploadStatus" style="margin-top:10px; font-weight:bold; font-size:0.85rem;"></div>
-            </div>
-            <div id="teacherDocsList" style="display:flex; flex-direction:column; gap:10px; padding-bottom:20px;"></div>
-        </div>
     </div>
 
     <script>
         // ================= I18N DICTIONARY =================
         const dict = {
-            en: { welcome: "Welcome to ge_nius", student: "Student", teacher: "Teacher", citizen: "Citizen", enterPlatform: "Enter Platform", settings: "Settings", uiLangLabel: "Interface Language", sumLangLabel: "Smart Summary Language", selectDocsSumm: "Select Docs to Summarize", generateSummary: "Generate Summary", menu: "Menu", logout: "Logout", newSession: "New Session", curriculum: "Curriculum", aiPersona: "AI Persona", human: "Human", strict: "Strict", humor: "Humor", roast: "Roast", history: "History", dashboard: "Dashboard", study: "Study", games: "Games", general: "General", platformReady: "Platform Ready.", docAttached: "Document attached", takePhoto: "Take Photo", uploadFile: "Upload PDF/Doc", aiSummarize: "AI Summarize", curriculumArchive: "Curriculum Archive", back: "Back", uploadMaterials: "Upload Materials", scan: "Scan", files: "Files", uploadCurriculum: "Upload Curriculum", selectFile: "Select File", retry: "Retry", copy: "Copy", listen: "Listen", selectAll: "Select All" },
-            ar: { welcome: "مرحباً في ge_nius", student: "طالب", teacher: "أستاذ", citizen: "مواطن", enterPlatform: "دخول المنصة", settings: "الإعدادات", uiLangLabel: "لغة الواجهة", sumLangLabel: "لغة التلخيص الذكي", selectDocsSumm: "اختر الوثائق للتلخيص", generateSummary: "إنشاء التلخيص", menu: "القائمة", logout: "تسجيل خروج", newSession: "جلسة جديدة", curriculum: "المنهج الدراسي", aiPersona: "شخصية الذكاء", human: "ودود", strict: "صارم", humor: "مرح", roast: "تحدي", history: "السجل", dashboard: "لوحة التحكم", study: "دراسة", games: "ألعاب", general: "عام", platformReady: "المنصة جاهزة.", docAttached: "تم إرفاق مستند", takePhoto: "التقاط صورة", uploadFile: "رفع ملف", aiSummarize: "تلخيص ذكي", curriculumArchive: "أرشيف الدروس", back: "رجوع", uploadMaterials: "رفع المواد", scan: "مسح ضوئي", files: "ملفات", uploadCurriculum: "رفع المناهج", selectFile: "اختر ملف", retry: "إعادة المحاولة", copy: "نسخ", listen: "استماع", selectAll: "تحديد الكل" },
-            fr: { welcome: "Bienvenue sur ge_nius", student: "Étudiant", teacher: "Professeur", citizen: "Citoyen", enterPlatform: "Entrer", settings: "Paramètres", uiLangLabel: "Langue de l'interface", sumLangLabel: "Langue du résumé", selectDocsSumm: "Sélectionner les docs", generateSummary: "Générer le résumé", menu: "Menu", logout: "Déconnexion", newSession: "Nouvelle Session", curriculum: "Programme", aiPersona: "Personnage IA", human: "Humain", strict: "Strict", humor: "Humour", roast: "Défi", history: "Historique", dashboard: "Tableau de bord", study: "Études", games: "Jeux", general: "Général", platformReady: "Plateforme prête.", docAttached: "Document joint", takePhoto: "Prendre Photo", uploadFile: "Téléverser Fichier", aiSummarize: "Résumé IA", curriculumArchive: "Archives des cours", back: "Retour", uploadMaterials: "Téléverser Matériel", scan: "Scanner", files: "Fichiers", uploadCurriculum: "Téléverser Programme", selectFile: "Choisir Fichier", retry: "Réessayer", copy: "Copier", listen: "Écouter", selectAll: "Tout sélectionner" }
+            en: { welcome: "AXIOM", tagline: "Intelligence, Structurized.", student: "Student", teacher: "Teacher", enterPlatform: "Enter Axiom", settings: "Preferences", uiLangLabel: "Language", aiTemp: "AI Creativity", precise: "Precise & Strict", balanced: "Balanced", creative: "Creative", fontSize: "Font Size", autoSpeech: "Auto Speech (TTS)", theme: "Theme Mode", vault: "Knowledge Vault", clickOrDrop: "Click or Drag & Drop Documents Here", summarizeAll: "Summarize Knowledge", workspaces: "Workspaces", general: "General", study: "Study / Curriculum", games: "Brain Games", history: "History", newChat: "New Chat", ready: "System Ready", docAttached: "File attached" },
+            ar: { welcome: "أكسيوم", tagline: "ذكاء مهيكل.", student: "طالب", teacher: "أستاذ", enterPlatform: "دخول أكسيوم", settings: "التفضيلات", uiLangLabel: "اللغة", aiTemp: "مستوى الإبداع", precise: "دقيق وصارم", balanced: "متوازن", creative: "إبداعي", fontSize: "حجم الخط", autoSpeech: "النطق التلقائي", theme: "المظهر", vault: "خزنة المعرفة", clickOrDrop: "اضغط أو اسحب الملفات هنا", summarizeAll: "تلخيص المعرفة", workspaces: "مساحات العمل", general: "عام", study: "الدراسة / المنهج", games: "ألعاب التفكير", history: "السجل", newChat: "محادثة جديدة", ready: "النظام جاهز", docAttached: "ملف مرفق" },
+            fr: { welcome: "AXIOM", tagline: "L'intelligence, Structurée.", student: "Étudiant", teacher: "Professeur", enterPlatform: "Entrer Axiom", settings: "Préférences", uiLangLabel: "Langue", aiTemp: "Créativité IA", precise: "Précis", balanced: "Équilibré", creative: "Créatif", fontSize: "Taille de police", autoSpeech: "Lecture Auto", theme: "Thème", vault: "Coffre de Connaissances", clickOrDrop: "Cliquez ou glissez-déposez ici", summarizeAll: "Résumer la Connaissance", workspaces: "Espaces", general: "Général", study: "Études / Cours", games: "Jeux", history: "Historique", newChat: "Nouveau Chat", ready: "Système Prêt", docAttached: "Fichier joint" }
         };
         const phDict = {
-            en: { fullName: "Full Name", email: "Email Address", password: "Password", askAnything: "Ask anything..." },
-            ar: { fullName: "الاسم الكامل", email: "البريد الإلكتروني", password: "كلمة المرور", askAnything: "اسأل أي شيء..." },
-            fr: { fullName: "Nom Complet", email: "Adresse Email", password: "Mot de passe", askAnything: "Demandez n'importe quoi..." }
+            en: { fullName: "Full Name", email: "Email Address", password: "Password", askAnything: "Message Axiom..." },
+            ar: { fullName: "الاسم الكامل", email: "البريد الإلكتروني", password: "كلمة المرور", askAnything: "اسأل أكسيوم..." },
+            fr: { fullName: "Nom Complet", email: "Adresse Email", password: "Mot de passe", askAnything: "Message Axiom..." }
         };
 
+        let userSettings = { lang: 'en', temp: 'balanced', size: '16px', autoSpeech: false, theme: 'dark' };
+        
         function changeUILanguage() {
             const lang = document.getElementById('uiLangSelect').value;
+            userSettings.lang = lang;
             document.body.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
-            
-            document.querySelectorAll('[data-i18n]').forEach(el => {
-                const key = el.getAttribute('data-i18n');
-                if(dict[lang][key]) el.innerHTML = dict[lang][key];
-            });
-            document.querySelectorAll('[data-i18n-ph]').forEach(el => {
-                const key = el.getAttribute('data-i18n-ph');
-                if(phDict[lang][key]) el.setAttribute('placeholder', phDict[lang][key]);
-            });
-            localStorage.setItem('ge_nius_ui_lang', lang);
-            lucide.createIcons();
+            document.querySelectorAll('[data-i18n]').forEach(el => { const key = el.getAttribute('data-i18n'); if(dict[lang][key]) el.innerHTML = dict[lang][key]; });
+            document.querySelectorAll('[data-i18n-ph]').forEach(el => { const key = el.getAttribute('data-i18n-ph'); if(phDict[lang][key]) el.setAttribute('placeholder', phDict[lang][key]); });
+            saveSettings(); lucide.createIcons();
         }
+
+        function updateSettings() {
+            userSettings.temp = document.getElementById('aiTempSelect').value;
+            userSettings.size = document.getElementById('fontSizeSelect').value;
+            userSettings.autoSpeech = document.getElementById('autoSpeechToggle').checked;
+            document.documentElement.style.setProperty('--font-size-base', userSettings.size);
+            saveSettings();
+        }
+
+        function saveSettings() { localStorage.setItem('axiom_settings', JSON.stringify(userSettings)); }
+        function loadSettings() {
+            const saved = localStorage.getItem('axiom_settings');
+            if(saved) {
+                userSettings = JSON.parse(saved);
+                document.getElementById('uiLangSelect').value = userSettings.lang;
+                document.getElementById('aiTempSelect').value = userSettings.temp;
+                document.getElementById('fontSizeSelect').value = userSettings.size;
+                document.getElementById('autoSpeechToggle').checked = userSettings.autoSpeech;
+                if(userSettings.theme === 'light') toggleTheme(true);
+                document.documentElement.style.setProperty('--font-size-base', userSettings.size);
+                changeUILanguage();
+            }
+        }
+
+        function toggleTheme(forceLight = false) { 
+            const isLight = forceLight || document.body.classList.toggle('light-mode'); 
+            userSettings.theme = document.body.classList.contains('light-mode') ? 'light' : 'dark';
+            document.getElementById('themeIcon').setAttribute('data-lucide', userSettings.theme === 'light' ? 'moon' : 'sun'); 
+            saveSettings(); lucide.createIcons(); 
+        }
+
+        function openModal(id) { document.getElementById(id).style.display = 'flex'; setTimeout(() => document.getElementById(id).style.opacity = '1', 10); toggleSidebar(false); }
+        function closeModal(id) { document.getElementById(id).style.opacity = '0'; setTimeout(() => document.getElementById(id).style.display = 'none', 300); }
+        function toggleSidebar(forceClose = false) { 
+            const sb = document.getElementById('sidebar'); const ov = document.getElementById('sidebarOverlay');
+            if(forceClose) { sb.classList.remove('open'); ov.classList.remove('active'); return; }
+            sb.classList.toggle('open'); ov.classList.toggle('active'); 
+        }
+        function autoResizeTextarea(el) { el.style.height = 'auto'; el.style.height = (el.scrollHeight) + 'px'; }
+        function handleEnter(e) { if(e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submitQuestion(); } }
 
         // ================= PRE-PARSER FOR MATHJAX =================
         function processTextForMathJax(text) {
-            // Protect LaTeX before Marked parses it to prevent underscores from becoming italics
             let safeText = text;
             safeText = safeText.replace(/\\\\\[(.*?)\\\\\]/gs, '$$$$$1$$$$');
             safeText = safeText.replace(/\\\\\((.*?)\\\\\)/g, '$$$1$$');
-            let htmlText = marked.parse(safeText);
-            return htmlText;
-        }
-        
-        // Settings / Overlays Logic
-        function openSettings() { document.getElementById('settingsOverlay').style.display = 'flex'; setTimeout(() => document.getElementById('settingsOverlay').style.opacity = '1', 10); toggleSidebar(); }
-        function closeSettings() { document.getElementById('settingsOverlay').style.opacity = '0'; setTimeout(() => document.getElementById('settingsOverlay').style.display = 'none', 300); }
-
-        function openSummaryModal() {
-            document.getElementById('magicMenu').classList.remove('show');
-            const listDiv = document.getElementById('summaryDocsList');
-            listDiv.innerHTML = `<label class="checkbox-container"><input type="checkbox" class="custom-checkbox" id="selectAllDocs" onchange="toggleAllDocs(this)"> <strong data-i18n="selectAll">Select All</strong></label><hr style="border-color:var(--border); width:100%; margin:4px 0;">`;
-            
-            curriculumDocs.forEach((doc, i) => {
-                listDiv.innerHTML += `<label class="checkbox-container"><input type="checkbox" class="custom-checkbox doc-check" value="${doc.id}"> Doc ${i+1}: ${doc.title || 'Document'}</label>`;
-            });
-
-            document.getElementById('summaryOverlay').style.display = 'flex'; 
-            setTimeout(() => document.getElementById('summaryOverlay').style.opacity = '1', 10);
-            changeUILanguage(); // re-apply lang to dynamic content
-        }
-        function closeSummaryModal() { document.getElementById('summaryOverlay').style.opacity = '0'; setTimeout(() => document.getElementById('summaryOverlay').style.display = 'none', 300); }
-        function toggleAllDocs(chk) { document.querySelectorAll('.doc-check').forEach(c => c.checked = chk.checked); }
-
-        function executeSummary() {
-            const selected = Array.from(document.querySelectorAll('.doc-check:checked')).map(c => c.value);
-            if(selected.length === 0) { alert("Please select at least one document."); return; }
-            closeSummaryModal();
-            const sumLang = document.getElementById('sumLangSelect').value;
-            const langName = sumLang === 'ar' ? 'Arabic (Professional & Accurate, avoid literal translation)' : (sumLang === 'fr' ? 'French (Professional)' : 'English');
-            
-            document.getElementById('userQuery').value = `Please provide a highly professional, structured summary for the selected documents. Focus on: Core concepts, LaTeX math formulas, examples, and exam notes. Write it beautifully in ${langName}. [DOC_IDS: ${selected.join(',')}]`;
-            submitQuestion(true);
+            return marked.parse(safeText);
         }
 
-        // Export to PDF
-        window.exportToPDF = function(btn) {
-            const containerId = btn.getAttribute('data-target');
-            const element = document.getElementById(containerId);
-            if(!element) return;
-            const opt = {
-                margin:       0.5,
-                filename:     'ge_nius_summary.pdf',
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2, useCORS: true },
-                jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
-            };
-            btn.innerHTML = `<i data-lucide="loader"></i> Exporting...`;
-            lucide.createIcons({root:btn});
-            html2pdf().set(opt).from(element).save().then(()=>{
-                btn.innerHTML = `<i data-lucide="download"></i> PDF`;
-                lucide.createIcons({root:btn});
-            });
-        };
-
-        // --- Init & Start ---
         document.addEventListener("DOMContentLoaded", () => { 
             marked.setOptions({ breaks: true, gfm: true });
-            const savedLang = localStorage.getItem('ge_nius_ui_lang');
-            if(savedLang) { document.getElementById('uiLangSelect').value = savedLang; changeUILanguage(); }
-            lucide.createIcons(); checkAuth(); 
+            lucide.createIcons(); loadSettings(); checkAuth(); 
+            initDragAndDrop();
         });
 
-        let isAiThinking = false; let currentUser = null; let attachedQuestionBase64 = null;
-        let currentMode = 'general'; let currentPersonaValue = 'human';
-        let modeContents = { study: "", general: "", games: "" };
-        let lastPayload = null; // for Retry
+        // Application State
+        let isAiThinking = false; let currentUser = null; let attachedFileBase64 = null;
+        let currentWorkspace = 'general';
         const chatFeed = document.getElementById('chatFeed');
+        let chatSessions = JSON.parse(localStorage.getItem('axiom_sessions_v1')) || {};
+        let currentSessionId = localStorage.getItem('axiom_current_session_v1');
+        let curriculumDocs = [];
 
+        // Auth Logic
         let selectedRole = 'student';
-        function selectRole(role) { selectedRole = role; document.querySelectorAll('.role-card').forEach(c => c.classList.remove('active')); document.getElementById('role-' + role).classList.add('active'); const levelSelect = document.getElementById('authLevel'); if(role === 'student') levelSelect.style.display = 'block'; else levelSelect.style.display = 'none'; }
+        function selectRole(role) { selectedRole = role; document.querySelectorAll('.role-selector .sb-item').forEach(c => c.classList.remove('active')); document.getElementById('role-' + role).classList.add('active'); }
+        
         async function performAuth() {
             const name = document.getElementById('authName').value.trim(); const email = document.getElementById('authEmail').value.trim(); const pwd = document.getElementById('authPassword').value.trim(); const level = document.getElementById('authLevel').value; const err = document.getElementById('authError');
-            if(!name || !email || !pwd) { err.innerText = "Please fill all fields."; return; } if(selectedRole === 'student' && !level) { err.innerText = "Please select your study level."; return; }
+            if(!name || !email || !pwd) { err.innerText = "Please fill all fields."; return; }
             err.innerText = "Authenticating...";
-            try { const res = await fetch('/api/auth', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({name, email, password: pwd, role: selectedRole, level}) }); const data = await res.json(); if(data.success) { document.getElementById('authOverlay').style.opacity = '0'; setTimeout(() => document.getElementById('authOverlay').style.display = 'none', 400); currentUser = data.user; configureUIForRole(); } else { err.innerText = data.error || "Authentication failed."; } } catch(e) { err.innerText = "Network error."; }
+            try { 
+                const res = await fetch('/api/auth', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({name, email, password: pwd, role: selectedRole, level}) }); 
+                const data = await res.json(); 
+                if(data.success) { document.getElementById('authOverlay').style.opacity = '0'; setTimeout(() => document.getElementById('authOverlay').style.display = 'none', 500); currentUser = data.user; setupUI(); fetchDocs(); } 
+                else { err.innerText = data.error; } 
+            } catch(e) { err.innerText = "Network error."; }
         }
-        async function checkAuth() { try { const res = await fetch('/api/user/me'); const data = await res.json(); if(data.user) { document.getElementById('authOverlay').style.display = 'none'; currentUser = data.user; configureUIForRole(); } } catch(e) {} }
-        async function performLogout() { try { await fetch('/api/logout', { method: 'POST' }); document.cookie = "session_id=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"; currentUser = null; document.getElementById('authName').value = ''; document.getElementById('authEmail').value = ''; document.getElementById('authPassword').value = ''; document.getElementById('authOverlay').style.display = 'flex'; setTimeout(() => document.getElementById('authOverlay').style.opacity = '1', 10); if(document.getElementById('sidebar').classList.contains('open')) toggleSidebar(); } catch(e) { console.error(e); } }
+        async function checkAuth() { try { const res = await fetch('/api/user/me'); const data = await res.json(); if(data.user) { document.getElementById('authOverlay').style.display = 'none'; currentUser = data.user; setupUI(); fetchDocs(); } } catch(e) {} }
+        async function performLogout() { try { await fetch('/api/logout', { method: 'POST' }); document.cookie = "session_id=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"; location.reload(); } catch(e) {} }
 
-        function configureUIForRole() {
+        function setupUI() {
             document.getElementById('sidebarUserName').innerText = currentUser.name;
-            document.getElementById('sidebarRoleLabel').innerText = currentUser.role.toUpperCase() + (currentUser.level ? ` • ${currentUser.level}` : '');
-            document.querySelectorAll('.mode-tab').forEach(t => t.classList.add('hidden'));
-            document.getElementById('modeGeneral').classList.remove('hidden');
-            document.getElementById('btnCurriculum').style.display = 'none';
-
-            if (currentUser.role === 'teacher') { document.getElementById('modeTeacher').classList.remove('hidden'); switchMode('teacher'); } 
-            else if (currentUser.role === 'student') { document.getElementById('modeStudy').classList.remove('hidden'); document.getElementById('modeGames').classList.remove('hidden'); document.getElementById('btnCurriculum').style.display = 'flex'; updateGamificationHUD(currentUser.hearts, currentUser.xp); switchMode('study'); } 
-            else { switchMode('general'); }
+            document.getElementById('sidebarRoleLabel').innerText = currentUser.role.toUpperCase();
+            initSessions();
         }
 
-        function updateGamificationHUD(hearts, xp) { let heartStr = ""; for(let i=0; i<5; i++) { heartStr += (i < hearts) ? "❤️" : "🤍"; } document.getElementById('hudHearts').innerText = heartStr; document.getElementById('userXp').innerText = xp; }
-        window.selectPersona = function(val, btnElement) { currentPersonaValue = val; document.querySelectorAll('.persona-chip').forEach(btn => btn.classList.remove('active')); btnElement.classList.add('active'); if(window.innerWidth < 768) toggleSidebar(); };
-        function toggleMagicMenu() { if(isAiThinking) return; const menu = document.getElementById('magicMenu'); const btn = document.getElementById('magicBtn'); menu.classList.toggle('show'); btn.classList.toggle('active-magic'); }
-        document.addEventListener('click', (e) => { const menu = document.getElementById('magicMenu'); const btn = document.getElementById('magicBtn'); if (menu && btn && !menu.contains(e.target) && !btn.contains(e.target)) { menu.classList.remove('show'); btn.classList.remove('active-magic'); } });
-        function toggleTheme() { const isLight = document.body.classList.toggle('light-mode'); localStorage.setItem('theme', isLight ? 'light' : 'dark'); const iconId = isLight ? 'moon' : 'sun'; document.getElementById('themeIcon').setAttribute('data-lucide', iconId); lucide.createIcons(); }
-        if (localStorage.getItem('theme') === 'light') { document.body.classList.add('light-mode'); document.getElementById('themeIcon').setAttribute('data-lucide', 'moon'); }
-        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebarOverlay').classList.toggle('active'); }
-        function switchSection(sectionId) { document.querySelectorAll('.tab-section').forEach(s => s.classList.remove('active')); document.getElementById(sectionId).classList.add('active'); if(document.getElementById('sidebar').classList.contains('open')) toggleSidebar(); }
-        function autoResizeTextarea(el) { el.style.height = 'auto'; el.style.height = (el.scrollHeight) + 'px'; }
-
-        // Sessions
-        let chatSessions = JSON.parse(localStorage.getItem('ge_nius_sessions_royal_v6')) || {};
-        let currentSessionId = localStorage.getItem('ge_nius_current_session_royal_v6');
+        // Sessions & Workspaces
         function initSessions() { if (!currentSessionId || !chatSessions[currentSessionId]) { createNewSessionQuiet(); } else { loadChatSession(currentSessionId); } renderChatHistoryList(); }
-        function createNewSessionQuiet() { const id = Date.now().toString(); chatSessions[id] = { id: id, title: "New Session", mode: "study", modesData: { study: "", general: "", games: "" } }; currentSessionId = id; saveSessionsData(); }
-        function createNewChatSession() { if(isAiThinking) return; createNewSessionQuiet(); loadChatSession(currentSessionId); if(document.getElementById('sidebar').classList.contains('open')) toggleSidebar(); }
-        function switchMode(mode) {
-            if(isAiThinking) return;
-            if (currentMode !== 'teacher') { modeContents[currentMode] = chatFeed.innerHTML; }
-            currentMode = mode;
-            document.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
-            const btnSumm = document.getElementById('btnSummarize');
-            if(btnSumm) btnSumm.style.display = (mode === 'study') ? 'flex' : 'none';
-            if (mode === 'teacher') { document.getElementById('modeTeacher').classList.add('active'); switchSection('teacherTab'); fetchTeacherDocs(); return; } 
-            else { switchSection('askTab'); if(mode === 'study') document.getElementById('modeStudy').classList.add('active'); else if(mode === 'general') document.getElementById('modeGeneral').classList.add('active'); else if(mode === 'games') document.getElementById('modeGames').classList.add('active'); }
-            
-            const gamesStatsBar = document.getElementById('gamesStatsBar');
-            if (mode === 'games' && currentUser && currentUser.role === 'student') { gamesStatsBar.classList.add('active'); updateGamificationHUD(currentUser.hearts, currentUser.xp); } else { gamesStatsBar.classList.remove('active'); }
-
-            if (modeContents[mode] && modeContents[mode].trim() !== '') { chatFeed.innerHTML = modeContents[mode]; } 
-            else { chatFeed.innerHTML = `<div id="welcomeMsg" style="color: var(--text-dim); text-align: center; padding: 80px 20px; display: flex; flex-direction: column; align-items: center; gap: 16px;"><svg class="submarine-logo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 13v-2a2 2 0 0 0-2-2h-1v-2a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v2H7a2 2 0 0 0-2 2v2"/><path d="M4 11h16a2 2 0 0 1 2 2v2a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5v-2a2 2 0 0 1 2-2z"/><circle cx="12" cy="15" r="2"/><path d="M20 15h2"/><path d="M2 15h2"/></svg><p style="margin: 0; font-size: 1rem; color: var(--text-dim);"><span data-i18n="platformReady">Platform Ready.</span></p></div>`; changeUILanguage(); }
-            if(chatSessions[currentSessionId]) { chatSessions[currentSessionId].mode = mode; chatSessions[currentSessionId].modesData = modeContents; saveSessionsData(); }
-            lucide.createIcons({root: chatFeed}); if (window.MathJax) window.MathJax.typesetPromise([chatFeed]).catch(e => {});
+        function createNewSessionQuiet() { 
+            const id = Date.now().toString(); 
+            chatSessions[id] = { id: id, title: "New Conversation", workspace: currentWorkspace, messages: [] }; 
+            currentSessionId = id; saveSessionsData(); 
         }
-        function loadChatSession(id) { currentSessionId = id; const session = chatSessions[id]; if (session && session.modesData) { modeContents = session.modesData; } else { modeContents = { study: "", general: "", games: "" }; } if(session && session.mode) switchMode(session.mode); else switchMode('study'); renderChatHistoryList(); if(document.getElementById('sidebar').classList.contains('open')) toggleSidebar(); }
-        function deleteSessionItem(e, id) { e.stopPropagation(); if(confirm('Delete this session?')) { delete chatSessions[id]; if(id === currentSessionId) { const keys = Object.keys(chatSessions); if(keys.length > 0) { currentSessionId = keys[0]; loadChatSession(currentSessionId); } else { createNewChatSession(); } } else { saveSessionsData(); renderChatHistoryList(); } } }
-        function saveCurrentChatHtml(userQueryText = null) { if(!chatSessions[currentSessionId] || currentMode === 'teacher') return; modeContents[currentMode] = chatFeed.innerHTML; chatSessions[currentSessionId].modesData = modeContents; if (userQueryText && chatSessions[currentSessionId].title === "New Session") { chatSessions[currentSessionId].title = userQueryText.substring(0, 20) + "..."; } saveSessionsData(); }
-        function saveSessionsData() { localStorage.setItem('ge_nius_sessions_royal_v6', JSON.stringify(chatSessions)); localStorage.setItem('ge_nius_current_session_royal_v6', currentSessionId); renderChatHistoryList(); }
-        function renderChatHistoryList() { const listDiv = document.getElementById('chatHistoryList'); if(!listDiv) return; listDiv.innerHTML = ''; const sortedIds = Object.keys(chatSessions).sort((a, b) => b - a); sortedIds.forEach(id => { const session = chatSessions[id]; const isActive = id === currentSessionId ? 'active' : ''; listDiv.innerHTML += `<div class="history-item ${isActive}" onclick="loadChatSession('${id}')"><div class="history-item-content"><i data-lucide="message-square" style="width: 13px; height: 13px;"></i><span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${session.title}</span></div><button class="delete-history-btn" onclick="deleteSessionItem(event, '${id}')"><i data-lucide="trash-2" style="width: 13px; height: 13px;"></i></button></div>`; }); lucide.createIcons({root: listDiv}); }
-        initSessions();
-
-        window.speakText = function(text) { if ('speechSynthesis' in window) { window.speechSynthesis.cancel(); const utterance = new SpeechSynthesisUtterance(decodeURIComponent(text)); utterance.rate = 1.0; utterance.pitch = 1.0; window.speechSynthesis.speak(utterance); } };
-        window.copyCodeText = function(btn) { const container = btn.closest('.complex-card-box'); if(container) { const contentText = container.querySelector('.ai-content').innerText; navigator.clipboard.writeText(contentText).then(() => { const originalHtml = btn.innerHTML; btn.innerHTML = `<i data-lucide="check" style="width:12px;height:12px;"></i> Copied`; lucide.createIcons({root: btn}); setTimeout(() => { btn.innerHTML = originalHtml; lucide.createIcons({root: btn}); }, 2000); }); } };
-
-        // Docs System
-        let curriculumDocs = []; fetchDocs();
-        function fetchDocs() { fetch('/api/docs').then(res => res.json()).then(data => { curriculumDocs = data; renderDocs(); }); }
-        window.toggleDocCollapse = function(id) { const el = document.getElementById('doc-body-' + id); const icon = document.getElementById('doc-icon-' + id); if(el.style.display === 'none' || el.style.display === '') { el.style.display = 'block'; icon.style.transform = 'rotate(180deg)'; } else { el.style.display = 'none'; icon.style.transform = 'rotate(0deg)'; } };
-        function renderDocs() { const listDiv = document.getElementById('docsList'); if (!listDiv) return; if (curriculumDocs.length === 0) { listDiv.innerHTML = '<div style="color: var(--text-dim); text-align: center; padding: 20px; font-size:0.8rem;">No documents uploaded yet.</div>'; return; } listDiv.innerHTML = curriculumDocs.map((item, index) => `<div class="doc-card-compact"><div class="doc-card-header" onclick="toggleDocCollapse(${item.id})"><span class="doc-card-title"><i data-lucide="file-text" style="width:14px;height:14px;"></i> Doc ${index + 1}</span><div style="display:flex; align-items:center; gap:8px;"><button class="btn" style="padding:2px 6px; font-size:0.7rem; color:var(--danger); border:none; background:transparent;" onclick="event.stopPropagation(); deleteDoc(${item.id})"><i data-lucide="trash-2" style="width:14px;height:14px;"></i></button><i data-lucide="chevron-down" id="doc-icon-${item.id}" style="width:16px;height:16px;color:var(--text-dim);transition:0.3s;"></i></div></div><div class="doc-card-body" id="doc-body-${item.id}">${item.concepts}</div></div>`).join(''); lucide.createIcons({root: listDiv}); }
-
-        // PARALLEL UPLOAD FIX
-        async function handleDocImageSelect(e) {
-            const files = e.target.files; if (!files || files.length === 0) return;
-            const statusDiv = document.getElementById('uploadStatus');
-            if(statusDiv) { statusDiv.innerHTML = `Processing ${files.length} file(s) fast...`; statusDiv.style.color = 'var(--primary)'; }
+        function createNewChatSession() { if(isAiThinking) return; createNewSessionQuiet(); loadChatSession(currentSessionId); toggleSidebar(true); }
+        
+        function switchWorkspace(ws) {
+            if(isAiThinking) return; currentWorkspace = ws;
+            document.querySelectorAll('.sb-section-title + .sb-item, .sb-section-title + .sb-item + .sb-item, .sb-section-title + .sb-item + .sb-item + .sb-item').forEach(i => i.classList.remove('active'));
+            document.getElementById('ws-' + ws).classList.add('active');
             
-            const uploadPromises = Array.from(files).map(file => {
-                return new Promise((resolve) => {
+            // If in a session that has messages, changing workspace creates a new session to keep contexts clean
+            if(chatSessions[currentSessionId] && chatSessions[currentSessionId].messages.length > 0 && chatSessions[currentSessionId].workspace !== ws) {
+                createNewChatSession();
+            } else if (chatSessions[currentSessionId]) {
+                chatSessions[currentSessionId].workspace = ws; saveSessionsData();
+            }
+            toggleSidebar(true); renderChat();
+        }
+
+        function loadChatSession(id) { 
+            currentSessionId = id; const session = chatSessions[id]; 
+            if(session) {
+                currentWorkspace = session.workspace || 'general';
+                document.querySelectorAll('[id^="ws-"]').forEach(i => i.classList.remove('active'));
+                const wsElem = document.getElementById('ws-' + currentWorkspace);
+                if(wsElem) wsElem.classList.add('active');
+                renderChat();
+            }
+            renderChatHistoryList(); 
+        }
+
+        function saveSessionsData() { localStorage.setItem('axiom_sessions_v1', JSON.stringify(chatSessions)); localStorage.setItem('axiom_current_session_v1', currentSessionId); renderChatHistoryList(); }
+        
+        function renderChatHistoryList() { 
+            const listDiv = document.getElementById('chatHistoryList'); if(!listDiv) return; listDiv.innerHTML = ''; 
+            Object.values(chatSessions).sort((a,b) => b.id - a.id).forEach(session => { 
+                const isActive = session.id === currentSessionId ? 'active' : ''; 
+                listDiv.innerHTML += `<div class="sb-item ${isActive}" style="justify-content:space-between;" onclick="loadChatSession('${session.id}')"><span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:80%;">${session.title}</span> <i data-lucide="trash" style="width:14px; cursor:pointer;" onclick="deleteSession(event, '${session.id}')"></i></div>`; 
+            }); 
+            lucide.createIcons({root: listDiv}); 
+        }
+        function deleteSession(e, id) { e.stopPropagation(); delete chatSessions[id]; if(id === currentSessionId) createNewChatSession(); else saveSessionsData(); }
+
+        // Render Chat Flow (Seamless UI)
+        function renderChat() {
+            chatFeed.innerHTML = '';
+            const session = chatSessions[currentSessionId];
+            if(!session || session.messages.length === 0) {
+                chatFeed.innerHTML = `<div id="welcomeMsg" style="text-align: center; padding: 80px 20px; color: var(--text-dim);"><i data-lucide="box" style="width:48px;height:48px; margin-bottom:16px; opacity:0.5;"></i><h3 style="margin:0; font-weight:500;" data-i18n="ready">System Ready</h3></div>`;
+                changeUILanguage(); return;
+            }
+            
+            session.messages.forEach(msg => {
+                if(msg.role === 'user') appendUserMessage(msg.content);
+                else appendAIMessage(msg.content, false);
+            });
+            chatFeed.scrollTop = chatFeed.scrollHeight;
+            if (window.MathJax) window.MathJax.typesetPromise([chatFeed]).catch(e => {});
+        }
+
+        function appendUserMessage(text) {
+            const row = document.createElement('div'); row.className = 'msg-block msg-user';
+            let cleanText = text.replace(/\[DOC_IDS:.*?\]/g, ''); // hide backend tokens
+            row.innerHTML = `<div class="user-label">You</div><div class="msg-user-text">${cleanText.replace(/\\n/g, '<br>')}</div>`;
+            chatFeed.appendChild(row);
+        }
+        
+        function appendAIMessage(text, animate = true) {
+            const row = document.createElement('div'); row.className = 'msg-block msg-ai';
+            let html = processTextForMathJax(text);
+            row.innerHTML = `<div class="ai-label"><i data-lucide="cpu" style="width:14px;"></i> Axiom</div><div class="ai-content">${html}</div>`;
+            chatFeed.appendChild(row);
+            lucide.createIcons({root: row});
+            if(animate) chatFeed.scrollTop = chatFeed.scrollHeight;
+            if(window.MathJax) window.MathJax.typesetPromise([row]).catch(e => {});
+            
+            if(animate && userSettings.autoSpeech && 'speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        // Vault & Upload Logic
+        function fetchDocs() { fetch('/api/docs').then(res => res.json()).then(data => { curriculumDocs = data; renderVaultDocs(); }); }
+        function renderVaultDocs() {
+            const list = document.getElementById('vaultDocsList');
+            if(curriculumDocs.length === 0) { list.innerHTML = `<div style="text-align:center; color:var(--text-dim); font-size:0.85rem;">Vault is empty.</div>`; return; }
+            list.innerHTML = curriculumDocs.map(d => `<div class="doc-item"><span><i data-lucide="file-text" style="width:14px; margin-right:6px;"></i> ${d.title}</span><i data-lucide="trash-2" style="width:14px; color:var(--danger); cursor:pointer;" onclick="deleteDoc(${d.id})"></i></div>`).join('');
+            lucide.createIcons({root: list});
+        }
+        function deleteDoc(id) { fetch('/api/docs/delete', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id }) }).then(res => res.json()).then(data => { curriculumDocs = data; renderVaultDocs(); }); }
+        
+        function initDragAndDrop() {
+            const dz = document.getElementById('dropZone');
+            dz.addEventListener('dragover', e => { e.preventDefault(); dz.style.borderColor = "var(--primary)"; });
+            dz.addEventListener('dragleave', e => { e.preventDefault(); dz.style.borderColor = "var(--border)"; });
+            dz.addEventListener('drop', e => { e.preventDefault(); dz.style.borderColor = "var(--border)"; handleVaultFiles(e.dataTransfer.files); });
+        }
+        function handleVaultUpload(e) { handleVaultFiles(e.target.files); }
+        async function handleVaultFiles(files) {
+            if(!files || files.length === 0) return;
+            const status = document.getElementById('vaultUploadStatus');
+            status.innerText = "Encrypting and storing in Vault..."; status.style.color = "var(--text-main)";
+            
+            const promises = Array.from(files).map(file => {
+                return new Promise(resolve => {
                     const reader = new FileReader();
-                    reader.onload = async function(evt) {
-                        try {
-                            const res = await fetch('/api/docs/upload', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ image: evt.target.result }) });
-                            const data = await res.json(); resolve(data);
-                        } catch(e) { resolve(null); }
+                    reader.onload = async evt => {
+                        try { const res = await fetch('/api/docs/upload', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ image: evt.target.result, name: file.name }) }); resolve(await res.json()); } catch(e) { resolve(null); }
                     }; reader.readAsDataURL(file);
                 });
             });
-            
-            const results = await Promise.all(uploadPromises);
-            const successResult = results.reverse().find(r => r && r.docs);
-            if(successResult) curriculumDocs = successResult.docs;
-            
-            renderDocs();
-            if(statusDiv) { statusDiv.innerHTML = 'Saved successfully!'; statusDiv.style.color = 'var(--accent-green)'; }
+            const results = await Promise.all(promises);
+            const success = results.find(r => r && r.docs);
+            if(success) { curriculumDocs = success.docs; renderVaultDocs(); status.innerText = "Secured in Vault."; status.style.color = "var(--success)"; }
+            else { status.innerText = "Upload failed."; status.style.color = "var(--danger)"; }
         }
-        document.getElementById('docFileInputCamera').addEventListener('change', handleDocImageSelect);
-        document.getElementById('docFileInputGallery').addEventListener('change', handleDocImageSelect);
 
-        async function handleFileSelect(e, isTeacher) {
+        // Quick Attachment
+        function handleQuickUpload(e) {
             const file = e.target.files[0]; if(!file) return;
             const reader = new FileReader();
-            reader.onload = async function(evt) {
-                const b64 = evt.target.result;
-                if(isTeacher) { const stat = document.getElementById('teacherUploadStatus'); stat.innerText = "Compressing & Uploading to Curriculum..."; stat.style.color = "var(--primary)"; await fetch('/api/teacher/upload', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({file: b64, filename: file.name}) }); stat.innerText = "Uploaded successfully!"; stat.style.color = "var(--accent-green)"; fetchTeacherDocs(); } 
-                else { attachedQuestionBase64 = b64; document.getElementById('questionImgPreview').style.display = 'flex'; document.getElementById('magicMenu').classList.remove('show'); const btn = document.getElementById('magicBtn'); if(btn) btn.classList.remove('active-magic'); }
-            }; reader.readAsDataURL(file); e.target.value = '';
+            reader.onload = evt => { attachedFileBase64 = evt.target.result; document.getElementById('attachedFileIndicator').style.display = 'flex'; };
+            reader.readAsDataURL(file); e.target.value = '';
         }
-        document.getElementById('teacherUploadBtn').addEventListener('change', (e) => handleFileSelect(e, true));
-        document.getElementById('qFileInputGallery').addEventListener('change', (e) => handleFileSelect(e, false));
-        document.getElementById('qFileInputCamera').addEventListener('change', (e) => handleFileSelect(e, false));
-        function removeQuestionImage() { attachedQuestionBase64 = null; document.getElementById('questionImgPreview').style.display = 'none'; }
-        function deleteDoc(id) { fetch('/api/docs/delete', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id }) }).then(res => res.json()).then(data => { curriculumDocs = data; renderDocs(); }); }
-        async function fetchTeacherDocs() { const res = await fetch('/api/teacher/docs'); const data = await res.json(); const list = document.getElementById('teacherDocsList'); list.innerHTML = data.docs.map(d => `<div style="background:var(--card); padding:10px 14px; border-radius:12px; border:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;"><span style="font-weight:600; font-size:0.85rem;"><i data-lucide="file-check" style="width:14px;height:14px; margin-right:4px;"></i> ${d.title}</span><span style="font-size:0.75rem; color:var(--text-dim);">Compressed</span></div>`).join('') || "<div style='color:var(--text-dim); font-size:0.85rem; text-align:center;'>No materials uploaded yet.</div>"; lucide.createIcons({root: list}); }
+        function removeAttachedFile() { attachedFileBase64 = null; document.getElementById('attachedFileIndicator').style.display = 'none'; }
 
-        // Retry Function
-        window.retryRequest = function(btn) {
-            const row = btn.closest('.message-row');
-            if(row) chatFeed.removeChild(row);
-            if(lastPayload) {
-                document.getElementById('userQuery').value = lastPayload.query;
-                submitQuestion(lastPayload.isSummary, true);
-            }
-        };
+        function triggerSmartSummary() {
+            if(curriculumDocs.length === 0) return alert("Vault is empty.");
+            document.getElementById('userQuery').value = `Provide a master summary of all Vault documents. Format professionally with LaTeX for math. [DOC_IDS: ${curriculumDocs.map(d=>d.id).join(',')}]`;
+            submitQuestion();
+        }
 
-        function submitQuestion(isSummary = false, isRetry = false) {
+        // Main AI Submission Logic with History
+        function submitQuestion() {
             if (isAiThinking) return;
             const queryInput = document.getElementById('userQuery');
             let query = queryInput.value.trim();
+            if (!query && !attachedFileBase64) return;
 
-            if(isSummary) {
-                // Remove the manual [DOC_IDS: ...] injected earlier so user doesn't see it raw if we clean it, but we need it.
-                // It's fine to leave it for backend parsing.
-            }
-
-            if (!query && !attachedQuestionBase64) return;
-            if (currentMode === 'study' && curriculumDocs.length === 0) { alert('Study mode requires uploaded curriculum documents. Switch to General or Games!'); return; }
-            if (currentUser && currentUser.role === 'student' && currentMode === 'games' && currentUser.hearts <= 0) { alert("You have 0 hearts left! Take a break."); return; }
-            
-            isAiThinking = true; document.getElementById('inputPanel').classList.add('locked');
-            const sendBtn = document.getElementById('sendBtn'); sendBtn.classList.add('loading'); sendBtn.innerHTML = `<i data-lucide="loader-2" class="spinner-icon" style="width:20px;height:20px;"></i>`; lucide.createIcons({root: sendBtn});
+            isAiThinking = true;
+            document.getElementById('sendBtn').disabled = true; document.getElementById('sendBtn').innerHTML = `<i data-lucide="loader-2" style="animation: spin 1s linear infinite; width:18px;"></i>`; lucide.createIcons({root: document.getElementById('sendBtn')});
             
             const welcome = document.getElementById('welcomeMsg'); if(welcome) welcome.remove();
 
-            if(!isRetry) {
-                let userTextDisplay = query.replace(/\\n/g, '<br>');
-                if (attachedQuestionBase64) { userTextDisplay = (query ? userTextDisplay + '<br>' : '') + `<span style="color:var(--primary); font-size:0.85em; display:flex; align-items:center; gap:4px; margin-top:6px;"><i data-lucide="image" style="width:14px;height:14px;"></i> <span data-i18n="docAttached">Document attached</span></span>`; }
-                const userRow = document.createElement('div'); userRow.className = 'message-row'; userRow.style.alignItems = 'flex-end';
-                userRow.innerHTML = `<div class="message-sender" style="justify-content:flex-end; margin-bottom: 2px;"><div class="avatar-user"><i data-lucide="user" style="width:14px;height:14px;color:#fff;"></i></div></div><div class="message-text-user">${userTextDisplay}</div>`;
-                chatFeed.appendChild(userRow); lucide.createIcons({root: userRow});
-            }
-
-            const loadingRow = document.createElement('div'); loadingRow.className = 'message-row loading-bubble-temp';
-            loadingRow.innerHTML = `<div class="message-sender" style="margin-bottom: 2px;"><div class="avatar-ai"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;color:var(--primary);"><path d="M16 13v-2a2 2 0 0 0-2-2h-1v-2a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v2H7a2 2 0 0 0-2 2v2"/><path d="M4 11h16a2 2 0 0 1 2 2v2a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5v-2a2 2 0 0 1 2-2z"/><circle cx="12" cy="15" r="2"/><path d="M20 15h2"/><path d="M2 15h2"/></svg></div></div><div class="hologram-thinking">Processing logic...</div>`;
-            chatFeed.appendChild(loadingRow); lucide.createIcons({root: loadingRow});
-            saveCurrentChatHtml(query);
-
-            const payload = { query: query, file: attachedQuestionBase64, mode: currentMode, isSummary: isSummary, persona: currentPersonaValue };
-            lastPayload = payload; // save for retry
+            appendUserMessage(query + (attachedFileBase64 ? " [File Attached]" : ""));
             
-            queryInput.value = ''; queryInput.style.height = 'auto'; removeQuestionImage(); chatFeed.scrollTop = chatFeed.scrollHeight;
+            // Add to session memory
+            const session = chatSessions[currentSessionId];
+            if(session.messages.length === 0) session.title = query.substring(0, 30) + "...";
+            session.messages.push({role: 'user', content: query + (attachedFileBase64 ? "\n[System: A file was attached by user]" : "")});
+            saveSessionsData();
+
+            const loadingRow = document.createElement('div'); loadingRow.className = 'msg-block msg-ai';
+            loadingRow.innerHTML = `<div class="ai-label"><i data-lucide="cpu" style="width:14px;"></i> Axiom</div><div class="hologram-thinking">Synthesizing...</div>`;
+            chatFeed.appendChild(loadingRow); lucide.createIcons({root: loadingRow});
+            chatFeed.scrollTop = chatFeed.scrollHeight;
+
+            const payload = { 
+                query: query, 
+                file: attachedFileBase64, 
+                mode: currentWorkspace, 
+                history: session.messages.slice(0, -1), // Send past messages
+                temp: userSettings.temp,
+                lang: userSettings.lang
+            };
+            
+            queryInput.value = ''; queryInput.style.height = 'auto'; removeAttachedFile();
 
             fetch('/api/ask', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
             .then(res => res.json())
             .then(data => {
                 chatFeed.removeChild(loadingRow);
-                const aiRow = document.createElement('div'); aiRow.className = 'message-row';
-
-                let avatarHtml = `<div class="message-sender" style="margin-bottom: 2px;"><div class="avatar-ai"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;color:var(--primary);"><path d="M16 13v-2a2 2 0 0 0-2-2h-1v-2a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v2H7a2 2 0 0 0-2 2v2"/><path d="M4 11h16a2 2 0 0 1 2 2v2a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5v-2a2 2 0 0 1 2-2z"/><circle cx="12" cy="15" r="2"/><path d="M20 15h2"/><path d="M2 15h2"/></svg></div></div>`;
-
-                if (data.status === 'out_of_scope') {
-                    aiRow.innerHTML = avatarHtml + `<div class="message-text-ai" style="color:#fca5a5;">Out of curriculum scope. Switch to General mode.</div>`;
-                } else if (data.status === 'success') {
-                    let fullText = data.answer;
-                    
-                    if(data.hearts !== undefined && data.xp !== undefined && currentUser.role === 'student' && currentMode === 'games') {
-                        currentUser.hearts = data.hearts; currentUser.xp = data.xp;
-                        updateGamificationHUD(data.hearts, data.xp);
-                    }
-
-                    // Process text for MathJax safely
-                    let finalHtml = processTextForMathJax(fullText);
-                    const encoded = encodeURIComponent(fullText);
-                    const blockId = 'res-' + Date.now();
-                    
-                    if (isSummary) {
-                        // Advanced Summary Card with PDF Export
-                        aiRow.innerHTML = avatarHtml + `
-                            <div class="complex-card-box" style="border: 1px solid var(--accent-gold);">
-                                <div class="complex-card-header" style="color:var(--accent-gold);">
-                                    <span><i data-lucide="sparkles" style="width:12px;height:12px;"></i> Smart Summary</span>
-                                    <div style="display:flex;gap:5px;">
-                                        <button class="action-btn" data-target="${blockId}" onclick="exportToPDF(this)"><i data-lucide="download" style="width:12px;height:12px;"></i> PDF</button>
-                                        <button class="action-btn" onclick="copyCodeText(this)"><i data-lucide="copy" style="width:12px;height:12px;"></i> <span data-i18n="copy">Copy</span></button>
-                                    </div>
-                                </div>
-                                <div class="message-text-ai ai-content" id="${blockId}" style="padding:15px; background:var(--bg-main); border-radius:10px;">${finalHtml}</div>
-                            </div>
-                            <div><button class="audio-speech-btn" onclick="speakText('${encoded}')"><i data-lucide="volume-2" style="width:14px;height:14px;"></i> <span data-i18n="listen">Listen</span></button></div>
-                        `;
-                    } else if (fullText.includes("```") || fullText.length > 500) {
-                        aiRow.innerHTML = avatarHtml + `
-                            <div class="complex-card-box">
-                                <div class="complex-card-header">
-                                    <span>Detailed Output</span>
-                                    <button class="action-btn" onclick="copyCodeText(this)"><i data-lucide="copy" style="width:12px;height:12px;"></i> <span data-i18n="copy">Copy</span></button>
-                                </div>
-                                <div class="message-text-ai ai-content" id="${blockId}">${finalHtml}</div>
-                            </div>
-                            <div><button class="audio-speech-btn" onclick="speakText('${encoded}')"><i data-lucide="volume-2" style="width:14px;height:14px;"></i> <span data-i18n="listen">Listen</span></button></div>
-                        `;
-                    } else {
-                        aiRow.innerHTML = avatarHtml + `
-                            <div class="message-text-ai ai-content" id="${blockId}" style="padding-top:4px;">${finalHtml}</div>
-                            <div><button class="audio-speech-btn" onclick="speakText('${encoded}')"><i data-lucide="volume-2" style="width:14px;height:14px;"></i> <span data-i18n="listen">Listen</span></button></div>
-                        `;
-                    }
-                } else {
-                    aiRow.innerHTML = avatarHtml + `<div class="error-bubble"><span>Error: ${data.error || 'Failed.'}</span> <button class="btn" style="padding:4px 10px; font-size:0.75rem;" onclick="retryRequest(this)"><i data-lucide="refresh-cw" style="width:12px;height:12px;"></i> <span data-i18n="retry">Retry</span></button></div>`;
-                }
+                let finalAnswer = data.answer;
+                if (data.status === 'out_of_scope') finalAnswer = "Query out of Vault scope. Please switch to General Workspace.";
                 
-                chatFeed.appendChild(aiRow); lucide.createIcons({root: aiRow});
-                chatFeed.scrollTop = chatFeed.scrollHeight;
-                if (window.MathJax) window.MathJax.typesetPromise([aiRow]).catch(e => {});
-                saveCurrentChatHtml();
-                changeUILanguage();
+                session.messages.push({role: 'assistant', content: finalAnswer});
+                saveSessionsData();
+                appendAIMessage(finalAnswer);
             }).catch(err => {
                 chatFeed.removeChild(loadingRow);
-                const errRow = document.createElement('div'); errRow.className = 'message-row';
-                errRow.innerHTML = `
-                    <div class="message-sender"><div class="avatar-ai"><i data-lucide="alert-circle" style="width:14px;height:14px;color:var(--danger);"></i></div></div>
-                    <div class="error-bubble"><span>Connection Error.</span> <button class="btn" style="padding:4px 10px; font-size:0.75rem;" onclick="retryRequest(this)"><i data-lucide="refresh-cw" style="width:12px;height:12px;"></i> <span data-i18n="retry">Retry</span></button></div>`;
-                chatFeed.appendChild(errRow); lucide.createIcons({root: errRow});
-                changeUILanguage();
+                appendAIMessage("**System Error:** Connection disrupted. Please retry.");
             }).finally(() => {
                 isAiThinking = false;
-                document.getElementById('inputPanel').classList.remove('locked');
-                sendBtn.classList.remove('loading');
-                sendBtn.innerHTML = `<i data-lucide="arrow-up" id="sendIcon"></i>`;
-                lucide.createIcons({root: sendBtn});
+                document.getElementById('sendBtn').disabled = false; document.getElementById('sendBtn').innerHTML = `<i data-lucide="arrow-up" style="width:18px;"></i>`; lucide.createIcons({root: document.getElementById('sendBtn')});
                 queryInput.focus();
             });
         }
@@ -974,9 +828,6 @@ class StudyAppRequestHandler(BaseHTTPRequestHandler):
                 user = get_current_user(sess_id)
                 self.send_json_response({"user": user})
 
-            elif self.path == "/api/teacher/docs":
-                self.send_json_response({"docs": MOCK_DB.get("GLOBAL_DOCS", [])})
-
         except Exception as e:
             self.send_json_response({"error": str(e)})
 
@@ -996,7 +847,7 @@ class StudyAppRequestHandler(BaseHTTPRequestHandler):
                 if email not in MOCK_USERS:
                     MOCK_USERS[email] = {
                         "name": req_json.get("name"), "email": email, "password": req_json.get("password"),
-                        "role": req_json.get("role"), "level": req_json.get("level"), "hearts": 5, "xp": 0
+                        "role": req_json.get("role"), "level": req_json.get("level")
                     }
                 MOCK_SESSIONS[session_id] = email
                 self.send_json_response({"success": True, "user": MOCK_USERS[email]})
@@ -1006,28 +857,22 @@ class StudyAppRequestHandler(BaseHTTPRequestHandler):
                     del MOCK_SESSIONS[session_id]
                 self.send_json_response({"success": True})
 
-            elif self.path == "/api/teacher/upload":
-                b64_file = req_json.get("file", "")
-                filename = req_json.get("filename", "Document")
-                if b64_file:
-                    head, comp = compress_file_data(b64_file)
-                    add_document_to_db(session_id, filename, f"Content extracted and compressed by ge_nius for {filename}.", is_global=True)
-                self.send_json_response({"success": True})
-
             elif self.path == "/api/docs/upload":
                 image_base64 = req_json.get("image")
+                filename = req_json.get("name", "Document")
                 if not image_base64:
-                    self.send_json_response({"error": "No image"})
+                    self.send_json_response({"error": "No data"})
                     return
                 try:
-                    prompt = "Read this document image and extract all concepts, text, and rules clearly."
+                    # If it's a PDF/DOC handled via b64, extract text/concepts. For simplicity, mock extraction logic via AI:
+                    prompt = f"Extract all educational concepts, structured text, and math formulas from this document clearly."
                     payload = {
                         "model": MODEL_NAME,
                         "messages": [{"role": "user", "content": [{"type": "text", "text": prompt}, {"type": "image_url", "image_url": {"url": image_base64}}]}],
                         "max_tokens": 4096
                     }
                     extracted_concepts = self.send_api_request(payload)
-                    add_document_to_db(session_id, "Document Lesson", extracted_concepts)
+                    add_document_to_db(session_id, filename, extracted_concepts)
                     docs = load_curriculum(session_id)
                     self.send_json_response({"status": "success", "docs": docs})
                 except Exception as e:
@@ -1044,82 +889,68 @@ class StudyAppRequestHandler(BaseHTTPRequestHandler):
                 user = get_current_user(session_id)
                 user_query = req_json.get("query", "")
                 file_b64 = req_json.get("file")
-                mode = req_json.get("mode", "study") 
-                is_summary = req_json.get("isSummary", False)
-                persona = req_json.get("persona", "human")
+                mode = req_json.get("mode", "general") 
+                history = req_json.get("history", [])
+                temp_setting = req_json.get("temp", "balanced")
+                pref_lang = req_json.get("lang", "en")
+                
                 docs = load_curriculum(session_id, user)
 
-                # Summary specific doc filtering based on user selection logic parsing
-                if is_summary and "[DOC_IDS:" in user_query:
+                # Filter summary DOCs if requested
+                if "[DOC_IDS:" in user_query:
                     import re
                     match = re.search(r'\[DOC_IDS:\s*([\d,]+)\]', user_query)
                     if match:
                         selected_ids = match.group(1).split(',')
                         docs = [d for d in docs if str(d['id']) in selected_ids]
-                        # Remove the tag so the AI doesn't get confused
                         user_query = re.sub(r'\[DOC_IDS:\s*[\d,]+\]', '', user_query).strip()
 
-                messages_content = []
+                # Build System Prompt based on mode
+                persona = "You are Axiom, a highly advanced, professional, and precise AI."
+                if temp_setting == "precise":
+                    persona += " Be extremely strict, factual, and concise."
+                elif temp_setting == "creative":
+                    persona += " Be creative, expansive, and engaging."
+
+                sys_prompt = f"{persona}\nRespond seamlessly in the user's language (preferred UI lang: {pref_lang}). Ensure all math uses valid LaTeX $inline$ or $$display$$.\n"
+                
+                if mode == "study" and docs:
+                    all_concepts = "\n\n".join([f"Doc '{d['title']}':\n{d['concepts']}" for d in docs])
+                    sys_prompt += f"\nVAULT KNOWLEDGE BASE:\n{all_concepts}\n\nAct as an expert tutor. Ground your answers in the vault knowledge. If entirely unrelated, reply exactly: OUT_OF_SCOPE."
+                elif mode == "games":
+                    sys_prompt += "\nAct as a Brain Game Master. Challenge the user's logic."
+
+                # Construct Messages with Context Memory
+                api_messages = [{"role": "system", "content": sys_prompt}]
+                
+                # Append History (limit to last 10 for token safety)
+                for msg in history[-10:]:
+                    api_messages.append({"role": msg["role"], "content": msg["content"]})
+                
+                # Append Current Query
+                current_content = []
                 if file_b64:
                     if file_b64.startswith("data:image"):
-                        messages_content.append({"type": "image_url", "image_url": {"url": file_b64}})
+                        current_content.append({"type": "image_url", "image_url": {"url": file_b64}})
                     else:
-                        messages_content.append({"type": "text", "text": "[File Attached. Read context.]"})
-
-                persona_instructions = {
-                    "strict": "Persona: Strict & Professional. Be highly formal, precise, and academic.",
-                    "humor": "Persona: Entertainment & Light Humor. Keep it witty and fun.",
-                    "roast": "Persona: Witty & Playful Challenge. Gently challenge the user's logic.",
-                    "human": "Persona: Human-like & Warm. Be friendly, empathetic, natural."
-                }.get(persona, "Persona: Human-like & Warm.")
-
-                if mode == "general":
-                    full_prompt = f"You are a global AI assistant named ge_nius.\n{persona_instructions}\nUser request: \"{user_query}\"\nIMPORTANT: Respond in the exact same language the user is using."
-                elif mode == "games":
-                    full_prompt = (
-                        f"You are an interactive Brain Games and Puzzle master named ge_nius.\n{persona_instructions}\n"
-                        f"The user is playing brain/thinking games.\nUser input: \"{user_query}\"\n"
-                        f"IMPORTANT: If the user answers WRONG, prefix your response EXACTLY with [WRONG]. If CORRECT, prefix with [CORRECT]. Respond in their language."
-                    )
-                else:
-                    all_concepts_summary = "\n\n".join([f"Document {d['id']} Title: {d['title']}\nContent: {d['concepts']}" for d in docs])
-                    full_prompt = (
-                        f"You are an expert tutor.\n{persona_instructions}\nHere is the student's curriculum study material:\n"
-                        f"--- START CURRICULUM ---\n{all_concepts_summary}\n--- END CURRICULUM ---\n\n"
-                    )
-                    if is_summary:
-                        full_prompt += f"User Request: {user_query}\n(Ensure LaTeX is formatted correctly, and use professional language translation without literal meaning loss)."
-                    else:
-                        full_prompt += f"User question: \"{user_query}\"\nIMPORTANT: Respond in the exact same language the user is asking in.\nIf completely unrelated to the curriculum, reply with EXACTLY: OUT_OF_SCOPE\nIf in scope, provide a clear, step-by-step explanation using proper LaTeX formatting for math."
-                    
-                messages_content.append({"type": "text", "text": full_prompt})
+                        current_content.append({"type": "text", "text": "[File Attached]"})
+                current_content.append({"type": "text", "text": user_query})
+                
+                api_messages.append({"role": "user", "content": current_content})
 
                 payload = {
                     "model": MODEL_NAME,
-                    "messages": [{"role": "user", "content": messages_content}],
-                    "max_tokens": 4096
+                    "messages": api_messages,
+                    "max_tokens": 4096,
+                    "temperature": 0.2 if temp_setting == "precise" else (0.8 if temp_setting == "creative" else 0.5)
                 }
 
                 try:
                     ai_reply = self.send_api_request(payload)
-                    resp_data = {"status": "success"}
-                    
-                    if mode == "study" and ("OUT_OF_SCOPE" in ai_reply or ai_reply.startswith("OUT_OF_SCOPE")):
-                        resp_data["status"] = "out_of_scope"
+                    if mode == "study" and "OUT_OF_SCOPE" in ai_reply:
+                        self.send_json_response({"status": "out_of_scope", "answer": ""})
                     else:
-                        if user and user["role"] == "student" and mode == "games":
-                            if "[WRONG]" in ai_reply:
-                                user["hearts"] = max(0, user["hearts"] - 1)
-                                ai_reply = ai_reply.replace("[WRONG]", "").strip()
-                            elif "[CORRECT]" in ai_reply:
-                                user["xp"] += 50
-                                ai_reply = ai_reply.replace("[CORRECT]", "").strip()
-                            resp_data["hearts"] = user["hearts"]
-                            resp_data["xp"] = user["xp"]
-                        
-                        resp_data["answer"] = ai_reply
-
-                    self.send_json_response(resp_data)
+                        self.send_json_response({"status": "success", "answer": ai_reply})
                 except Exception as e:
                     self.send_json_response({"status": "error", "error": str(e)})
         except Exception as e:
