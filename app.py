@@ -67,10 +67,8 @@ def load_curriculum(session_id, user=None):
         except Exception as e:
             pass
         finally:
-            try:
-                conn.close()
-            except:
-                pass
+            try: conn.close()
+            except: pass
     else:
         docs.extend(MOCK_DB.get(session_id, []))
     return docs
@@ -97,10 +95,8 @@ def add_document_to_db(session_id, title, content, is_global=False):
         except Exception as e:
             pass
         finally:
-            try:
-                conn.close()
-            except:
-                pass
+            try: conn.close()
+            except: pass
     if session_id not in MOCK_DB:
         MOCK_DB[session_id] = []
     MOCK_DB[session_id].append({"id": MOCK_DB_DOC_ID, "title": title, "concepts": content})
@@ -123,10 +119,8 @@ def delete_document_from_db(session_id, doc_id):
         except Exception as e:
             pass
         finally:
-            try:
-                conn.close()
-            except:
-                pass
+            try: conn.close()
+            except: pass
     if session_id in MOCK_DB:
         MOCK_DB[session_id] = [d for d in MOCK_DB[session_id] if str(d["id"]) != str(doc_id)]
 
@@ -256,7 +250,7 @@ HTML_CODE = """<!DOCTYPE html>
         .games-stats-bar.active { display: flex; }
         .hud-hearts { color: var(--danger); letter-spacing: 2px;}
 
-        /* --- REDESIGNED DRAWER SIDEBAR --- */
+        /* --- REDESIGNED DRAWER SIDEBAR (Covers perfectly without gaps) --- */
         .sidebar-overlay { 
             position: fixed; top: 0; left: 0; right: 0; bottom: 0; 
             background: rgba(0,0,0,0.75); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); 
@@ -276,6 +270,7 @@ HTML_CODE = """<!DOCTYPE html>
         .sidebar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 12px;}
         .sidebar h3 { margin: 0; font-size: 1.05rem; color: var(--text-main); font-weight: 800; display: flex; align-items: center; gap: 8px;}
         
+        /* Modern Profile Card */
         .user-profile-card {
             background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 12px 14px;
             display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;
@@ -291,6 +286,7 @@ HTML_CODE = """<!DOCTYPE html>
         }
         .btn-logout-mini:hover { background: var(--danger); color: white; }
 
+        /* Unified Persona Grid */
         .sidebar-section-title { font-size: 0.72rem; color: var(--text-dim); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; margin: 14px 0 8px 0; display: flex; align-items: center; gap: 6px;}
         .persona-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
         .persona-chip {
@@ -592,4 +588,816 @@ HTML_CODE = """<!DOCTYPE html>
                         <i data-lucide="plus"></i>
                     </button>
 
-                    <textarea id="userQuery" placeholder
+                    <textarea id="userQuery" placeholder="Ask anything..." rows="1" oninput="autoResizeTextarea(this)"></textarea>
+                    
+                    <button class="tool-btn" id="voiceRecordBtn" onclick="toggleVoiceRecording()" title="Voice Input">
+                        <i data-lucide="mic"></i>
+                    </button>
+
+                    <button class="send-btn-royal" id="sendBtn" onclick="submitQuestion()" title="Send">
+                        <i data-lucide="arrow-up" id="sendIcon"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Curriculum Docs Tab -->
+        <div class="tab-section" id="docsTab" style="gap:15px; overflow-y:auto; padding:0 4px;">
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+                <h3 style="margin:0; font-size: 1.15rem; color: var(--text-main); font-weight: 700;">Curriculum Archive</h3>
+                <button class="btn" style="padding: 6px 10px; font-size: 0.75rem;" onclick="switchSection('askTab')">
+                    <i data-lucide="arrow-left" style="width:14px;height:14px;"></i> Back
+                </button>
+            </div>
+            <div class="card" id="studentUploadArea" style="padding: 12px;">
+                <span style="font-weight: 700; font-size: 0.85rem; color: var(--primary); display: flex; align-items: center; gap: 8px; margin-bottom:8px;"><i data-lucide="file-up" style="width:14px;height:14px;"></i> Upload Materials</span>
+                <div style="display: flex; gap: 6px;">
+                    <label for="docFileInputCamera" class="btn btn-purple" style="flex: 1; padding:8px; font-size:0.8rem; text-align: center; margin:0;"><i data-lucide="scan" style="width:14px;height:14px;"></i> Scan</label>
+                    <input type="file" id="docFileInputCamera" accept="image/*" capture="environment">
+                    
+                    <label for="docFileInputGallery" class="btn btn-purple" style="flex: 1; padding:8px; font-size:0.8rem; text-align: center; margin:0;"><i data-lucide="folder" style="width:14px;height:14px;"></i> Files</label>
+                    <input type="file" id="docFileInputGallery" accept=".pdf, .doc, .docx, image/*" multiple>
+                </div>
+                <div id="uploadStatus" style="font-size: 0.75rem; font-weight: bold; text-align:center; margin-top:8px;"></div>
+            </div>
+            <div id="docsList" style="display: flex; flex-direction: column; gap: 6px;"></div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => { lucide.createIcons(); checkAuth(); });
+
+        let isAiThinking = false;
+        let currentUser = null;
+        let attachedQuestionBase64 = null;
+        let currentMode = 'general';
+        let currentPersonaValue = 'human';
+        let modeContents = { study: "", general: "", games: "" };
+        const chatFeed = document.getElementById('chatFeed');
+
+        // --- AUTHENTICATION ---
+        let selectedRole = 'student';
+        function selectRole(role) {
+            selectedRole = role;
+            document.querySelectorAll('.role-card').forEach(c => c.classList.remove('active'));
+            document.getElementById('role-' + role).classList.add('active');
+            
+            const levelSelect = document.getElementById('authLevel');
+            if(role === 'student') levelSelect.style.display = 'block';
+            else levelSelect.style.display = 'none';
+        }
+
+        async function performAuth() {
+            const name = document.getElementById('authName').value.trim();
+            const email = document.getElementById('authEmail').value.trim();
+            const pwd = document.getElementById('authPassword').value.trim();
+            const level = document.getElementById('authLevel').value;
+            const err = document.getElementById('authError');
+
+            if(!name || !email || !pwd) { err.innerText = "Please fill all fields."; return; }
+            if(selectedRole === 'student' && !level) { err.innerText = "Please select your study level."; return; }
+            
+            err.innerText = "Authenticating...";
+            try {
+                const res = await fetch('/api/auth', {
+                    method: 'POST', headers: {'Content-Type':'application/json'},
+                    body: JSON.stringify({name, email, password: pwd, role: selectedRole, level})
+                });
+                const data = await res.json();
+                if(data.success) {
+                    document.getElementById('authOverlay').style.opacity = '0';
+                    setTimeout(() => document.getElementById('authOverlay').style.display = 'none', 400);
+                    currentUser = data.user;
+                    configureUIForRole();
+                } else {
+                    err.innerText = data.error || "Authentication failed.";
+                }
+            } catch(e) { err.innerText = "Network error."; }
+        }
+
+        async function checkAuth() {
+            try {
+                const res = await fetch('/api/user/me');
+                const data = await res.json();
+                if(data.user) {
+                    document.getElementById('authOverlay').style.display = 'none';
+                    currentUser = data.user;
+                    configureUIForRole();
+                }
+            } catch(e) {}
+        }
+
+        async function performLogout() {
+            try {
+                await fetch('/api/logout', { method: 'POST' });
+                document.cookie = "session_id=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+                currentUser = null;
+                document.getElementById('authName').value = '';
+                document.getElementById('authEmail').value = '';
+                document.getElementById('authPassword').value = '';
+                
+                document.getElementById('authOverlay').style.display = 'flex';
+                setTimeout(() => document.getElementById('authOverlay').style.opacity = '1', 10);
+                if(document.getElementById('sidebar').classList.contains('open')) toggleSidebar();
+                
+            } catch(e) { console.error(e); }
+        }
+
+        function configureUIForRole() {
+            document.getElementById('sidebarUserName').innerText = currentUser.name;
+            document.getElementById('sidebarRoleLabel').innerText = currentUser.role.toUpperCase() + (currentUser.level ? ` • ${currentUser.level}` : '');
+            
+            document.querySelectorAll('.mode-tab').forEach(t => t.classList.add('hidden'));
+            document.getElementById('modeGeneral').classList.remove('hidden');
+            document.getElementById('btnCurriculum').style.display = 'none';
+
+            if (currentUser.role === 'teacher') {
+                document.getElementById('modeTeacher').classList.remove('hidden');
+                switchMode('teacher');
+            } else if (currentUser.role === 'student') {
+                document.getElementById('modeStudy').classList.remove('hidden');
+                document.getElementById('modeGames').classList.remove('hidden');
+                document.getElementById('btnCurriculum').style.display = 'flex';
+                updateGamificationHUD(currentUser.hearts, currentUser.xp);
+                switchMode('study');
+            } else {
+                switchMode('general');
+            }
+        }
+
+        function updateGamificationHUD(hearts, xp) {
+            let heartStr = "";
+            for(let i=0; i<5; i++) { heartStr += (i < hearts) ? "❤️" : "🤍"; }
+            document.getElementById('hudHearts').innerText = heartStr;
+            document.getElementById('userXp').innerText = xp;
+        }
+
+        window.selectPersona = function(val, btnElement) {
+            currentPersonaValue = val;
+            document.querySelectorAll('.persona-chip').forEach(btn => btn.classList.remove('active'));
+            btnElement.classList.add('active');
+            if(window.innerWidth < 768) toggleSidebar();
+        };
+
+        function toggleMagicMenu() {
+            if(isAiThinking) return;
+            const menu = document.getElementById('magicMenu');
+            const btn = document.getElementById('magicBtn');
+            menu.classList.toggle('show');
+            btn.classList.toggle('active-magic');
+        }
+
+        document.addEventListener('click', (e) => {
+            const menu = document.getElementById('magicMenu');
+            const btn = document.getElementById('magicBtn');
+            if (menu && btn && !menu.contains(e.target) && !btn.contains(e.target)) {
+                menu.classList.remove('show');
+                btn.classList.remove('active-magic');
+            }
+        });
+
+        function toggleTheme() {
+            const isLight = document.body.classList.toggle('light-mode');
+            localStorage.setItem('theme', isLight ? 'light' : 'dark');
+            const iconId = isLight ? 'moon' : 'sun';
+            document.getElementById('themeIcon').setAttribute('data-lucide', iconId);
+            lucide.createIcons();
+        }
+        if (localStorage.getItem('theme') === 'light') { 
+            document.body.classList.add('light-mode'); 
+            document.getElementById('themeIcon').setAttribute('data-lucide', 'moon');
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('sidebarOverlay').classList.toggle('active');
+        }
+
+        function switchSection(sectionId) {
+            document.querySelectorAll('.tab-section').forEach(s => s.classList.remove('active'));
+            document.getElementById(sectionId).classList.add('active');
+            if(document.getElementById('sidebar').classList.contains('open')) toggleSidebar();
+        }
+
+        function autoResizeTextarea(el) {
+            el.style.height = 'auto';
+            el.style.height = (el.scrollHeight) + 'px';
+        }
+
+        let recognition = null;
+        function toggleVoiceRecording() {
+            const btn = document.getElementById('voiceRecordBtn');
+            const queryInput = document.getElementById('userQuery');
+            
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                alert('Speech recognition is not supported in your browser.');
+                return;
+            }
+
+            if (btn.classList.contains('recording')) {
+                if(recognition) recognition.stop();
+                btn.classList.remove('recording');
+                return;
+            }
+
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            recognition.lang = 'en-US';
+            recognition.interimResults = false;
+
+            recognition.onstart = () => { btn.classList.add('recording'); };
+            recognition.onresult = (event) => {
+                queryInput.value = event.results[0][0].transcript;
+                autoResizeTextarea(queryInput);
+                btn.classList.remove('recording');
+            };
+            recognition.onerror = () => { btn.classList.remove('recording'); };
+            recognition.onend = () => { btn.classList.remove('recording'); };
+            recognition.start();
+        }
+
+        let chatSessions = JSON.parse(localStorage.getItem('ge_nius_sessions_royal_v5')) || {};
+        let currentSessionId = localStorage.getItem('ge_nius_current_session_royal_v5');
+
+        function initSessions() {
+            if (!currentSessionId || !chatSessions[currentSessionId]) { createNewSessionQuiet(); } 
+            else { loadChatSession(currentSessionId); }
+            renderChatHistoryList();
+        }
+
+        function createNewSessionQuiet() {
+            const id = Date.now().toString();
+            chatSessions[id] = { id: id, title: "New Session", mode: "study", modesData: { study: "", general: "", games: "" } };
+            currentSessionId = id;
+            saveSessionsData();
+        }
+
+        function createNewChatSession() {
+            if(isAiThinking) return;
+            createNewSessionQuiet();
+            loadChatSession(currentSessionId);
+            if(document.getElementById('sidebar').classList.contains('open')) toggleSidebar();
+        }
+
+        function switchMode(mode) {
+            if(isAiThinking) return;
+            
+            if (currentMode !== 'teacher') {
+                modeContents[currentMode] = chatFeed.innerHTML;
+            }
+            currentMode = mode;
+            document.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
+            
+            const btnSumm = document.getElementById('btnSummarize');
+            if(btnSumm) btnSumm.style.display = (mode === 'study') ? 'flex' : 'none';
+
+            if (mode === 'teacher') {
+                document.getElementById('modeTeacher').classList.add('active');
+                switchSection('teacherTab');
+                fetchTeacherDocs();
+                return;
+            } else {
+                switchSection('askTab');
+                if(mode === 'study') document.getElementById('modeStudy').classList.add('active');
+                else if(mode === 'general') document.getElementById('modeGeneral').classList.add('active');
+                else if(mode === 'games') document.getElementById('modeGames').classList.add('active');
+            }
+
+            const gamesStatsBar = document.getElementById('gamesStatsBar');
+            if (mode === 'games' && currentUser && currentUser.role === 'student') {
+                gamesStatsBar.classList.add('active');
+                updateGamificationHUD(currentUser.hearts, currentUser.xp);
+            } else {
+                gamesStatsBar.classList.remove('active');
+            }
+
+            if (modeContents[mode] && modeContents[mode].trim() !== '') {
+                chatFeed.innerHTML = modeContents[mode];
+            } else {
+                chatFeed.innerHTML = `<div id="welcomeMsg" style="color: var(--text-dim); text-align: center; padding: 80px 20px; display: flex; flex-direction: column; align-items: center; gap: 16px;"><svg class="submarine-logo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 13v-2a2 2 0 0 0-2-2h-1v-2a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v2H7a2 2 0 0 0-2 2v2"/><path d="M4 11h16a2 2 0 0 1 2 2v2a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5v-2a2 2 0 0 1 2-2z"/><circle cx="12" cy="15" r="2"/><path d="M20 15h2"/><path d="M2 15h2"/></svg><p style="margin: 0; font-size: 1rem; max-width: 250px; line-height: 1.5; color: var(--text-dim);">${mode.toUpperCase()} Workspace is ready.</p></div>`;
+            }
+
+            if(chatSessions[currentSessionId]) {
+                chatSessions[currentSessionId].mode = mode;
+                chatSessions[currentSessionId].modesData = modeContents;
+                saveSessionsData();
+            }
+            lucide.createIcons({root: chatFeed});
+        }
+
+        function loadChatSession(id) {
+            currentSessionId = id;
+            const session = chatSessions[id];
+            if (session && session.modesData) { modeContents = session.modesData; } 
+            else { modeContents = { study: "", general: "", games: "" }; }
+            if(session && session.mode) switchMode(session.mode); else switchMode('study');
+            renderChatHistoryList();
+            if(document.getElementById('sidebar').classList.contains('open')) toggleSidebar();
+        }
+
+        function deleteSessionItem(e, id) {
+            e.stopPropagation();
+            if(confirm('Delete this session?')) {
+                delete chatSessions[id];
+                if(id === currentSessionId) {
+                    const keys = Object.keys(chatSessions);
+                    if(keys.length > 0) { currentSessionId = keys[0]; loadChatSession(currentSessionId); } 
+                    else { createNewChatSession(); }
+                } else { saveSessionsData(); renderChatHistoryList(); }
+            }
+        }
+
+        function saveCurrentChatHtml(userQueryText = null) {
+            if(!chatSessions[currentSessionId] || currentMode === 'teacher') return;
+            modeContents[currentMode] = chatFeed.innerHTML;
+            chatSessions[currentSessionId].modesData = modeContents;
+            if (userQueryText && chatSessions[currentSessionId].title === "New Session") {
+                chatSessions[currentSessionId].title = userQueryText.substring(0, 20) + "...";
+            }
+            saveSessionsData();
+        }
+
+        function saveSessionsData() {
+            localStorage.setItem('ge_nius_sessions_royal_v5', JSON.stringify(chatSessions));
+            localStorage.setItem('ge_nius_current_session_royal_v5', currentSessionId);
+            renderChatHistoryList();
+        }
+
+        function renderChatHistoryList() {
+            const listDiv = document.getElementById('chatHistoryList');
+            if(!listDiv) return;
+            listDiv.innerHTML = '';
+            const sortedIds = Object.keys(chatSessions).sort((a, b) => b - a);
+            
+            sortedIds.forEach(id => {
+                const session = chatSessions[id];
+                const isActive = id === currentSessionId ? 'active' : '';
+                listDiv.innerHTML += `<div class="history-item ${isActive}" onclick="loadChatSession('${id}')"><div class="history-item-content"><i data-lucide="message-square" style="width: 13px; height: 13px;"></i><span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${session.title}</span></div><button class="delete-history-btn" onclick="deleteSessionItem(event, '${id}')"><i data-lucide="trash-2" style="width: 13px; height: 13px;"></i></button></div>`;
+            });
+            lucide.createIcons({root: listDiv});
+        }
+
+        initSessions();
+
+        window.speakText = function(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(decodeURIComponent(text));
+                utterance.rate = 1.0; utterance.pitch = 1.0;
+                window.speechSynthesis.speak(utterance);
+            }
+        };
+
+        window.copyCodeText = function(btn) {
+            const container = btn.closest('.complex-card-box');
+            if(container) {
+                const contentText = container.querySelector('.ai-content').innerText;
+                navigator.clipboard.writeText(contentText).then(() => {
+                    const originalHtml = btn.innerHTML;
+                    btn.innerHTML = `<i data-lucide="check" style="width:12px;height:12px;"></i> Copied`;
+                    lucide.createIcons({root: btn});
+                    setTimeout(() => { btn.innerHTML = originalHtml; lucide.createIcons({root: btn}); }, 2000);
+                });
+            }
+        };
+
+        let curriculumDocs = [];
+        fetchDocs();
+
+        function fetchDocs() { fetch('/api/docs').then(res => res.json()).then(data => { curriculumDocs = data; renderDocs(); }); }
+
+        window.toggleDocCollapse = function(id) {
+            const el = document.getElementById('doc-body-' + id);
+            const icon = document.getElementById('doc-icon-' + id);
+            if(el.style.display === 'none' || el.style.display === '') {
+                el.style.display = 'block';
+                icon.style.transform = 'rotate(180deg)';
+            } else {
+                el.style.display = 'none';
+                icon.style.transform = 'rotate(0deg)';
+            }
+        };
+
+        function renderDocs() {
+            const listDiv = document.getElementById('docsList');
+            if (!listDiv) return;
+            if (curriculumDocs.length === 0) { listDiv.innerHTML = '<div style="color: var(--text-dim); text-align: center; padding: 20px; font-size:0.8rem;">No documents uploaded yet.</div>'; return; }
+            listDiv.innerHTML = curriculumDocs.map((item, index) => `
+                <div class="doc-card-compact">
+                    <div class="doc-card-header" onclick="toggleDocCollapse(${item.id})">
+                        <span class="doc-card-title"><i data-lucide="file-text" style="width:14px;height:14px;"></i> Doc ${index + 1}</span>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <button class="btn" style="padding:2px 6px; font-size:0.7rem; color:var(--danger); border:none; background:transparent;" onclick="event.stopPropagation(); deleteDoc(${item.id})"><i data-lucide="trash-2" style="width:14px;height:14px;"></i></button>
+                            <i data-lucide="chevron-down" id="doc-icon-${item.id}" style="width:16px;height:16px;color:var(--text-dim);transition:0.3s;"></i>
+                        </div>
+                    </div>
+                    <div class="doc-card-body" id="doc-body-${item.id}">
+                        ${item.concepts}
+                    </div>
+                </div>
+            `).join('');
+            lucide.createIcons({root: listDiv});
+        }
+
+        async function handleFileSelect(e, isTeacher) {
+            const file = e.target.files[0]; if(!file) return;
+            const reader = new FileReader();
+            reader.onload = async function(evt) {
+                const b64 = evt.target.result;
+                if(isTeacher) {
+                    const stat = document.getElementById('teacherUploadStatus');
+                    stat.innerText = "Compressing & Uploading to Curriculum...";
+                    stat.style.color = "var(--primary)";
+                    await fetch('/api/teacher/upload', {
+                        method: 'POST', headers: {'Content-Type':'application/json'},
+                        body: JSON.stringify({file: b64, filename: file.name})
+                    });
+                    stat.innerText = "Uploaded successfully!";
+                    stat.style.color = "var(--accent-green)";
+                    fetchTeacherDocs();
+                } else {
+                    attachedQuestionBase64 = b64;
+                    document.getElementById('questionImgPreview').style.display = 'flex';
+                    document.getElementById('magicMenu').classList.remove('show');
+                    const btn = document.getElementById('magicBtn');
+                    if(btn) btn.classList.remove('active-magic');
+                }
+            };
+            reader.readAsDataURL(file); e.target.value = '';
+        }
+
+        document.getElementById('teacherUploadBtn').addEventListener('change', (e) => handleFileSelect(e, true));
+        document.getElementById('qFileInputGallery').addEventListener('change', (e) => handleFileSelect(e, false));
+        document.getElementById('qFileInputCamera').addEventListener('change', (e) => handleFileSelect(e, false));
+
+        function removeQuestionImage() { attachedQuestionBase64 = null; document.getElementById('questionImgPreview').style.display = 'none'; }
+
+        async function handleDocImageSelect(e) {
+            const files = e.target.files; if (!files || files.length === 0) return;
+            const statusDiv = document.getElementById('uploadStatus');
+            for (let i = 0; i < files.length; i++) {
+                if(statusDiv) { statusDiv.innerHTML = `Processing ${i + 1}...`; statusDiv.style.color = 'var(--primary)'; }
+                await new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onload = async function(evt) {
+                        try {
+                            const res = await fetch('/api/docs/upload', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ image: evt.target.result }) });
+                            const data = await res.json(); if (data.docs) curriculumDocs = data.docs;
+                        } catch (err) {} resolve();
+                    }; reader.readAsDataURL(files[i]);
+                });
+            }
+            renderDocs();
+            if(statusDiv) { statusDiv.innerHTML = 'Saved successfully!'; statusDiv.style.color = 'var(--accent-green)'; }
+        }
+        document.getElementById('docFileInputCamera').addEventListener('change', handleDocImageSelect);
+        document.getElementById('docFileInputGallery').addEventListener('change', handleDocImageSelect);
+
+        function deleteDoc(id) { fetch('/api/docs/delete', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id }) }).then(res => res.json()).then(data => { curriculumDocs = data; renderDocs(); }); }
+
+        async function fetchTeacherDocs() {
+            const res = await fetch('/api/teacher/docs');
+            const data = await res.json();
+            const list = document.getElementById('teacherDocsList');
+            list.innerHTML = data.docs.map(d => `
+                <div style="background:var(--card); padding:10px 14px; border-radius:12px; border:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-weight:600; font-size:0.85rem;"><i data-lucide="file-check" style="width:14px;height:14px; margin-right:4px;"></i> ${d.title}</span>
+                    <span style="font-size:0.75rem; color:var(--text-dim);">Compressed</span>
+                </div>
+            `).join('') || "<div style='color:var(--text-dim); font-size:0.85rem; text-align:center;'>No materials uploaded yet.</div>";
+            lucide.createIcons({root: list});
+        }
+
+        function triggerSummarizer() {
+            document.getElementById('magicMenu').classList.remove('show');
+            document.getElementById('userQuery').value = "Please summarize the current curriculum focusing on: 1. Core Concepts, 2. Formulas (LaTeX), 3. Examples, 4. Exam notes.";
+            submitQuestion(true);
+        }
+
+        function submitQuestion(isSummary = false) {
+            if (isAiThinking) return;
+
+            const queryInput = document.getElementById('userQuery');
+            const query = queryInput.value.trim();
+
+            if (!query && !attachedQuestionBase64) return;
+            if (currentMode === 'study' && curriculumDocs.length === 0) { alert('Study mode requires uploaded curriculum documents. Switch to General or Games!'); return; }
+            if (currentUser && currentUser.role === 'student' && currentMode === 'games' && currentUser.hearts <= 0) { alert("You have 0 hearts left! Take a break."); return; }
+            
+            isAiThinking = true;
+            document.getElementById('inputPanel').classList.add('locked');
+            const sendBtn = document.getElementById('sendBtn');
+            sendBtn.classList.add('loading');
+            sendBtn.innerHTML = `<i data-lucide="loader-2" class="spinner-icon" style="width:20px;height:20px;"></i>`;
+            lucide.createIcons({root: sendBtn});
+            
+            const welcome = document.getElementById('welcomeMsg'); if(welcome) welcome.remove();
+
+            let userTextDisplay = query.replace(/\\n/g, '<br>');
+            if (attachedQuestionBase64) { userTextDisplay = (query ? userTextDisplay + '<br>' : '') + `<span style="color:var(--primary); font-size:0.85em; display:flex; align-items:center; gap:4px; margin-top:6px;"><i data-lucide="image" style="width:14px;height:14px;"></i> File attached</span>`; }
+
+            const userRow = document.createElement('div'); userRow.className = 'message-row';
+            userRow.style.alignItems = 'flex-end';
+            userRow.innerHTML = `
+                <div class="message-sender" style="justify-content:flex-end; margin-bottom: 2px;">
+                    <div class="avatar-user"><i data-lucide="user" style="width:14px;height:14px;color:#fff;"></i></div>
+                </div>
+                <div class="message-text-user">${userTextDisplay}</div>`;
+            chatFeed.appendChild(userRow); lucide.createIcons({root: userRow});
+
+            const loadingRow = document.createElement('div'); loadingRow.className = 'message-row loading-bubble-temp';
+            loadingRow.innerHTML = `
+                <div class="message-sender" style="margin-bottom: 2px;">
+                    <div class="avatar-ai">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;color:var(--primary);">
+                            <path d="M16 13v-2a2 2 0 0 0-2-2h-1v-2a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v2H7a2 2 0 0 0-2 2v2"/><path d="M4 11h16a2 2 0 0 1 2 2v2a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5v-2a2 2 0 0 1 2-2z"/><circle cx="12" cy="15" r="2"/><path d="M20 15h2"/><path d="M2 15h2"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="hologram-thinking">Processing logic...</div>
+            `;
+            chatFeed.appendChild(loadingRow); lucide.createIcons({root: loadingRow});
+            
+            saveCurrentChatHtml(query);
+
+            const payload = { query: query, file: attachedQuestionBase64, mode: currentMode, isSummary: isSummary, persona: currentPersonaValue };
+            queryInput.value = ''; queryInput.style.height = 'auto'; removeQuestionImage(); chatFeed.scrollTop = chatFeed.scrollHeight;
+
+            fetch('/api/ask', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+            .then(res => res.json())
+            .then(data => {
+                chatFeed.removeChild(loadingRow);
+                const aiRow = document.createElement('div'); aiRow.className = 'message-row';
+
+                let avatarHtml = `
+                <div class="message-sender" style="margin-bottom: 2px;">
+                    <div class="avatar-ai">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;color:var(--primary);">
+                            <path d="M16 13v-2a2 2 0 0 0-2-2h-1v-2a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v2H7a2 2 0 0 0-2 2v2"/><path d="M4 11h16a2 2 0 0 1 2 2v2a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5v-2a2 2 0 0 1 2-2z"/><circle cx="12" cy="15" r="2"/><path d="M20 15h2"/><path d="M2 15h2"/>
+                        </svg>
+                    </div>
+                </div>`;
+
+                if (data.status === 'out_of_scope') {
+                    aiRow.innerHTML = avatarHtml + `<div class="message-text-ai" style="color:#fca5a5;">Out of curriculum scope. Switch to General mode.</div>`;
+                } else if (data.status === 'success') {
+                    let fullText = data.answer;
+                    const encoded = encodeURIComponent(fullText);
+                    
+                    if(data.hearts !== undefined && data.xp !== undefined && currentUser.role === 'student' && currentMode === 'games') {
+                        currentUser.hearts = data.hearts; currentUser.xp = data.xp;
+                        updateGamificationHUD(data.hearts, data.xp);
+                    }
+                    
+                    if (fullText.includes("```") || fullText.length > 500) {
+                        aiRow.innerHTML = avatarHtml + `
+                            <div class="complex-card-box">
+                                <div class="complex-card-header">
+                                    <span>Detailed Output</span>
+                                    <button class="copy-code-btn" onclick="copyCodeText(this)"><i data-lucide="copy" style="width:12px;height:12px;"></i> Copy</button>
+                                </div>
+                                <div class="message-text-ai ai-content">${marked.parse(fullText)}</div>
+                            </div>
+                            <div><button class="audio-speech-btn" onclick="speakText('${encoded}')"><i data-lucide="volume-2" style="width:14px;height:14px;"></i> Listen</button></div>
+                        `;
+                    } else {
+                        aiRow.innerHTML = avatarHtml + `
+                            <div class="message-text-ai ai-content" style="padding-top:4px;">${marked.parse(fullText)}</div>
+                            <div><button class="audio-speech-btn" onclick="speakText('${encoded}')"><i data-lucide="volume-2" style="width:14px;height:14px;"></i> Listen</button></div>
+                        `;
+                    }
+                } else {
+                    aiRow.innerHTML = avatarHtml + `<div class="message-text-ai" style="color:var(--danger)">Error: ${data.error || 'Failed.'}</div>`;
+                }
+                
+                chatFeed.appendChild(aiRow); lucide.createIcons({root: aiRow});
+                chatFeed.scrollTop = chatFeed.scrollHeight;
+                if (window.MathJax) window.MathJax.typesetPromise([aiRow]).catch(e => {});
+                saveCurrentChatHtml();
+            }).catch(err => {
+                chatFeed.removeChild(loadingRow);
+                const errRow = document.createElement('div'); errRow.className = 'message-row';
+                errRow.innerHTML = `
+                    <div class="message-sender"><div class="avatar-ai"><i data-lucide="alert-circle" style="width:14px;height:14px;color:var(--danger);"></i></div></div>
+                    <div class="message-text-ai" style="color:var(--danger);">Connection error.</div>`;
+                chatFeed.appendChild(errRow); lucide.createIcons({root: errRow});
+            }).finally(() => {
+                isAiThinking = false;
+                document.getElementById('inputPanel').classList.remove('locked');
+                sendBtn.classList.remove('loading');
+                sendBtn.innerHTML = `<i data-lucide="arrow-up" id="sendIcon"></i>`;
+                lucide.createIcons({root: sendBtn});
+                queryInput.focus();
+            });
+        }
+    </script>
+</body>
+</html>
+"""
+
+# ==============================================================================
+# Python Backend Server
+# ==============================================================================
+class StudyAppRequestHandler(BaseHTTPRequestHandler):
+
+    def get_session_id(self):
+        cookie_header = self.headers.get('Cookie')
+        if cookie_header:
+            c = cookies.SimpleCookie(cookie_header)
+            if 'session_id' in c:
+                return c['session_id'].value
+        return None
+
+    def send_api_request(self, payload):
+        req_data = json.dumps(payload).encode("utf-8")
+        headers = { "Content-Type": "application/json", "Authorization": f"Bearer {API_KEY}" }
+        ssl_ctx = ssl._create_unverified_context()
+        req = urllib.request.Request(API_URL, data=req_data, headers=headers, method="POST")
+        with urllib.request.urlopen(req, context=ssl_ctx, timeout=50) as response:
+            res_json = json.loads(response.read().decode("utf-8"))
+            return res_json["choices"][0]["message"]["content"].strip()
+
+    def do_GET(self):
+        try:
+            if self.path == "/":
+                session_id = self.get_session_id()
+                is_new_session = False
+                if not session_id:
+                    session_id = str(uuid.uuid4())
+                    is_new_session = True
+
+                self.send_response(200)
+                self.send_header("Content-type", "text/html; charset=utf-8")
+                if is_new_session:
+                    self.send_header("Set-Cookie", f"session_id={session_id}; Path=/; Max-Age=31536000; HttpOnly; SameSite=Lax")
+                self.end_headers()
+                self.wfile.write(HTML_CODE.encode("utf-8"))
+                
+            elif self.path == "/api/docs":
+                session_id = self.get_session_id()
+                if not session_id:
+                    self.send_json_response([])
+                    return
+                docs = load_curriculum(session_id)
+                self.send_json_response(docs)
+                
+            elif self.path == "/api/user/me":
+                sess_id = self.get_session_id()
+                user = get_current_user(sess_id)
+                self.send_json_response({"user": user})
+
+            elif self.path == "/api/teacher/docs":
+                self.send_json_response({"docs": MOCK_DB.get("GLOBAL_DOCS", [])})
+
+        except Exception as e:
+            self.send_json_response({"error": str(e)})
+
+    def do_POST(self):
+        try:
+            session_id = self.get_session_id()
+            if not session_id:
+                self.send_json_response({"error": "Invalid session."})
+                return
+
+            content_length = int(self.headers.get('Content-Length', 0))
+            post_data = self.rfile.read(content_length)
+            req_json = json.loads(post_data.decode('utf-8')) if post_data else {}
+
+            if self.path == "/api/auth":
+                email = req_json.get("email")
+                if email not in MOCK_USERS:
+                    MOCK_USERS[email] = {
+                        "name": req_json.get("name"), "email": email, "password": req_json.get("password"),
+                        "role": req_json.get("role"), "level": req_json.get("level"), "hearts": 5, "xp": 0
+                    }
+                MOCK_SESSIONS[session_id] = email
+                self.send_json_response({"success": True, "user": MOCK_USERS[email]})
+            
+            elif self.path == "/api/logout":
+                if session_id in MOCK_SESSIONS:
+                    del MOCK_SESSIONS[session_id]
+                self.send_json_response({"success": True})
+
+            elif self.path == "/api/teacher/upload":
+                b64_file = req_json.get("file", "")
+                filename = req_json.get("filename", "Document")
+                if b64_file:
+                    head, comp = compress_file_data(b64_file)
+                    add_document_to_db(session_id, filename, f"Content extracted and compressed by ge_nius for {filename}.", is_global=True)
+                self.send_json_response({"success": True})
+
+            elif self.path == "/api/docs/upload":
+                image_base64 = req_json.get("image")
+                if not image_base64:
+                    self.send_json_response({"error": "No image"})
+                    return
+                try:
+                    prompt = "Read this document image and extract all concepts, text, and rules clearly."
+                    payload = {
+                        "model": MODEL_NAME,
+                        "messages": [{"role": "user", "content": [{"type": "text", "text": prompt}, {"type": "image_url", "image_url": {"url": image_base64}}]}],
+                        "max_tokens": 4096
+                    }
+                    extracted_concepts = self.send_api_request(payload)
+                    add_document_to_db(session_id, "Document Lesson", extracted_concepts)
+                    docs = load_curriculum(session_id)
+                    self.send_json_response({"status": "success", "docs": docs})
+                except Exception as e:
+                    self.send_json_response({"error": str(e)})
+
+            elif self.path == "/api/docs/delete":
+                doc_id = req_json.get("id")
+                if doc_id is not None:
+                    delete_document_from_db(session_id, doc_id)
+                docs = load_curriculum(session_id)
+                self.send_json_response(docs)
+
+            elif self.path == "/api/ask":
+                user = get_current_user(session_id)
+                user_query = req_json.get("query", "")
+                file_b64 = req_json.get("file")
+                mode = req_json.get("mode", "study") 
+                is_summary = req_json.get("isSummary", False)
+                persona = req_json.get("persona", "human")
+                docs = load_curriculum(session_id, user)
+
+                messages_content = []
+                if file_b64:
+                    if file_b64.startswith("data:image"):
+                        messages_content.append({"type": "image_url", "image_url": {"url": file_b64}})
+                    else:
+                        messages_content.append({"type": "text", "text": "[File Attached. Read context.]"})
+
+                persona_instructions = {
+                    "strict": "Persona: Strict & Professional. Be highly formal, precise, and academic.",
+                    "humor": "Persona: Entertainment & Light Humor. Keep it witty and fun.",
+                    "roast": "Persona: Witty & Playful Challenge. Gently challenge the user's logic.",
+                    "human": "Persona: Human-like & Warm. Be friendly, empathetic, natural."
+                }.get(persona, "Persona: Human-like & Warm.")
+
+                if mode == "general":
+                    full_prompt = f"You are a global AI assistant named ge_nius.\n{persona_instructions}\nUser request: \"{user_query}\"\nIMPORTANT: Respond in the exact same language the user is using."
+                elif mode == "games":
+                    full_prompt = (
+                        f"You are an interactive Brain Games and Puzzle master named ge_nius.\n{persona_instructions}\n"
+                        f"The user is playing brain/thinking games.\nUser input: \"{user_query}\"\n"
+                        f"IMPORTANT: If the user answers WRONG, prefix your response EXACTLY with [WRONG]. If CORRECT, prefix with [CORRECT]. Respond in their language."
+                    )
+                else:
+                    all_concepts_summary = "\n\n".join([f"Document {i+1}:\n{doc['concepts']}" for i, doc in enumerate(docs)])
+                    full_prompt = (
+                        f"You are an expert tutor.\n{persona_instructions}\nHere is the student's curriculum study material:\n"
+                        f"--- START CURRICULUM ---\n{all_concepts_summary}\n--- END CURRICULUM ---\n\n"
+                    )
+                    if is_summary:
+                        full_prompt += "The user requested a summary. Output a highly structured, professional summary of the curriculum focusing on: 1. Core Concepts, 2. Formulas (use LaTeX for math), 3. Examples, 4. Exam Traps/Notes. Respond in the user's language."
+                    else:
+                        full_prompt += f"User question: \"{user_query}\"\nIMPORTANT: Respond in the exact same language the user is asking in.\nIf completely unrelated to the curriculum, reply with EXACTLY: OUT_OF_SCOPE\nIf in scope, provide a clear, step-by-step explanation."
+                    
+                messages_content.append({"type": "text", "text": full_prompt})
+
+                payload = {
+                    "model": MODEL_NAME,
+                    "messages": [{"role": "user", "content": messages_content}],
+                    "max_tokens": 4096
+                }
+
+                try:
+                    ai_reply = self.send_api_request(payload)
+                    resp_data = {"status": "success"}
+                    
+                    if mode == "study" and ("OUT_OF_SCOPE" in ai_reply or ai_reply.startswith("OUT_OF_SCOPE")):
+                        resp_data["status"] = "out_of_scope"
+                    else:
+                        if user and user["role"] == "student" and mode == "games":
+                            if "[WRONG]" in ai_reply:
+                                user["hearts"] = max(0, user["hearts"] - 1)
+                                ai_reply = ai_reply.replace("[WRONG]", "").strip()
+                            elif "[CORRECT]" in ai_reply:
+                                user["xp"] += 50
+                                ai_reply = ai_reply.replace("[CORRECT]", "").strip()
+                            resp_data["hearts"] = user["hearts"]
+                            resp_data["xp"] = user["xp"]
+                        
+                        resp_data["answer"] = ai_reply
+
+                    self.send_json_response(resp_data)
+                except Exception as e:
+                    self.send_json_response({"status": "error", "error": str(e)})
+        except Exception as e:
+            self.send_json_response({"error": str(e)})
+
+    def send_json_response(self, data):
+        self.send_response(200)
+        self.send_header("Content-type", "application/json; charset=utf-8")
+        self.end_headers()
+        self.wfile.write(json.dumps(data, ensure_ascii=False).encode("utf-8"))
+
+    def log_message(self, format, *args):
+        return
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 8080))
+    server = HTTPServer(("0.0.0.0", port), StudyAppRequestHandler)
+    print(f"Server started on port {port}")
+    server.serve_forever()
