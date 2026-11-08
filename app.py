@@ -67,8 +67,10 @@ def load_curriculum(session_id, user=None):
         except Exception as e:
             pass
         finally:
-            try: conn.close()
-            except: pass
+            try:
+                conn.close()
+            except:
+                pass
     else:
         docs.extend(MOCK_DB.get(session_id, []))
     return docs
@@ -95,8 +97,10 @@ def add_document_to_db(session_id, title, content, is_global=False):
         except Exception as e:
             pass
         finally:
-            try: conn.close()
-            except: pass
+            try:
+                conn.close()
+            except:
+                pass
     if session_id not in MOCK_DB:
         MOCK_DB[session_id] = []
     MOCK_DB[session_id].append({"id": MOCK_DB_DOC_ID, "title": title, "concepts": content})
@@ -119,13 +123,15 @@ def delete_document_from_db(session_id, doc_id):
         except Exception as e:
             pass
         finally:
-            try: conn.close()
-            except: pass
+            try:
+                conn.close()
+            except:
+                pass
     if session_id in MOCK_DB:
         MOCK_DB[session_id] = [d for d in MOCK_DB[session_id] if str(d["id"]) != str(doc_id)]
 
 # ==============================================================================
-# HTML Frontend (ge_nius Royal World-Class UI - Fixed Architecture & Logic)
+# HTML Frontend (ge_nius Royal World-Class UI - Seamless Drawer Refined)
 # ==============================================================================
 HTML_CODE = """<!DOCTYPE html>
 <html lang="en" dir="auto">
@@ -148,18 +154,18 @@ HTML_CODE = """<!DOCTYPE html>
 
     <style>
         :root {
-            --bg-main: #030304; --surface: #0f1014; --card: #18191f;
-            --primary: #4169E1; --primary-glow: rgba(65, 105, 225, 0.4);
+            --bg-main: #030304; --surface: #0f1014; --card: #16181e;
+            --primary: #4169E1; --primary-glow: rgba(65, 105, 225, 0.35);
             --danger: #ef4444; --accent-gold: #fbbf24; --accent-green: #10b981;
             --text-main: #f8fafc; --text-dim: #94a3b8;
-            --border: rgba(255, 255, 255, 0.06); --glass: rgba(15, 16, 20, 0.75);
+            --border: rgba(255, 255, 255, 0.07); --glass: rgba(15, 16, 20, 0.8);
         }
 
         body.light-mode {
             --bg-main: #f8fafc; --surface: #ffffff; --card: #f1f5f9;
-            --primary: #2563eb; --primary-glow: rgba(37, 99, 235, 0.3);
+            --primary: #2563eb; --primary-glow: rgba(37, 99, 235, 0.25);
             --text-main: #0f172a; --text-dim: #64748b;
-            --border: rgba(0, 0, 0, 0.08); --glass: rgba(255, 255, 255, 0.85);
+            --border: rgba(0, 0, 0, 0.08); --glass: rgba(255, 255, 255, 0.88);
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -172,7 +178,6 @@ HTML_CODE = """<!DOCTYPE html>
                 radial-gradient(ellipse at 10% 10%, rgba(65, 105, 225, 0.08) 0%, transparent 50%),
                 radial-gradient(ellipse at 90% 90%, rgba(139, 92, 246, 0.05) 0%, transparent 50%);
             background-attachment: fixed;
-            transition: direction 0.3s ease;
         }
 
         .main-wrapper { 
@@ -180,19 +185,18 @@ HTML_CODE = """<!DOCTYPE html>
             width: 100%; height: 100%; height: 100dvh; max-width: 900px; margin: 0 auto; 
         }
 
-        /* --- Overlays & Modals --- */
-        .full-overlay {
+        /* --- Auth Overlay --- */
+        #authOverlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(3, 3, 4, 0.95); backdrop-filter: blur(20px);
             z-index: 9999; display: flex; justify-content: center; align-items: center; padding: 20px;
             transition: opacity 0.4s ease;
         }
-        .modal-card {
+        .auth-card {
             background: var(--surface); border: 1px solid var(--border); border-radius: 24px;
             padding: 30px; width: 100%; max-width: 400px; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-            display: flex; flex-direction: column; gap: 15px; position: relative;
+            display: flex; flex-direction: column; gap: 15px;
         }
-        
         .role-selector { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 10px; }
         .role-card {
             background: var(--card); border: 1px solid var(--border); border-radius: 12px;
@@ -215,1029 +219,91 @@ HTML_CODE = """<!DOCTYPE html>
         }
 
         .nav-header-row { display: flex; align-items: center; gap: 10px; width: 100%; }
-        .app-brand { font-family: 'Outfit', sans-serif; font-weight: 900; font-size: 1.05rem; color: var(--text-main); letter-spacing: -0.5px; display: flex; align-items: center; gap: 6px; }
+
+        .app-brand {
+            font-family: 'Outfit', sans-serif; font-weight: 900; font-size: 1.05rem;
+            color: var(--text-main); letter-spacing: -0.5px; display: flex; align-items: center; gap: 6px;
+        }
         .app-brand span { color: var(--primary); }
         .brand-icon { width: 18px; height: 18px; color: var(--primary); }
 
-        .icon-btn { background: transparent; border: none; color: var(--text-main); border-radius: 50%; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; flex-shrink: 0; }
+        .icon-btn {
+            background: transparent; border: none; color: var(--text-main);
+            border-radius: 50%; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.2s; flex-shrink: 0;
+        }
         .icon-btn:hover { background: var(--card); color: var(--primary); transform: scale(1.05); }
 
-        .mode-switcher-bar { display: flex; gap: 6px; background: rgba(0,0,0,0.2); padding: 4px; border-radius: 16px; justify-content: center; width: 100%; overflow-x: auto; }
-        .mode-tab { padding: 6px 14px; background: transparent; border: none; color: var(--text-dim); font-weight: 600; font-size: 0.8rem; cursor: pointer; border-radius: 12px; white-space: nowrap; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.3s; flex: 1; }
-        .mode-tab.active { background: var(--surface); color: var(--text-main); box-shadow: 0 2px 10px rgba(0,0,0,0.2); border: 1px solid var(--border); }
+        .mode-switcher-bar {
+            display: flex; gap: 6px; background: rgba(0,0,0,0.25); padding: 4px; border-radius: 14px;
+            justify-content: center; width: 100%; overflow-x: auto;
+        }
+        .mode-tab {
+            padding: 6px 14px; background: transparent; border: none; color: var(--text-dim);
+            font-family: 'Inter', sans-serif; font-weight: 600; font-size: 0.8rem; cursor: pointer;
+            border-radius: 10px; white-space: nowrap; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.3s;
+            flex: 1;
+        }
+        .mode-tab.active { background: var(--surface); color: var(--text-main); box-shadow: 0 2px 10px rgba(0,0,0,0.3); border: 1px solid var(--border); }
         .mode-tab.hidden { display: none !important; }
 
         .lucide { width: 18px; height: 18px; stroke-width: 2.2; display: inline-block; vertical-align: middle; }
 
-        .games-stats-bar { display: none; background: rgba(65, 105, 225, 0.1); border: 1px solid rgba(65, 105, 225, 0.2); padding: 8px 16px; border-radius: 16px; align-items: center; justify-content: space-between; font-size: 0.85rem; color: #93c5fd; flex-shrink: 0; margin-bottom: 10px; }
+        .games-stats-bar {
+            display: none; background: rgba(65, 105, 225, 0.1); border: 1px solid rgba(65, 105, 225, 0.2);
+            padding: 8px 16px; border-radius: 16px; align-items: center; justify-content: space-between; font-size: 0.85rem; color: #93c5fd; flex-shrink: 0; margin-bottom: 10px;
+        }
         .games-stats-bar.active { display: flex; }
         .hud-hearts { color: var(--danger); letter-spacing: 2px;}
 
-        /* --- Sidebar & Persona --- */
-        .sidebar-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); z-index: 999; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+        /* --- REDESIGNED DRAWER SIDEBAR --- */
+        .sidebar-overlay { 
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0; 
+            background: rgba(0,0,0,0.75); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); 
+            z-index: 999; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; 
+        }
         .sidebar-overlay.active { opacity: 1; pointer-events: auto; }
         
         .sidebar {
-            position: fixed; top: 0; left: -320px; width: 300px; height: 100vh; height: 100dvh;
+            position: fixed; top: 0; left: -100%; width: 85%; max-width: 320px; height: 100vh; height: 100dvh;
             background: var(--surface); border-right: 1px solid var(--border);
-            z-index: 1000; transition: left 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-            display: flex; flex-direction: column; padding: 20px; box-shadow: 15px 0 50px rgba(0,0,0,0.5);
+            z-index: 1000; transition: left 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex; flex-direction: column; padding: 18px 16px; box-shadow: 10px 0 40px rgba(0,0,0,0.6);
             overflow-y: auto;
         }
-        body[dir="rtl"] .sidebar { left: auto; right: -320px; border-right: none; border-left: 1px solid var(--border); transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
         .sidebar.open { left: 0; }
-        body[dir="rtl"] .sidebar.open { right: 0; left: auto; }
         
-        .sidebar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 15px;}
-        .sidebar h3 { margin: 0; font-size: 1.15rem; font-weight: 800; display: flex; align-items: center; gap: 8px;}
+        .sidebar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 12px;}
+        .sidebar h3 { margin: 0; font-size: 1.05rem; color: var(--text-main); font-weight: 800; display: flex; align-items: center; gap: 8px;}
         
-        .sidebar-section-title { font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; margin: 15px 0 8px 0; display: flex; align-items: center; gap: 6px;}
+        .user-profile-card {
+            background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 12px 14px;
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;
+        }
+        .user-info-text { display: flex; flex-direction: column; gap: 2px; }
+        .user-name-title { font-weight: 700; font-size: 0.9rem; color: var(--primary); }
+        .user-role-subtitle { font-size: 0.72rem; color: var(--text-dim); }
+
+        .btn-logout-mini {
+            background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); color: var(--danger);
+            padding: 6px 10px; border-radius: 10px; font-size: 0.75rem; font-weight: 600; cursor: pointer;
+            display: flex; align-items: center; gap: 4px; transition: all 0.2s;
+        }
+        .btn-logout-mini:hover { background: var(--danger); color: white; }
+
+        .sidebar-section-title { font-size: 0.72rem; color: var(--text-dim); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; margin: 14px 0 8px 0; display: flex; align-items: center; gap: 6px;}
         .persona-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
-        .persona-chip { background: var(--bg-main); border: 1px solid var(--border); border-radius: 12px; padding: 8px; font-size: 0.75rem; font-weight: 600; color: var(--text-dim); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; transition: all 0.2s; }
+        .persona-chip {
+            background: var(--bg-main); border: 1px solid var(--border); border-radius: 12px;
+            padding: 8px; font-size: 0.75rem; font-family: 'Inter', sans-serif; font-weight: 600;
+            color: var(--text-dim); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;
+            transition: all 0.2s ease;
+        }
         .persona-chip:hover { background: var(--card); color: var(--text-main); }
         .persona-chip.active { background: rgba(65, 105, 225, 0.15); color: var(--primary); border-color: var(--primary); }
 
         .chat-history-list { flex: 1; display: flex; flex-direction: column; gap: 6px; }
-        .history-item { background: transparent; color: var(--text-main); padding: 10px 12px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; font-size: 0.88rem; transition: all 0.2s;}
+        .history-item { background: var(--bg-main); border: 1px solid var(--border); color: var(--text-main); padding: 8px 10px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; font-size: 0.82rem; transition: all 0.2s;}
         .history-item:hover { background: var(--card); }
-        .history-item.active { background: rgba(65, 105, 225, 0.1); border: 1px solid var(--primary); color: var(--primary); font-weight: bold; }
-        .history-item-content { display: flex; align-items: center; gap: 8px; flex: 1; overflow: hidden; }
-        .delete-history-btn { background: none; border: none; color: var(--text-dim); cursor: pointer; padding: 4px; border-radius: 6px; }
-        .delete-history-btn:hover { color: var(--danger); background: rgba(239, 68, 68, 0.1); }
-
-        .tab-section { display: none; flex-direction: column; flex: 1; min-height: 0; }
-        .tab-section.active { display: flex; }
-        
-        .card { background: var(--surface); border-radius: 20px; border: 1px solid var(--border); padding: 16px; display: flex; flex-direction: column; gap: 10px; }
-
-        /* --- Chat Layout & Avatars --- */
-        .chat-container-wrapper { position: relative; flex: 1; display: flex; flex-direction: column; min-height: 0; }
-        .chat-feed { display: flex; flex-direction: column; gap: 24px; flex: 1; overflow-y: auto; padding: 10px 4px 20px 4px; background: transparent; scroll-behavior: smooth; }
-        
-        .message-row { display: flex; flex-direction: column; gap: 4px; width: 100%; animation: slideUp 0.3s; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
-        
-        .message-sender { display: flex; align-items: center; }
-        .avatar-user { background: var(--primary); padding: 6px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px var(--primary-glow);}
-        .avatar-ai { background: var(--card); padding: 6px; border-radius: 50%; border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; }
-
-        .message-text-user { font-size: 0.95rem; line-height: 1.6; background: var(--surface); padding: 12px 16px; border-radius: 20px; border-top-right-radius: 4px; width: fit-content; max-width: 85%; border: 1px solid var(--border); align-self: flex-end; }
-        body[dir="rtl"] .message-text-user { border-top-right-radius: 20px; border-top-left-radius: 4px; }
-
-        .message-text-ai { font-size: 1.05rem; line-height: 1.75; font-weight: 500; align-self: flex-start; max-width: 95%;}
-
-        .submarine-logo { width: 72px; height: 72px; filter: drop-shadow(0 0 20px rgba(65, 105, 225, 0.5)); color: var(--primary); }
-
-        .complex-card-box { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 16px; margin: 6px 0; box-shadow: 0 4px 25px rgba(0,0,0,0.25); position: relative; overflow-x: auto; }
-        .complex-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 8px; font-size: 0.8rem; color: var(--primary); font-weight: bold; }
-        
-        .copy-code-btn, .audio-speech-btn { background: transparent; border: 1px solid var(--border); color: var(--text-dim); border-radius: 12px; padding: 6px 14px; font-size: 0.8rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s;}
-        .copy-code-btn:hover, .audio-speech-btn:hover { background: var(--card); color: var(--primary); }
-
-        /* --- Thinking Animation Fixed (No Box, Just Beautiful Text Gradient) --- */
-        .hologram-thinking {
-            display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 0.95rem; margin-top: 4px;
-            background: linear-gradient(90deg, #4169E1, #8B5CF6, #fbbf24, #4169E1);
-            background-size: 300% 100%; -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            animation: gradientMove 2s linear infinite;
-        }
-        @keyframes gradientMove { 0% { background-position: 100% 0; } 100% { background-position: 0 0; } }
-
-        /* --- Input Box --- */
-        .chat-input-container { flex-shrink: 0; padding-bottom: 6px; position: relative; margin-top: auto;}
-        .input-glass-panel { background: rgba(15, 16, 20, 0.85); backdrop-filter: blur(24px); border: 1px solid var(--border); border-radius: 28px; padding: 8px 10px 8px 16px; box-shadow: 0 12px 40px rgba(0,0,0,0.5); display: flex; align-items: center; gap: 10px; transition: all 0.3s; position: relative; z-index: 10; }
-        .input-glass-panel:focus-within { border-color: rgba(65, 105, 225, 0.5); box-shadow: 0 12px 40px rgba(65, 105, 225, 0.15); }
-        .input-glass-panel.locked { opacity: 0.6; pointer-events: none; }
-        textarea { background: transparent; color: var(--text-main); border: none; outline: none; font-size: 1rem; resize: none; max-height: 120px; min-height: 24px; line-height: 1.5; width: 100%; padding: 8px 0; }
-        textarea::placeholder { color: #64748b; }
-        
-        .magic-menu { position: absolute; bottom: 70px; left: 10px; background: var(--surface); border: 1px solid var(--border); border-radius: 18px; padding: 8px; display: flex; flex-direction: column; gap: 4px; opacity: 0; transform: translateY(15px) scale(0.95); pointer-events: none; transition: all 0.3s; box-shadow: 0 12px 30px rgba(0,0,0,0.6); z-index: 20; }
-        body[dir="rtl"] .magic-menu { left: auto; right: 10px; }
-        .magic-menu.show { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
-        .magic-item { display: flex; align-items: center; gap: 10px; padding: 10px 16px; font-size: 0.9rem; font-weight: 500; border-radius: 12px; cursor: pointer; transition: all 0.2s; }
-        .magic-item:hover { background: var(--card); color: var(--primary); }
-
-        .tool-btn { background: transparent; border: none; color: var(--text-dim); border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; flex-shrink: 0; }
-        .tool-btn:hover { background: var(--card); color: var(--text-main); }
-        .tool-btn.active-magic { color: var(--primary); transform: rotate(45deg); }
-        .tool-btn.recording { color: var(--danger) !important; animation: pulse 1.2s infinite; }
-        @keyframes pulse { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(1.1); } 100% { opacity: 1; transform: scale(1); } }
-
-        .send-btn-royal { background: var(--primary); color: white; border: none; border-radius: 50%; width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 15px var(--primary-glow); flex-shrink: 0; }
-        .send-btn-royal.loading { background: transparent; border: 2px solid var(--border); box-shadow: none; pointer-events: none; }
-        .spinner-icon { animation: spin 1s linear infinite; color: var(--text-dim); }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-
-        .btn { background: var(--card); color: var(--text-main); border: 1px solid var(--border); padding: 12px 18px; border-radius: 16px; font-weight: 600; font-size: 0.9rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s; }
-        .btn-purple { background: linear-gradient(135deg, #1d4ed8, #4169E1); color: white; border: none; box-shadow: 0 4px 20px var(--primary-glow);}
-        
-        input[type="file"] { display: none; }
-        .image-preview-bar { display: none; align-items: center; justify-content: space-between; background: rgba(65, 105, 225, 0.1); border: 1px solid rgba(65, 105, 225, 0.3); padding: 8px 12px; border-radius: 16px; font-size: 0.82rem; color: #93c5fd; margin-bottom: 8px; }
-
-        /* Document Accordion (Small & Clean UI) */
-        .doc-card-compact { background: var(--bg-main); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 8px; }
-        .doc-card-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; cursor: pointer; }
-        .doc-card-title { font-weight: 700; color: var(--primary); font-size: 0.85rem; display: flex; align-items: center; gap: 6px; }
-        .doc-card-body { padding: 10px 14px; border-top: 1px solid var(--border); font-size: 0.8rem; color: var(--text-dim); line-height: 1.6; display: none; background: var(--surface); border-bottom-left-radius: 12px; border-bottom-right-radius: 12px;}
-    </style>
-</head>
-<body>
-
-    <!-- ================= SETTINGS MODAL ================= -->
-    <div id="settingsModal" class="full-overlay" style="display:none; z-index: 10005;">
-        <div class="modal-card">
-            <button class="icon-btn" onclick="toggleSettingsModal()" style="position:absolute; top:15px; right:15px;"><i data-lucide="x"></i></button>
-            <h3 style="margin-top:0; display:flex; align-items:center; gap:8px;"><i data-lucide="settings"></i> <span data-i18n="settingsTitle">Settings</span></h3>
-            
-            <div style="display:flex; flex-direction:column; gap:8px;">
-                <label data-i18n="languageLabel" style="font-size:0.85rem; color:var(--text-dim); font-weight:bold;">Language</label>
-                <select id="langSelect" class="custom-select" onchange="changeLanguage(this.value)">
-                    <option value="en">English</option>
-                    <option value="ar">العربية (Arabic)</option>
-                    <option value="fr">Français (French)</option>
-                </select>
-            </div>
-        </div>
-    </div>
-
-    <!-- ================= AUTHENTICATION OVERLAY ================= -->
-    <div id="authOverlay" class="full-overlay">
-        <div class="modal-card">
-            <div style="text-align: center; margin-bottom: 10px;">
-                <svg viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:48px;height:48px;margin-bottom:10px;">
-                    <path d="M16 13v-2a2 2 0 0 0-2-2h-1v-2a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v2H7a2 2 0 0 0-2 2v2"/><path d="M4 11h16a2 2 0 0 1 2 2v2a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5v-2a2 2 0 0 1 2-2z"/>
-                </svg>
-                <h2 style="margin:0; font-family:'Outfit';">Welcome to ge_nius</h2>
-                <p style="color:var(--text-dim); font-size:0.85rem; margin-top:5px;">Select your role to configure the platform</p>
-            </div>
-            
-            <div class="role-selector">
-                <div class="role-card active" onclick="selectRole('student')" id="role-student"><i data-lucide="graduation-cap"></i> Student</div>
-                <div class="role-card" onclick="selectRole('teacher')" id="role-teacher"><i data-lucide="presentation"></i> Teacher</div>
-                <div class="role-card" onclick="selectRole('citizen')" id="role-citizen"><i data-lucide="globe"></i> Citizen</div>
-            </div>
-
-            <input type="text" id="authName" class="custom-input" placeholder="Full Name">
-            <input type="email" id="authEmail" class="custom-input" placeholder="Email Address">
-            <input type="password" id="authPassword" class="custom-input" placeholder="Password">
-            
-            <select id="authLevel" class="custom-select">
-                <option value="" disabled selected>Select Study Level...</option>
-                <option value="Middle School">Middle School</option>
-                <option value="High School">High School</option>
-                <option value="University">University</option>
-                <option value="Other">Other</option>
-            </select>
-
-            <button class="btn btn-purple" id="authBtn" onclick="performAuth()">Enter Platform <i data-lucide="arrow-right"></i></button>
-            <div id="authError" style="color:var(--danger); font-size:0.8rem; text-align:center;"></div>
-        </div>
-    </div>
-    <!-- ========================================================= -->
-
-    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
-    <aside class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <h3><i data-lucide="menu"></i> <span data-i18n="menu">Menu</span></h3>
-            <button class="icon-btn" style="width:34px; height:34px;" onclick="toggleSidebar()"><i data-lucide="x"></i></button>
-        </div>
-        
-        <div style="margin-bottom: 20px; background: var(--card); padding: 10px; border-radius: 12px; border: 1px solid var(--border);">
-            <div style="font-weight: bold; font-size: 0.95rem; color: var(--primary);" id="sidebarUserName">User</div>
-            <div style="font-size: 0.75rem; color: var(--text-dim);" id="sidebarRoleLabel">Role</div>
-            <button class="btn" style="width: 100%; margin-top: 10px; border-color:var(--danger); color:var(--danger);" onclick="performLogout()">
-                <i data-lucide="log-out"></i> <span data-i18n="logout">Logout</span>
-            </button>
-        </div>
-
-        <button class="btn" onclick="createNewChatSession()" style="width: 100%; justify-content: center; margin-bottom: 12px; border-radius: 16px;">
-            <i data-lucide="plus-circle"></i> <span data-i18n="newSession">New Session</span>
-        </button>
-
-        <button class="btn btn-purple" onclick="switchSection('docsTab')" style="width: 100%; justify-content: center; margin-bottom: 15px; border-radius: 16px;" id="btnCurriculum">
-            <i data-lucide="folder-kanban"></i> <span data-i18n="curriculum">Curriculum</span>
-        </button>
-
-        <div class="sidebar-section-title"><i data-lucide="brain"></i> <span data-i18n="aiPersona">AI Persona</span></div>
-        <div class="persona-grid" id="personaContainer">
-            <button class="persona-chip active" data-val="human" onclick="selectPersona('human', this)"><i data-lucide="heart" style="width:14px;height:14px;"></i> <span data-i18n="human">Human</span></button>
-            <button class="persona-chip" data-val="strict" onclick="selectPersona('strict', this)"><i data-lucide="briefcase" style="width:14px;height:14px;"></i> <span data-i18n="strict">Strict</span></button>
-            <button class="persona-chip" data-val="humor" onclick="selectPersona('humor', this)"><i data-lucide="smile" style="width:14px;height:14px;"></i> <span data-i18n="humor">Humor</span></button>
-            <button class="persona-chip" data-val="roast" onclick="selectPersona('roast', this)"><i data-lucide="flame" style="width:14px;height:14px;"></i> <span data-i18n="roast">Roast</span></button>
-        </div>
-
-        <div class="sidebar-section-title"><i data-lucide="history"></i> <span data-i18n="history">History</span></div>
-        <div class="chat-history-list" id="chatHistoryList"></div>
-
-        <!-- أزرار الإعدادات والمظهر في أسفل القائمة -->
-        <div style="margin-top: auto; padding-top: 15px; border-top: 1px solid var(--border); display:flex; gap:8px;">
-            <button class="btn" style="flex:1; justify-content: center; padding: 10px;" onclick="toggleTheme()" title="Toggle Theme">
-                <i data-lucide="moon" id="themeIcon"></i>
-            </button>
-            <button class="btn" style="flex:1; justify-content: center; padding: 10px;" onclick="toggleSettingsModal()" title="Settings">
-                <i data-lucide="settings"></i>
-            </button>
-        </div>
-    </aside>
-
-    <div class="main-wrapper">
-        <div class="top-nav-bar">
-            <div class="nav-header-row">
-                <button class="icon-btn" onclick="toggleSidebar()" title="Menu">
-                    <i data-lucide="align-left"></i>
-                </button>
-                <div class="app-brand">
-                    <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M16 13v-2a2 2 0 0 0-2-2h-1v-2a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v2H7a2 2 0 0 0-2 2v2"/><path d="M4 11h16a2 2 0 0 1 2 2v2a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5v-2a2 2 0 0 1 2-2z"/>
-                    </svg>
-                    ge<span>_</span>nius
-                </div>
-            </div>
-
-            <div class="mode-switcher-bar">
-                <button class="mode-tab hidden" id="modeTeacher" onclick="switchMode('teacher')"><span data-i18n="dashboard">Dashboard</span></button>
-                <button class="mode-tab hidden" id="modeStudy" onclick="switchMode('study')"><span data-i18n="study">Study</span></button>
-                <button class="mode-tab hidden" id="modeGames" onclick="switchMode('games')"><span data-i18n="games">Games</span></button>
-                <button class="mode-tab active" id="modeGeneral" onclick="switchMode('general')"><span data-i18n="general">General</span></button>
-            </div>
-        </div>
-
-        <div class="games-stats-bar" id="gamesStatsBar">
-            <span class="hud-hearts" id="hudHearts">❤️❤️❤️❤️❤️</span>
-            <span>⭐ XP: <strong id="userXp">0</strong></span>
-            <span style="color: #93c5fd;" data-i18n="platformReady">Ready!</span>
-        </div>
-
-        <!-- Teacher Dashboard Tab -->
-        <div class="tab-section" id="teacherTab" style="gap:15px; overflow-y:auto; padding:0 4px;">
-            <div class="card" style="text-align:center;">
-                <h3 style="color:var(--primary); margin-top:0;"><i data-lucide="upload-cloud"></i> <span data-i18n="uploadCurriculum">Upload Curriculum</span></h3>
-                <p style="color:var(--text-dim); font-size:0.9rem;" data-i18n="uploadDesc">Upload PDFs, DOCs, or Images. The ge_nius engine will automatically compress and integrate them globally.</p>
-                <div style="display:flex; gap:10px; justify-content:center; margin-top:15px;">
-                    <label for="teacherUploadBtn" class="btn btn-purple" style="width:auto; padding:12px 30px;"><i data-lucide="file-plus"></i> <span data-i18n="selectFile">Select File</span></label>
-                    <input type="file" id="teacherUploadBtn" accept=".pdf, .doc, .docx, image/*">
-                </div>
-                <div id="teacherUploadStatus" style="margin-top:10px; font-weight:bold; font-size:0.85rem;"></div>
-            </div>
-            <h4 style="margin:0; color:var(--text-main);" data-i18n="globalArchive">Global Curriculum Archive</h4>
-            <div id="teacherDocsList" style="display:flex; flex-direction:column; gap:10px; padding-bottom:20px;"></div>
-        </div>
-
-        <!-- Chat / Ask Tab -->
-        <div class="tab-section active" id="askTab">
-            <div class="chat-container-wrapper">
-                <div class="chat-feed" id="chatFeed">
-                    <div id="welcomeMsg" style="color: var(--text-dim); text-align: center; padding: 80px 20px; display: flex; flex-direction: column; align-items: center; gap: 16px;">
-                        <svg class="submarine-logo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M16 13v-2a2 2 0 0 0-2-2h-1v-2a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v2H7a2 2 0 0 0-2 2v2"/>
-                            <path d="M4 11h16a2 2 0 0 1 2 2v2a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5v-2a2 2 0 0 1 2-2z"/>
-                            <circle cx="12" cy="15" r="2"/><path d="M20 15h2"/><path d="M2 15h2"/>
-                        </svg>
-                        <p style="margin: 0; font-size: 1rem; max-width: 250px; line-height: 1.5; color: var(--text-dim);" data-i18n="platformReady">Platform Ready.</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="chat-input-container">
-                <div class="image-preview-bar" id="questionImgPreview">
-                    <span style="display: flex; align-items: center; gap: 6px;"><i data-lucide="image" style="width: 14px; height: 14px;"></i> <span data-i18n="docAttached">Document attached</span></span>
-                    <span style="cursor: pointer; color: #fca5a5; font-weight: bold; display: flex; align-items: center;" onclick="removeQuestionImage()"><i data-lucide="x" style="width: 16px; height: 16px;"></i></span>
-                </div>
-
-                <div class="magic-menu" id="magicMenu">
-                    <label for="qFileInputCamera" class="magic-item">
-                        <i data-lucide="camera" style="color:var(--primary)"></i> <span data-i18n="takePhoto">Take Photo</span>
-                    </label>
-                    <input type="file" id="qFileInputCamera" accept="image/*" capture="environment">
-                    
-                    <label for="qFileInputGallery" class="magic-item">
-                        <i data-lucide="image-plus" style="color:var(--primary)"></i> <span data-i18n="uploadPdfDoc">Upload PDF/Doc</span>
-                    </label>
-                    <input type="file" id="qFileInputGallery" accept=".pdf, .doc, .docx, image/*">
-
-                    <div class="magic-item" id="btnSummarize" onclick="triggerSummarizer()" style="display:none; color:var(--accent-gold); font-weight:bold;">
-                        <i data-lucide="sparkles"></i> <span data-i18n="aiSummarize">AI Summarize</span>
-                    </div>
-                </div>
-
-                <div class="input-glass-panel" id="inputPanel">
-                    <button class="tool-btn" id="magicBtn" onclick="toggleMagicMenu()" title="Attach">
-                        <i data-lucide="plus"></i>
-                    </button>
-
-                    <textarea id="userQuery" data-i18n="askAnything" placeholder="Ask anything..." rows="1" oninput="autoResizeTextarea(this)"></textarea>
-                    
-                    <button class="tool-btn" id="voiceRecordBtn" onclick="toggleVoiceRecording()" title="Voice Input">
-                        <i data-lucide="mic"></i>
-                    </button>
-
-                    <button class="send-btn-royal" id="sendBtn" onclick="submitQuestion()" title="Send">
-                        <i data-lucide="arrow-up" id="sendIcon"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Curriculum Docs Tab -->
-        <div class="tab-section" id="docsTab" style="gap:15px; overflow-y:auto; padding:0 4px;">
-            <div style="display: flex; align-items: center; justify-content: space-between;">
-                <h3 style="margin:0; font-size: 1.15rem; color: var(--text-main); font-weight: 700;" data-i18n="curriculumArchive">Curriculum Archive</h3>
-                <button class="btn" style="padding: 6px 10px; font-size: 0.75rem;" onclick="switchSection('askTab')">
-                    <i data-lucide="arrow-left" style="width:14px;height:14px;"></i> <span data-i18n="back">Back</span>
-                </button>
-            </div>
-            <div class="card" id="studentUploadArea" style="padding: 12px;">
-                <span style="font-weight: 700; font-size: 0.85rem; color: var(--primary); display: flex; align-items: center; gap: 8px; margin-bottom:8px;"><i data-lucide="file-up" style="width:14px;height:14px;"></i> <span data-i18n="uploadMaterials">Upload Materials</span></span>
-                <div style="display: flex; gap: 6px;">
-                    <label for="docFileInputCamera" class="btn btn-purple" style="flex: 1; padding:8px; font-size:0.8rem; text-align: center; margin:0;"><i data-lucide="scan" style="width:14px;height:14px;"></i> <span data-i18n="scan">Scan</span></label>
-                    <input type="file" id="docFileInputCamera" accept="image/*" capture="environment">
-                    
-                    <label for="docFileInputGallery" class="btn btn-purple" style="flex: 1; padding:8px; font-size:0.8rem; text-align: center; margin:0;"><i data-lucide="folder" style="width:14px;height:14px;"></i> <span data-i18n="files">Files</span></label>
-                    <input type="file" id="docFileInputGallery" accept=".pdf, .doc, .docx, image/*" multiple>
-                </div>
-                <div id="uploadStatus" style="font-size: 0.75rem; font-weight: bold; text-align:center; margin-top:8px;"></div>
-            </div>
-            <div id="docsList" style="display: flex; flex-direction: column; gap: 6px;"></div>
-        </div>
-    </div>
-
-    <script>
-        // --- 1. Language & i18n System ---
-        const i18n = {
-            en: {
-                menu: "Menu", logout: "Logout", newSession: "New Session", curriculum: "Curriculum",
-                aiPersona: "AI Persona", human: "Human", strict: "Strict", humor: "Humor", roast: "Roast",
-                history: "History", dashboard: "Dashboard", study: "Study", games: "Games", general: "General",
-                platformReady: "Platform Ready.", uploadCurriculum: "Upload Curriculum",
-                uploadDesc: "Upload PDFs, DOCs, or Images. The ge_nius engine will automatically compress and integrate them globally.",
-                selectFile: "Select File", globalArchive: "Global Curriculum Archive", docAttached: "Document attached",
-                takePhoto: "Take Photo", uploadPdfDoc: "Upload PDF/Doc", aiSummarize: "AI Summarize",
-                askAnything: "Ask anything...", curriculumArchive: "Curriculum Archive", back: "Back",
-                uploadMaterials: "Upload Materials", scan: "Scan", files: "Files", settingsTitle: "Settings",
-                languageLabel: "Language", detailedOutput: "Detailed Output", copy: "Copy", listen: "Listen",
-                processing: "Processing logic..."
-            },
-            ar: {
-                menu: "القائمة", logout: "تسجيل الخروج", newSession: "جلسة جديدة", curriculum: "المناهج",
-                aiPersona: "شخصية الذكاء", human: "بشري", strict: "صارم", humor: "فكاهي", roast: "ساخر",
-                history: "السجل", dashboard: "لوحة التحكم", study: "دراسة", games: "ألعاب", general: "عام",
-                platformReady: "المنصة جاهزة.", uploadCurriculum: "رفع المناهج",
-                uploadDesc: "قم برفع ملفات PDF أو الصور. المحرك سيقوم بضغطها ودمجها عالمياً.",
-                selectFile: "اختر ملف", globalArchive: "أرشيف المناهج العالمي", docAttached: "تم إرفاق المستند",
-                takePhoto: "التقاط صورة", uploadPdfDoc: "رفع PDF/مستند", aiSummarize: "تلخيص ذكي",
-                askAnything: "اسأل أي شيء...", curriculumArchive: "أرشيف المناهج", back: "رجوع",
-                uploadMaterials: "رفع المواد", scan: "مسح", files: "ملفات", settingsTitle: "الإعدادات",
-                languageLabel: "اللغة", detailedOutput: "تفاصيل الإجابة", copy: "نسخ", listen: "استماع",
-                processing: "جاري المعالجة..."
-            },
-            fr: {
-                menu: "Menu", logout: "Déconnexion", newSession: "Nouvelle Session", curriculum: "Programme",
-                aiPersona: "Personnalité IA", human: "Humain", strict: "Strict", humor: "Humour", roast: "Sarcastique",
-                history: "Historique", dashboard: "Tableau de Bord", study: "Étude", games: "Jeux", general: "Général",
-                platformReady: "Plateforme Prête.", uploadCurriculum: "Télécharger Programme",
-                uploadDesc: "Téléchargez PDF ou Images. Le moteur les compressera et les intégrera.",
-                selectFile: "Sélectionner", globalArchive: "Archive Globale", docAttached: "Document joint",
-                takePhoto: "Prendre Photo", uploadPdfDoc: "Télécharger PDF/Doc", aiSummarize: "Résumé IA",
-                askAnything: "Demandez n'importe quoi...", curriculumArchive: "Archive du Programme", back: "Retour",
-                uploadMaterials: "Télécharger Matériel", scan: "Scanner", files: "Fichiers", settingsTitle: "Paramètres",
-                languageLabel: "Langue", detailedOutput: "Sortie Détaillée", copy: "Copier", listen: "Écouter",
-                processing: "Traitement en cours..."
-            }
-        };
-
-        let currentLang = localStorage.getItem('ge_nius_lang') || 'en';
-
-        function changeLanguage(lang) {
-            currentLang = lang;
-            localStorage.setItem('ge_nius_lang', lang);
-            document.getElementById('langSelect').value = lang;
-            
-            document.documentElement.dir = (lang === 'ar') ? 'rtl' : 'ltr';
-            
-            document.querySelectorAll('[data-i18n]').forEach(el => {
-                const key = el.getAttribute('data-i18n');
-                if (i18n[lang] && i18n[lang][key]) {
-                    if (el.tagName === 'TEXTAREA' || el.tagName === 'INPUT') {
-                        el.placeholder = i18n[lang][key];
-                    } else {
-                        el.innerText = i18n[lang][key];
-                    }
-                }
-            });
-        }
-
-        function toggleSettingsModal() {
-            const modal = document.getElementById('settingsModal');
-            modal.style.display = modal.style.display === 'none' ? 'flex' : 'none';
-        }
-
-        // --- Initialization ---
-        document.addEventListener("DOMContentLoaded", () => { 
-            lucide.createIcons(); 
-            changeLanguage(currentLang);
-            checkAuth(); 
-        });
-
-        let isAiThinking = false;
-        let currentUser = null;
-        let attachedQuestionBase64 = null;
-        let currentMode = 'general';
-        let currentPersonaValue = 'human'; 
-        let modeContents = { study: "", general: "", games: "" };
-        const chatFeed = document.getElementById('chatFeed');
-
-        // --- AUTHENTICATION ---
-        let selectedRole = 'student';
-        function selectRole(role) {
-            selectedRole = role;
-            document.querySelectorAll('.role-card').forEach(c => c.classList.remove('active'));
-            document.getElementById('role-' + role).classList.add('active');
-            
-            const levelSelect = document.getElementById('authLevel');
-            if(role === 'student') levelSelect.style.display = 'block';
-            else levelSelect.style.display = 'none';
-        }
-
-        async function performAuth() {
-            const name = document.getElementById('authName').value.trim();
-            const email = document.getElementById('authEmail').value.trim();
-            const pwd = document.getElementById('authPassword').value.trim();
-            const level = document.getElementById('authLevel').value;
-            const err = document.getElementById('authError');
-
-            if(!name || !email || !pwd) { err.innerText = "Please fill all fields."; return; }
-            if(selectedRole === 'student' && !level) { err.innerText = "Please select your study level."; return; }
-            
-            err.innerText = "Authenticating...";
-            try {
-                const res = await fetch('/api/auth', {
-                    method: 'POST', headers: {'Content-Type':'application/json'},
-                    body: JSON.stringify({name, email, password: pwd, role: selectedRole, level})
-                });
-                const data = await res.json();
-                if(data.success) {
-                    document.getElementById('authOverlay').style.opacity = '0';
-                    setTimeout(() => document.getElementById('authOverlay').style.display = 'none', 400);
-                    currentUser = data.user;
-                    configureUIForRole();
-                } else {
-                    err.innerText = data.error || "Authentication failed.";
-                }
-            } catch(e) { err.innerText = "Network error."; }
-        }
-
-        async function checkAuth() {
-            try {
-                const res = await fetch('/api/user/me');
-                const data = await res.json();
-                if(data.user) {
-                    document.getElementById('authOverlay').style.display = 'none';
-                    currentUser = data.user;
-                    configureUIForRole();
-                }
-            } catch(e) {}
-        }
-
-        async function performLogout() {
-            try {
-                await fetch('/api/logout', { method: 'POST' });
-                document.cookie = "session_id=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-                currentUser = null;
-                document.getElementById('authName').value = '';
-                document.getElementById('authEmail').value = '';
-                document.getElementById('authPassword').value = '';
-                
-                document.getElementById('authOverlay').style.display = 'flex';
-                setTimeout(() => document.getElementById('authOverlay').style.opacity = '1', 10);
-                if(document.getElementById('sidebar').classList.contains('open')) toggleSidebar();
-                
-            } catch(e) { console.error(e); }
-        }
-
-        function configureUIForRole() {
-            document.getElementById('sidebarUserName').innerText = currentUser.name;
-            document.getElementById('sidebarRoleLabel').innerText = currentUser.role.toUpperCase() + (currentUser.level ? ` • ${currentUser.level}` : '');
-            
-            document.querySelectorAll('.mode-tab').forEach(t => t.classList.add('hidden'));
-            document.getElementById('modeGeneral').classList.remove('hidden');
-            document.getElementById('btnCurriculum').style.display = 'none';
-
-            if (currentUser.role === 'teacher') {
-                document.getElementById('modeTeacher').classList.remove('hidden');
-                switchMode('teacher');
-            } else if (currentUser.role === 'student') {
-                document.getElementById('modeStudy').classList.remove('hidden');
-                document.getElementById('modeGames').classList.remove('hidden');
-                document.getElementById('btnCurriculum').style.display = 'flex';
-                updateGamificationHUD(currentUser.hearts, currentUser.xp);
-                switchMode('study');
-            } else {
-                switchMode('general');
-            }
-        }
-
-        function updateGamificationHUD(hearts, xp) {
-            let heartStr = "";
-            for(let i=0; i<5; i++) { heartStr += (i < hearts) ? "❤️" : "🤍"; }
-            document.getElementById('hudHearts').innerText = heartStr;
-            document.getElementById('userXp').innerText = xp;
-        }
-
-        // Persona Selection
-        window.selectPersona = function(val, btnElement) {
-            currentPersonaValue = val;
-            document.querySelectorAll('.persona-chip').forEach(btn => btn.classList.remove('active'));
-            btnElement.classList.add('active');
-            if(window.innerWidth < 768) toggleSidebar();
-        };
-
-        // UI Interactions
-        function toggleMagicMenu() {
-            if(isAiThinking) return;
-            const menu = document.getElementById('magicMenu');
-            const btn = document.getElementById('magicBtn');
-            menu.classList.toggle('show');
-            btn.classList.toggle('active-magic');
-        }
-
-        document.addEventListener('click', (e) => {
-            const menu = document.getElementById('magicMenu');
-            const btn = document.getElementById('magicBtn');
-            if (menu && btn && !menu.contains(e.target) && !btn.contains(e.target)) {
-                menu.classList.remove('show');
-                btn.classList.remove('active-magic');
-            }
-        });
-
-        function toggleTheme() {
-            const isLight = document.body.classList.toggle('light-mode');
-            localStorage.setItem('theme', isLight ? 'light' : 'dark');
-            const iconId = isLight ? 'moon' : 'sun';
-            document.getElementById('themeIcon').setAttribute('data-lucide', iconId);
-            lucide.createIcons();
-        }
-        if (localStorage.getItem('theme') === 'light') { 
-            document.body.classList.add('light-mode'); 
-            document.getElementById('themeIcon').setAttribute('data-lucide', 'moon');
-        }
-
-        function toggleSidebar() {
-            document.getElementById('sidebar').classList.toggle('open');
-            document.getElementById('sidebarOverlay').classList.toggle('active');
-        }
-
-        function switchSection(sectionId) {
-            document.querySelectorAll('.tab-section').forEach(s => s.classList.remove('active'));
-            document.getElementById(sectionId).classList.add('active');
-            if(document.getElementById('sidebar').classList.contains('open')) toggleSidebar();
-        }
-
-        function autoResizeTextarea(el) {
-            el.style.height = 'auto';
-            el.style.height = (el.scrollHeight) + 'px';
-        }
-
-        let recognition = null;
-        function toggleVoiceRecording() {
-            const btn = document.getElementById('voiceRecordBtn');
-            const queryInput = document.getElementById('userQuery');
-            
-            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-                alert('Speech recognition is not supported in your browser.');
-                return;
-            }
-
-            if (btn.classList.contains('recording')) {
-                if(recognition) recognition.stop();
-                btn.classList.remove('recording');
-                return;
-            }
-
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            recognition = new SpeechRecognition();
-            recognition.lang = currentLang === 'ar' ? 'ar-SA' : (currentLang === 'fr' ? 'fr-FR' : 'en-US');
-            recognition.interimResults = false;
-
-            recognition.onstart = () => { btn.classList.add('recording'); };
-            recognition.onresult = (event) => {
-                queryInput.value = event.results[0][0].transcript;
-                autoResizeTextarea(queryInput);
-                btn.classList.remove('recording');
-            };
-            recognition.onerror = () => { btn.classList.remove('recording'); };
-            recognition.onend = () => { btn.classList.remove('recording'); };
-            recognition.start();
-        }
-
-        // --- Sessions & Context Tracking ---
-        let chatSessions = JSON.parse(localStorage.getItem('ge_nius_sessions_royal_v5')) || {};
-        let currentSessionId = localStorage.getItem('ge_nius_current_session_royal_v5');
-
-        function initSessions() {
-            if (!currentSessionId || !chatSessions[currentSessionId]) { createNewSessionQuiet(); } 
-            else { loadChatSession(currentSessionId); }
-            renderChatHistoryList();
-        }
-
-        function createNewSessionQuiet() {
-            const id = Date.now().toString();
-            // Context array added to track history
-            chatSessions[id] = { id: id, title: "New Session", mode: "study", modesData: { study: "", general: "", games: "" }, context: [] };
-            currentSessionId = id;
-            saveSessionsData();
-        }
-
-        function createNewChatSession() {
-            if(isAiThinking) return;
-            createNewSessionQuiet();
-            loadChatSession(currentSessionId);
-            if(document.getElementById('sidebar').classList.contains('open')) toggleSidebar();
-        }
-
-        function switchMode(mode) {
-            if(isAiThinking) return;
-            
-            if (currentMode !== 'teacher') {
-                modeContents[currentMode] = chatFeed.innerHTML;
-            }
-            currentMode = mode;
-            document.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
-            
-            const btnSumm = document.getElementById('btnSummarize');
-            if(btnSumm) btnSumm.style.display = (mode === 'study') ? 'flex' : 'none';
-
-            if (mode === 'teacher') {
-                document.getElementById('modeTeacher').classList.add('active');
-                switchSection('teacherTab');
-                fetchTeacherDocs();
-                return;
-            } else {
-                switchSection('askTab');
-                if(mode === 'study') document.getElementById('modeStudy').classList.add('active');
-                else if(mode === 'general') document.getElementById('modeGeneral').classList.add('active');
-                else if(mode === 'games') document.getElementById('modeGames').classList.add('active');
-            }
-
-            const gamesStatsBar = document.getElementById('gamesStatsBar');
-            if (mode === 'games' && currentUser && currentUser.role === 'student') {
-                gamesStatsBar.classList.add('active');
-                updateGamificationHUD(currentUser.hearts, currentUser.xp);
-            } else {
-                gamesStatsBar.classList.remove('active');
-            }
-
-            if (modeContents[mode] && modeContents[mode].trim() !== '') {
-                chatFeed.innerHTML = modeContents[mode];
-            } else {
-                const welcomeText = i18n[currentLang]['platformReady'] || 'Platform Ready.';
-                chatFeed.innerHTML = `<div id="welcomeMsg" style="color: var(--text-dim); text-align: center; padding: 80px 20px; display: flex; flex-direction: column; align-items: center; gap: 16px;"><svg class="submarine-logo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 13v-2a2 2 0 0 0-2-2h-1v-2a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v2H7a2 2 0 0 0-2 2v2"/><path d="M4 11h16a2 2 0 0 1 2 2v2a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5v-2a2 2 0 0 1 2-2z"/><circle cx="12" cy="15" r="2"/><path d="M20 15h2"/><path d="M2 15h2"/></svg><p style="margin: 0; font-size: 1rem; max-width: 250px; line-height: 1.5; color: var(--text-dim);">${welcomeText}</p></div>`;
-            }
-
-            if(chatSessions[currentSessionId]) {
-                chatSessions[currentSessionId].mode = mode;
-                chatSessions[currentSessionId].modesData = modeContents;
-                saveSessionsData();
-            }
-            lucide.createIcons({root: chatFeed});
-        }
-
-        function loadChatSession(id) {
-            currentSessionId = id;
-            const session = chatSessions[id];
-            if (session && session.modesData) { modeContents = session.modesData; } 
-            else { modeContents = { study: "", general: "", games: "" }; }
-            if(session && session.mode) switchMode(session.mode); else switchMode('study');
-            renderChatHistoryList();
-            if(document.getElementById('sidebar').classList.contains('open')) toggleSidebar();
-        }
-
-        function deleteSessionItem(e, id) {
-            e.stopPropagation();
-            if(confirm('Delete this session?')) {
-                delete chatSessions[id];
-                if(id === currentSessionId) {
-                    const keys = Object.keys(chatSessions);
-                    if(keys.length > 0) { currentSessionId = keys[0]; loadChatSession(currentSessionId); } 
-                    else { createNewChatSession(); }
-                } else { saveSessionsData(); renderChatHistoryList(); }
-            }
-        }
-
-        function saveCurrentChatHtml(userQueryText = null) {
-            if(!chatSessions[currentSessionId] || currentMode === 'teacher') return;
-            modeContents[currentMode] = chatFeed.innerHTML;
-            chatSessions[currentSessionId].modesData = modeContents;
-            if (userQueryText && chatSessions[currentSessionId].title === "New Session") {
-                chatSessions[currentSessionId].title = userQueryText.substring(0, 20) + "...";
-            }
-            saveSessionsData();
-        }
-
-        function saveSessionsData() {
-            localStorage.setItem('ge_nius_sessions_royal_v5', JSON.stringify(chatSessions));
-            localStorage.setItem('ge_nius_current_session_royal_v5', currentSessionId);
-            renderChatHistoryList();
-        }
-
-        function renderChatHistoryList() {
-            const listDiv = document.getElementById('chatHistoryList');
-            if(!listDiv) return;
-            listDiv.innerHTML = '';
-            const sortedIds = Object.keys(chatSessions).sort((a, b) => b - a);
-            
-            sortedIds.forEach(id => {
-                const session = chatSessions[id];
-                const isActive = id === currentSessionId ? 'active' : '';
-                listDiv.innerHTML += `<div class="history-item ${isActive}" onclick="loadChatSession('${id}')"><div class="history-item-content"><i data-lucide="message-square" style="width: 14px; height: 14px;"></i><span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${session.title}</span></div><button class="delete-history-btn" onclick="deleteSessionItem(event, '${id}')"><i data-lucide="trash-2" style="width: 14px; height: 14px;"></i></button></div>`;
-            });
-            lucide.createIcons({root: listDiv});
-        }
-
-        initSessions();
-
-        window.speakText = function(text) {
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel();
-                const utterance = new SpeechSynthesisUtterance(decodeURIComponent(text));
-                utterance.rate = 1.0; utterance.pitch = 1.0;
-                window.speechSynthesis.speak(utterance);
-            }
-        };
-
-        window.copyCodeText = function(btn) {
-            const container = btn.closest('.complex-card-box');
-            if(container) {
-                const contentText = container.querySelector('.ai-content').innerText;
-                navigator.clipboard.writeText(contentText).then(() => {
-                    const originalHtml = btn.innerHTML;
-                    const cText = i18n[currentLang]['copy'] || 'Copy';
-                    btn.innerHTML = `<i data-lucide="check" style="width:12px;height:12px;"></i> ${cText}`;
-                    lucide.createIcons({root: btn});
-                    setTimeout(() => { btn.innerHTML = originalHtml; lucide.createIcons({root: btn}); }, 2000);
-                });
-            }
-        };
-
-        // --- Documents & Files ---
-        let curriculumDocs = [];
-        fetchDocs();
-
-        function fetchDocs() { fetch('/api/docs').then(res => res.json()).then(data => { curriculumDocs = data; renderDocs(); }); }
-
-        window.toggleDocCollapse = function(id) {
-            const el = document.getElementById('doc-body-' + id);
-            const icon = document.getElementById('doc-icon-' + id);
-            if(el.style.display === 'none' || el.style.display === '') {
-                el.style.display = 'block';
-                icon.style.transform = 'rotate(180deg)';
-            } else {
-                el.style.display = 'none';
-                icon.style.transform = 'rotate(0deg)';
-            }
-        };
-
-        function renderDocs() {
-            const listDiv = document.getElementById('docsList');
-            if (!listDiv) return;
-            if (curriculumDocs.length === 0) { listDiv.innerHTML = '<div style="color: var(--text-dim); text-align: center; padding: 20px; font-size:0.8rem;">No documents uploaded yet.</div>'; return; }
-            listDiv.innerHTML = curriculumDocs.map((item, index) => `
-                <div class="doc-card-compact">
-                    <div class="doc-card-header" onclick="toggleDocCollapse(${item.id})">
-                        <span class="doc-card-title"><i data-lucide="file-text" style="width:14px;height:14px;"></i> Doc ${index + 1}</span>
-                        <div style="display:flex; align-items:center; gap:8px;">
-                            <button class="btn" style="padding:2px 6px; font-size:0.7rem; color:var(--danger); border:none; background:transparent;" onclick="event.stopPropagation(); deleteDoc(${item.id})"><i data-lucide="trash-2" style="width:14px;height:14px;"></i></button>
-                            <i data-lucide="chevron-down" id="doc-icon-${item.id}" style="width:16px;height:16px;color:var(--text-dim);transition:0.3s;"></i>
-                        </div>
-                    </div>
-                    <div class="doc-card-body" id="doc-body-${item.id}">
-                        ${item.concepts}
-                    </div>
-                </div>
-            `).join('');
-            lucide.createIcons({root: listDiv});
-        }
-
-        async function handleFileSelect(e, isTeacher) {
-            const file = e.target.files[0]; if(!file) return;
-            const reader = new FileReader();
-            reader.onload = async function(evt) {
-                const b64 = evt.target.result;
-                if(isTeacher) {
-                    const stat = document.getElementById('teacherUploadStatus');
-                    stat.innerText = "Compressing & Uploading...";
-                    stat.style.color = "var(--primary)";
-                    await fetch('/api/teacher/upload', {
-                        method: 'POST', headers: {'Content-Type':'application/json'},
-                        body: JSON.stringify({file: b64, filename: file.name})
-                    });
-                    stat.innerText = "Uploaded successfully!";
-                    stat.style.color = "var(--accent-green)";
-                    fetchTeacherDocs();
-                } else {
-                    attachedQuestionBase64 = b64;
-                    document.getElementById('questionImgPreview').style.display = 'flex';
-                    document.getElementById('magicMenu').classList.remove('show');
-                    const btn = document.getElementById('magicBtn');
-                    if(btn) btn.classList.remove('active-magic');
-                }
-            };
-            reader.readAsDataURL(file); e.target.value = '';
-        }
-
-        document.getElementById('teacherUploadBtn').addEventListener('change', (e) => handleFileSelect(e, true));
-        document.getElementById('qFileInputGallery').addEventListener('change', (e) => handleFileSelect(e, false));
-        document.getElementById('qFileInputCamera').addEventListener('change', (e) => handleFileSelect(e, false));
-
-        function removeQuestionImage() { attachedQuestionBase64 = null; document.getElementById('questionImgPreview').style.display = 'none'; }
-
-        async function handleDocImageSelect(e) {
-            const files = e.target.files; if (!files || files.length === 0) return;
-            const statusDiv = document.getElementById('uploadStatus');
-            for (let i = 0; i < files.length; i++) {
-                if(statusDiv) { statusDiv.innerHTML = `Processing ${i + 1}...`; statusDiv.style.color = 'var(--primary)'; }
-                await new Promise((resolve) => {
-                    const reader = new FileReader();
-                    reader.onload = async function(evt) {
-                        try {
-                            const res = await fetch('/api/docs/upload', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ image: evt.target.result }) });
-                            const data = await res.json(); if (data.docs) curriculumDocs = data.docs;
-                        } catch (err) {} resolve();
-                    }; reader.readAsDataURL(files[i]);
-                });
-            }
-            renderDocs();
-            if(statusDiv) { statusDiv.innerHTML = 'Saved successfully!'; statusDiv.style.color = 'var(--accent-green)'; }
-        }
-        document.getElementById('docFileInputCamera').addEventListener('change', handleDocImageSelect);
-        document.getElementById('docFileInputGallery').addEventListener('change', handleDocImageSelect);
-
-        function deleteDoc(id) { fetch('/api/docs/delete', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id }) }).then(res => res.json()).then(data => { curriculumDocs = data; renderDocs(); }); }
-
-        async function fetchTeacherDocs() {
-            const res = await fetch('/api/teacher/docs');
-            const data = await res.json();
-            const list = document.getElementById('teacherDocsList');
-            list.innerHTML = data.docs.map(d => `
-                <div style="background:var(--card); padding:10px 14px; border-radius:12px; border:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
-                    <span style="font-weight:600; font-size:0.85rem;"><i data-lucide="file-check" style="width:14px;height:14px; margin-right:4px;"></i> ${d.title}</span>
-                    <span style="font-size:0.75rem; color:var(--text-dim);">Compressed</span>
-                </div>
-            `).join('') || "<div style='color:var(--text-dim); font-size:0.85rem; text-align:center;'>No materials uploaded yet.</div>";
-            lucide.createIcons({root: list});
-        }
-
-        function triggerSummarizer() {
-            document.getElementById('magicMenu').classList.remove('show');
-            document.getElementById('userQuery').value = "Please summarize the current curriculum focusing on: 1. Core Concepts, 2. Formulas (LaTeX), 3. Examples, 4. Exam notes.";
-            submitQuestion(true);
-        }
-
-        // --- AI Chat ---
-        function submitQuestion(isSummary = false) {
-            if (isAiThinking) return;
-
-            const queryInput = document.getElementById('userQuery');
-            const query = queryInput.value.trim();
-
-            if (!query && !attachedQuestionBase64) return;
-            if (currentMode === 'study' && curriculumDocs.length === 0) { alert('Study mode requires uploaded curriculum documents. Switch to General or Games!'); return; }
-            if (currentUser && currentUser.role === 'student' && currentMode === 'games' && currentUser.hearts <= 0) { alert("You have 0 hearts left! Take a break."); return; }
-            
-            isAiThinking = true;
-            document.getElementById('inputPanel').classList.add('locked');
-            const sendBtn = document.getElementById('sendBtn');
-            sendBtn.classList.add('loading');
-            sendBtn.innerHTML = `<i data-lucide="loader-2" class="spinner-icon" style="width:20px;height:20px;"></i>`;
-            lucide.createIcons({root: sendBtn});
-            
-            const welcome = document.getElementById('welcomeMsg'); if(welcome) welcome.remove();
-
-            let userTextDisplay = query.replace(/\\n/g, '<br>');
-            if (attachedQuestionBase64) { userTextDisplay = (query ? userTextDisplay + '<br>' : '') + `<span style="color:var(--primary); font-size:0.85em; display:flex; align-items:center; gap:4px; margin-top:6px;"><i data-lucide="image" style="width:14px;height:14px;"></i> File attached</span>`; }
-
-            const userRow = document.createElement('div'); userRow.className = 'message-row';
-            userRow.style.alignItems = 'flex-end';
-            userRow.innerHTML = `
-                <div class="message-sender" style="justify-content:flex-end; margin-bottom: 2px;">
-                    <div class="avatar-user"><i data-lucide="user" style="width:14px;height:14px;color:#fff;"></i></div>
-                </div>
-                <div class="message-text-user">${userTextDisplay}</div>`;
-            chatFeed.appendChild(userRow); lucide.createIcons({root: userRow});
-
-            const procText = i18n[currentLang]['processing'] || 'Processing logic...';
-            const loadingRow = document.createElement('div'); loadingRow.className = 'message-row loading-bubble-temp';
-            loadingRow.innerHTML = `
-                <div class="message-sender" style="margin-bottom: 2px;">
-                    <div class="avatar-ai">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;color:var(--primary);">
-                            <path d="M16 13v-2a2 2 0 0 0-2-2h-1v-2a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v2H7a2 2 0 0 0-2 2v2"/><path d="M4 11h16a2 2 0 0 1 2 2v2a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5v-2a2 2 0 0 1 2-2z"/><circle cx="12" cy="15" r="2"/><path d="M20 15h2"/><path d="M2 15h2"/>
-                        </svg>
-                    </div>
-                </div>
-                <div class="hologram-thinking">${procText}</div>
-            `;
-            chatFeed.appendChild(loadingRow); lucide.createIcons({root: loadingRow});
-            
-            saveCurrentChatHtml(query);
-
-            // Context/Memory Save
-            if (!chatSessions[currentSessionId].context) { chatSessions[currentSessionId].context = []; }
-            chatSessions[currentSessionId].context.push({role: "user", content: query});
-            if (chatSessions[currentSessionId].context.length > 10) { chatSessions[currentSessionId].context = chatSessions[currentSessionId].context.slice(-10); }
-
-            const payload = { 
-                query: query, file: attachedQuestionBase64, mode: currentMode, 
-                isSummary: isSummary, persona: currentPersonaValue, context: chatSessions[currentSessionId].context 
-            };
-            
-            queryInput.value = ''; queryInput.style.height = 'auto'; removeQuestionImage(); chatFeed.scrollTop = chatFeed.scrollHeight;
-
-            fetch('/api/ask', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
-            .then(res => res.json())
-            .then(data => {
-                chatFeed.removeChild(loadingRow);
-                const aiRow = document.createElement('div'); aiRow.className = 'message-row';
-                
-                const detOut = i18n[currentLang]['detailedOutput'] || 'Detailed Output';
-                const cpy = i18n[currentLang]['copy'] || 'Copy';
-                const lstn = i18n[currentLang]['listen'] || 'Listen';
-
-                let avatarHtml = `
-                <div class="message-sender" style="margin-bottom: 2px;">
-                    <div class="avatar-ai">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;color:var(--primary);">
-                            <path d="M16 13v-2a2 2 0 0 0-2-2h-1v-2a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v2H7a2 2 0 0 0-2 2v2"/><path d="M4 11h16a2 2 0 0 1 2 2v2a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5v-2a2 2 0 0 1 2-2z"/><circle cx="12" cy="15" r="2"/><path d="M20 15h2"/><path d="M2 15h2"/>
-                        </svg>
-                    </div>
-                </div>`;
-
-                if (data.status === 'out_of_scope') {
-                    aiRow.innerHTML = avatarHtml + `<div class="message-text-ai" style="color:#fca5a5;">Out of curriculum scope. Switch to General mode.</div>`;
-                } else if (data.status === 'success') {
-                    let fullText = data.answer;
-                    const encoded = encodeURIComponent(fullText);
-                    
-                    // Memory Context Assistant Save
-                    chatSessions[currentSessionId].context.push({role: "assistant", content: fullText});
-                    
-                    if(data.hearts !== undefined && data.xp !== undefined && currentUser.role === 'student' && currentMode === 'games') {
-                        currentUser.hearts = data.hearts; currentUser.xp = data.xp;
-                        updateGamificationHUD(data.hearts, data.xp);
-                    }
-                    
-                    if (fullText.includes("```") || fullText.length > 500) {
-                        aiRow.innerHTML = avatarHtml + `
-                            <div class="complex-card-box">
-                                <div class="complex-card-header">
-                                    <span>${detOut}</span>
-                                    <button class="copy-code-btn" onclick="copyCodeText(this)"><i data-lucide="copy" style="width:12px;height:12px;"></i> <span>${cpy}</span></button>
-                                </div>
-                                <div class="message-text-ai ai-content">${marked.parse(fullText)}</div>
-                            </div>
-                            <div><button class="audio-speech-btn" onclick="speakText('${encoded}')"><i data-lucide="volume-2" style="width:14px;height:14px;"></i> <span>${lstn}</span></button></div>
-                        `;
-                    } else {
-                        aiRow.innerHTML = avatarHtml + `
-                            <div class="message-text-ai ai-content" style="padding-top:4px;">${marked.parse(fullText)}</div>
-                            <div><button class="audio-speech-btn" onclick="speakText('${encoded}')"><i data-lucide="volume-2" style="width:14px;height:14px;"></i> <span>${lstn}</span></button></div>
-                        `;
-                    }
-                } else {
-                    aiRow.innerHTML = avatarHtml + `<div class="message-text-ai" style="color:var(--danger)">Error: ${data.error || 'Failed.'}</div>`;
-                }
-                
-                chatFeed.appendChild(aiRow); lucide.createIcons({root: aiRow});
-                chatFeed.scrollTop = chatFeed.scrollHeight;
-                if (window.MathJax) window.MathJax.typesetPromise([aiRow]).catch(e => {});
-                saveCurrentChatHtml();
-            }).catch(err => {
-                chatFeed.removeChild(loadingRow);
-                const errRow = document.createElement('div'); errRow.className = 'message-row';
-                errRow.innerHTML = `
-                    <div class="message-sender"><div class="avatar-ai"><i data-lucide="alert-circle" style="width:14px;height:14px;color:var(--danger);"></i></div></div>
-                    <div class="message-text-ai" style="color:var(--danger);">Connection error.</div>`;
-                chatFeed.appendChild(errRow); lucide.createIcons({root: errRow});
-            }).finally(() => {
-                isAiThinking = false;
-                document.getElementById('inputPanel').classList.remove('locked');
-                sendBtn.classList.remove('loading');
-                sendBtn.innerHTML = `<i data-lucide="arrow-up" id="sendIcon"></i>`;
-                lucide.createIcons({root: sendBtn});
-                queryInput.focus();
-            });
-        }
-    </script>
-</body>
-</html>
-"""
-
-# ==============================================================================
-# Python Backend Server
-# ==============================================================================
-class StudyAppRequestHandler(BaseHTTPRequestHandler):
-
-    def get_session_id(self):
-        cookie_header = self.headers.get('Cookie')
-        if cookie_header:
-            c = cookies.SimpleCookie(cookie_header)
-            if 'session_id' in c:
+        .history-item.active { background: rgba(65, 105, 225, 0.12); border: 1px solid var(--primary); color: var(--primary); font-weight: bold; }
+        .history-item-content { display: flex; align-items: center; gap
